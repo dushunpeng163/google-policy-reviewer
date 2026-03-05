@@ -162,7 +162,7 @@ python3 scripts/pre_submission_check.py
 
 - [提交 Issue](https://github.com/yourusername/google-policy-reviewer/issues)
 - [讨论区](https://github.com/yourusername/google-policy-reviewer/discussions)
-- 邮箱：your.email@example.com
+- 邮箱：dushunpeng@163.com
 
 ## 📄 许可证
 

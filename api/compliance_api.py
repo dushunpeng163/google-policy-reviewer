@@ -1265,10 +1265,26 @@ def audit_game():
         _root = str(Path(__file__).parent.parent)
         if _root not in sys.path:
             sys.path.insert(0, _root)
+
+        # 路径校验：若填写了路径但不存在，直接报错（不允许静默降级）
+        project_path = data.get('project_path') or None
+        if project_path:
+            import os as _os
+            if not _os.path.exists(project_path):
+                return jsonify({
+                    'status': 'error',
+                    'message': f'项目路径不存在：{project_path}\n请检查路径是否正确，或留空以使用向导模式。'
+                }), 400
+            if not _os.path.isdir(project_path):
+                return jsonify({
+                    'status': 'error',
+                    'message': f'路径不是文件夹：{project_path}\n请填写 Unity 项目根目录的路径。'
+                }), 400
+
         from engines.unified_audit import audit_game as _audit
         result = _audit(
             game_info=data.get('game_info', {}),
-            project_path=data.get('project_path'),
+            project_path=project_path,
             target_markets=data.get('target_markets', ['US', 'EU']),
             target_platforms=data.get('target_platforms', ['ios', 'android']),
         )

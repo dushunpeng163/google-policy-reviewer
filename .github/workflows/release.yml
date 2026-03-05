@@ -1,0 +1,109 @@
+name: Build and Release Skill
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install PyYAML
+        
+    - name: Validate skill structure
+      run: |
+        python3 -c "
+        import yaml
+        import os
+        
+        # Check SKILL.md exists and has valid frontmatter
+        if not os.path.exists('SKILL.md'):
+            raise FileNotFoundError('SKILL.md not found')
+            
+        with open('SKILL.md', 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        if not content.startswith('---'):
+            raise ValueError('SKILL.md missing YAML frontmatter')
+            
+        # Extract and validate frontmatter
+        parts = content.split('---', 2)
+        if len(parts) < 3:
+            raise ValueError('Invalid frontmatter format')
+            
+        frontmatter = yaml.safe_load(parts[1])
+        
+        if 'name' not in frontmatter or 'description' not in frontmatter:
+            raise ValueError('Frontmatter missing required fields: name, description')
+            
+        print(f'✅ Skill validation passed: {frontmatter[\"name\"]}')
+        "
+        
+    - name: Create skill package
+      run: |
+        # Create skill package (.skill is just a zip file)
+        zip -r google-policy-reviewer.skill . -x ".git/*" ".github/*" "*.md" "LICENSE" ".gitignore"
+        
+        # Verify package contents
+        echo "📦 Package contents:"
+        unzip -l google-policy-reviewer.skill
+        
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          google-policy-reviewer.skill
+        body: |
+          ## Google Policy Reviewer Skill Release
+          
+          ### 📋 What's Included
+          - Complete Google Play Store policy compliance checks
+          - AdSense advertising policy validation  
+          - Privacy and data protection compliance (GDPR, COPPA)
+          - Interactive compliance assessment script
+          - Detailed policy reference documentation
+          
+          ### 🚀 Installation
+          
+          **For OpenClaw:**
+          ```bash
+          # Download and install
+          curl -L -o google-policy-reviewer.skill https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/google-policy-reviewer.skill
+          cp google-policy-reviewer.skill ~/.openclaw/skills/
+          ```
+          
+          **For other AI agents:**
+          ```bash
+          # Using skills CLI
+          npx skills add ${{ github.repository }} -a your-agent
+          ```
+          
+          ### 📊 Usage
+          Ask your AI assistant: "Please help me review my app for Google policy compliance"
+          
+          ---
+          Generated automatically from commit ${{ github.sha }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: google-policy-reviewer-skill
+        path: google-policy-reviewer.skill

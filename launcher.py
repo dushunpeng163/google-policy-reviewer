@@ -317,11 +317,12 @@ class ComplianceSystemLauncher:
         print()
         
         print("🚀 可用启动模式:")
-        print("  web      - 启动Web可视化界面 (推荐)")
-        print("  api      - 启动RESTful API服务器")
-        print("  dashboard - 生成可视化仪表板")
-        print("  check    - 执行合规分析检查")
-        print("  full     - 完整系统演示")
+        print("  web             - 启动Web可视化界面 (推荐)")
+        print("  api             - 启动RESTful API服务器")
+        print("  dashboard       - 生成可视化仪表板")
+        print("  check           - 执行合规分析检查")
+        print("  check-policies  - 检查政策规则数据新鲜度")
+        print("  full            - 完整系统演示")
         print()
         
         print("📊 技术资产统计:")
@@ -352,9 +353,9 @@ def main():
     
     parser.add_argument(
         '--mode', 
-        choices=['api', 'dashboard', 'check', 'full', 'info', 'web'],
+        choices=['api', 'dashboard', 'check', 'full', 'info', 'web', 'check-policies'],
         default='info',
-        help='启动模式'
+        help='启动模式（check-policies: 检查政策规则新鲜度）'
     )
     
     parser.add_argument(
@@ -397,6 +398,30 @@ def main():
     elif args.mode == 'check':
         launcher.run_compliance_check()
     
+    elif args.mode == 'check-policies':
+        print("🔍 检查政策规则数据新鲜度...\n")
+        sys.path.insert(0, str(Path(__file__).parent))
+        from engines.policy_monitor import load_versions, analyze_freshness, print_freshness_report
+        versions = load_versions()
+        if not versions:
+            print("❌ policy_versions.json 未找到")
+        else:
+            report = analyze_freshness(versions)
+            print_freshness_report(report)
+            if report['outdated_rules']:
+                print("📋 复核步骤：")
+                print("  1. 访问上方列出的官方来源 URL，确认政策最新内容")
+                print("  2. 如政策有变化，更新 engines/platform_policies_expert.py 中的相关规则")
+                print("  3. 运行以下命令将规则标记为已验证：")
+                print("     python3 engines/policy_monitor.py --mark-verified PLATFORM:RULE_ID")
+                print("  4. 或一次性标记所有规则（全面复核后）：")
+                print("     python3 engines/policy_monitor.py --mark-all-verified")
+            print("\n💡 联网自动监控命令：")
+            print("   RSS 公告监控  : python3 engines/policy_monitor.py --rss")
+            print("   页面变化检测  : python3 engines/policy_monitor.py --fetch")
+            print("   持续自动监控  : python3 engines/policy_monitor.py --watch 3600")
+            print("   查看历史告警  : python3 engines/policy_monitor.py --alerts\n")
+
     elif args.mode == 'full':
         print("🚀 完整系统演示模式")
         print()

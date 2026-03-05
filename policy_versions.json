@@ -1,0 +1,237 @@
+{
+  "_meta": {
+    "description": "每条合规规则的最后人工验证时间、来源 URL 和页面内容哈希。超过 staleness_days 未验证的规则会在 API 响应中标记为 potentially_outdated。",
+    "staleness_days": 90,
+    "last_monitor_run": null,
+    "monitor_version": "1.0.0"
+  },
+  "apple_app_store": {
+    "source_urls": {
+      "review_guidelines": "https://developer.apple.com/app-store/review/guidelines/",
+      "human_interface_guidelines": "https://developer.apple.com/design/human-interface-guidelines/",
+      "news_updates": "https://developer.apple.com/news/releases/"
+    },
+    "page_hashes": {
+      "review_guidelines": null,
+      "human_interface_guidelines": null
+    },
+    "rules": {
+      "iap_3_1_1": {
+        "title": "App Store 3.1.1 - 应用内购买强制使用 StoreKit",
+        "guideline_ref": "3.1.1",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/review/guidelines/#payments",
+        "status": "active",
+        "notes": "2022年起明确禁止引导用户通过外部网页支付（含邮件通知）"
+      },
+      "iap_subscription_3_1_2": {
+        "title": "App Store 3.1.2 - 订阅披露要求",
+        "guideline_ref": "3.1.2",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/review/guidelines/#subscriptions",
+        "status": "active",
+        "notes": "免费试用期结束前须明确告知用户"
+      },
+      "att_5_1_2": {
+        "title": "ATT - App Tracking Transparency (iOS 14.5+)",
+        "guideline_ref": "5.1.2",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+        "status": "active",
+        "notes": "2021年4月 iOS 14.5 起强制执行"
+      },
+      "account_deletion_5_1_1v": {
+        "title": "账户删除 - Guideline 5.1.1(v)",
+        "guideline_ref": "5.1.1(v)",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage",
+        "status": "active",
+        "notes": "2022年6月30日起强制，不仅是注销而是完整删除"
+      },
+      "sign_in_with_apple_4_8": {
+        "title": "Sign in with Apple - Guideline 4.8",
+        "guideline_ref": "4.8",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/review/guidelines/#sign-in-with-apple",
+        "status": "active",
+        "notes": "提供任何第三方登录时必须同时提供"
+      },
+      "privacy_nutrition_labels": {
+        "title": "隐私营养标签 - App Store Connect 必填",
+        "guideline_ref": "5.1",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/app-privacy-details/",
+        "status": "active",
+        "notes": "2020年12月起强制；第三方 SDK 数据也须声明"
+      },
+      "kids_category_1_3": {
+        "title": "儿童类别 - Guideline 1.3",
+        "guideline_ref": "1.3",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/review/guidelines/#kids",
+        "status": "active",
+        "notes": "Parental Gate 须为随机数学题或复杂操作；SDK 须为 Apple 批准版本"
+      },
+      "age_rating": {
+        "title": "内容年龄分级准确性",
+        "guideline_ref": "1.3 / 2.3.9",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/review/guidelines/#age-ratings",
+        "status": "active",
+        "notes": ""
+      },
+      "app_integrity_2_1": {
+        "title": "App 完整性 - Guideline 2.1",
+        "guideline_ref": "2.1",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.apple.com/app-store/review/guidelines/#performance",
+        "status": "active",
+        "notes": "App 须为完整功能版本，不得存在隐藏功能"
+      }
+    }
+  },
+  "google_play_store": {
+    "source_urls": {
+      "policy_center": "https://support.google.com/googleplay/android-developer/answer/9904819",
+      "developer_program_policies": "https://play.google.com/about/developer-content-policy/",
+      "target_api": "https://support.google.com/googleplay/android-developer/answer/11926878",
+      "data_safety": "https://support.google.com/googleplay/android-developer/answer/10787469",
+      "families_policy": "https://support.google.com/googleplay/android-developer/answer/9893335",
+      "billing_policy": "https://support.google.com/googleplay/android-developer/answer/9858738"
+    },
+    "page_hashes": {
+      "developer_program_policies": null,
+      "target_api": null,
+      "data_safety": null
+    },
+    "rules": {
+      "target_api_level": {
+        "title": "Target API Level 要求",
+        "guideline_ref": "Target API Level Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/11926878",
+        "status": "active",
+        "notes": "每年 8 月更新截止日期；2025年要求 targetSdkVersion >= 35",
+        "deadline_notes": "⚠️ 此项每年更新，是最容易过期的规则"
+      },
+      "64bit_architecture": {
+        "title": "64位架构要求",
+        "guideline_ref": "64-bit Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.android.com/distribute/best-practices/develop/64-bit",
+        "status": "active",
+        "notes": "2019年8月起对含原生代码的应用强制"
+      },
+      "play_billing": {
+        "title": "Google Play 结算政策",
+        "guideline_ref": "Play Billing Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9858738",
+        "status": "active",
+        "notes": "数字商品强制使用 Play Billing；实物商品豁免"
+      },
+      "data_safety_section": {
+        "title": "数据安全表单（Data Safety Section）",
+        "guideline_ref": "Data Safety Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/10787469",
+        "status": "active",
+        "notes": "2022年7月起强制；须与实际代码行为一致"
+      },
+      "privacy_policy": {
+        "title": "隐私政策（必须公开可访问）",
+        "guideline_ref": "User Data Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9904819",
+        "status": "active",
+        "notes": ""
+      },
+      "background_location": {
+        "title": "后台位置权限限制",
+        "guideline_ref": "Location Permissions Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9799150",
+        "status": "active",
+        "notes": "须向 Google 提交使用说明表单"
+      },
+      "permissions_minimization": {
+        "title": "权限最小化",
+        "guideline_ref": "Permissions Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9888170",
+        "status": "active",
+        "notes": ""
+      },
+      "iarc_content_rating": {
+        "title": "IARC 内容分级（所有新应用强制）",
+        "guideline_ref": "Content Rating Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/188189",
+        "status": "active",
+        "notes": ""
+      },
+      "ads_policy": {
+        "title": "广告政策",
+        "guideline_ref": "Ads Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9857753",
+        "status": "active",
+        "notes": "全屏插屏须有关闭按钮；不得模拟系统通知"
+      },
+      "ugc_policy": {
+        "title": "用户生成内容（UGC）政策",
+        "guideline_ref": "User Generated Content Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9876714",
+        "status": "active",
+        "notes": "须有举报功能和内容审核机制"
+      },
+      "deceptive_behavior": {
+        "title": "欺骗性行为和元数据政策",
+        "guideline_ref": "Deceptive Behavior Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9898820",
+        "status": "active",
+        "notes": "截图/描述须与实际功能一致"
+      },
+      "android_app_bundle": {
+        "title": "Android App Bundle（.aab）要求",
+        "guideline_ref": "Technical Requirements",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://developer.android.com/guide/app-bundle",
+        "status": "active",
+        "notes": "2021年8月起新应用强制；现有应用豁免"
+      },
+      "families_policy": {
+        "title": "家庭政策（儿童应用）",
+        "guideline_ref": "Families Policy",
+        "last_verified": "2026-03-05",
+        "verified_by": "manual",
+        "source_url": "https://support.google.com/googleplay/android-developer/answer/9893335",
+        "status": "active",
+        "notes": "只能使用 Families Approved 列表内的广告/分析 SDK"
+      }
+    }
+  }
+}

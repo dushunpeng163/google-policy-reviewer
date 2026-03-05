@@ -19,8 +19,9 @@ from flask_limiter.util import get_remote_address
 import asyncio
 import json
 import logging
+import sys
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import os
 import threading
 from functools import wraps
@@ -110,6 +111,34 @@ rule_engine = AdvancedRuleEngine()
 visualizer = ComplianceVisualizationEngine()
 
 # API认证装饰器
+def _build_freshness_warning() -> Optional[Dict]:
+    """检查政策数据新鲜度，若有过期规则则返回警告信息"""
+    try:
+        _monitor_dir = str(Path(__file__).parent.parent)
+        if _monitor_dir not in sys.path:
+            sys.path.insert(0, _monitor_dir)
+        from engines.policy_monitor import load_versions, analyze_freshness
+        versions = load_versions()
+        if not versions:
+            return None
+        report = analyze_freshness(versions)
+        if report['overall_status'] == 'fresh':
+            return None
+        outdated_count = report['summary']['potentially_outdated'] + report['summary']['outdated']
+        return {
+            'status': report['overall_status'],
+            'message': (
+                f"⚠️ 有 {outdated_count} 条合规规则距上次人工验证已超过 "
+                f"{report['staleness_threshold_days']} 天，分析结果可能不反映最新政策。"
+                f" 建议查阅 /api/v1/policies/freshness 获取详情。"
+            ),
+            'outdated_rules_count': outdated_count,
+            'freshness_report_url': '/api/v1/policies/freshness',
+        }
+    except Exception:
+        return None
+
+
 def require_api_key(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -173,30 +202,38 @@ def analyze_compliance():
         finally:
             loop.close()
         
+        # 附加政策新鲜度警告
+        freshness_warning = _build_freshness_warning()
+
         # 根据选项定制输出
         output_format = options.get('format', 'json')
         
         if output_format == 'summary':
-            # 返回简化摘要
-            return jsonify({
+            summary = {
                 'app_name': app_profile.get('name'),
                 'risk_level': results.get('risk_assessment', {}).get('risk_level'),
                 'critical_issues': results.get('risk_assessment', {}).get('critical_issues', 0),
                 'recommendations_count': len(results.get('recommendations', [])),
                 'analysis_timestamp': results.get('timestamp')
-            })
+            }
+            if freshness_warning:
+                summary['policy_data_warning'] = freshness_warning
+            return jsonify(summary)
         
         elif output_format == 'detailed':
-            # 返回完整结果
+            if freshness_warning:
+                results['policy_data_warning'] = freshness_warning
             return jsonify(results)
         
         else:
-            # 默认返回标准格式
-            return jsonify({
+            response = {
                 'status': 'success',
                 'results': results,
                 'api_version': '1.0'
-            })
+            }
+            if freshness_warning:
+                response['policy_data_warning'] = freshness_warning
+            return jsonify(response)
         
     except Exception as e:
         app.logger.error(f"Analysis error: {e}")
@@ -646,6 +683,698 @@ def demo_dashboard():
     dashboard_html = visualizer.generate_dashboard(demo_results)
     return dashboard_html, 200, {'Content-Type': 'text/html; charset=utf-8'}
 
+@app.route('/api/v1/compliance/generate-templates', methods=['POST'])
+def generate_code_templates():
+    """
+    根据 App 功能和目标平台生成合规代码模板（Swift / Kotlin / Unity C#）
+    请求体：
+      {
+        "features": ["iap", "att", "kids", "social_login", "privacy", "account_deletion"],
+        "platforms": ["ios", "android", "unity"],
+        "min_user_age": 6
+      }
+    """
+    try:
+        data = request.get_json() or {}
+        features = data.get('features', ['iap', 'privacy', 'account_deletion'])
+        platforms = data.get('platforms', ['ios', 'android', 'unity'])
+        min_user_age = data.get('min_user_age', 18)
+
+        _gen_dir = str(Path(__file__).parent.parent)
+        if _gen_dir not in sys.path:
+            sys.path.insert(0, _gen_dir)
+        from engines.code_template_generator import generate_templates
+
+        result = generate_templates(
+            features=features,
+            platforms=platforms,
+            min_user_age=min_user_age,
+        )
+        return jsonify({'status': 'success', 'data': result})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/compliance/scan-project', methods=['POST'])
+def scan_existing_project():
+    """
+    静态扫描本地项目目录，检测合规缺项（iOS / Android / Unity）
+    请求体：
+      { "project_path": "/path/to/your/project" }
+    注意：project_path 必须是运行此 API 服务器的机器上的本地路径
+    """
+    try:
+        data = request.get_json() or {}
+        project_path = data.get('project_path', '')
+        if not project_path:
+            return jsonify({'status': 'error', 'message': 'project_path 不能为空'}), 400
+
+        _scan_dir = str(Path(__file__).parent.parent)
+        if _scan_dir not in sys.path:
+            sys.path.insert(0, _scan_dir)
+        from engines.code_scanner import scan_project
+
+        report = scan_project(project_path)
+        if 'error' in report:
+            return jsonify({'status': 'error', 'message': report['error']}), 400
+
+        return jsonify({'status': 'success', 'data': report})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/guide/new-game', methods=['POST'])
+def guide_new_game():
+    """Mode A：生成 Unity 游戏合规开发向导（路线图 + 代码模板 + 平台清单 + 法规要点）"""
+    try:
+        data = request.get_json() or {}
+        _root = str(Path(__file__).parent.parent)
+        if _root not in sys.path:
+            sys.path.insert(0, _root)
+        from engines.dev_guide import generate_dev_guide
+        result = generate_dev_guide(
+            game_name=data.get('game_name', 'My Unity Game'),
+            game_type=data.get('game_type', 'casual'),
+            features=data.get('features', []),
+            min_user_age=data.get('min_user_age', 13),
+            target_markets=data.get('target_markets', ['US', 'EU']),
+            target_platforms=data.get('target_platforms', ['ios', 'android']),
+        )
+        return jsonify({'status': 'success', 'data': result})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+def _load_dotenv():
+    """加载项目根目录的 .env 文件到 os.environ（无需 python-dotenv）"""
+    env_file = Path(__file__).parent.parent / ".env"
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        key = key.strip()
+        val = val.strip().strip('"').strip("'")
+        if key and val:
+            os.environ[key] = val
+
+# 启动时加载 .env
+_load_dotenv()
+
+
+@app.route('/api/v1/policies/save-config', methods=['POST'])
+def save_llm_config():
+    """保存 LLM API Key 到 .env 文件并即时生效（无需重启服务器）"""
+    data = request.get_json() or {}
+    env_file = Path(__file__).parent.parent / ".env"
+
+    updates = {}
+    if data.get('anthropic_key'):
+        updates['ANTHROPIC_API_KEY'] = data['anthropic_key'].strip()
+    if data.get('openai_key'):
+        updates['OPENAI_API_KEY'] = data['openai_key'].strip()
+    # 允许清空某个 key
+    if data.get('clear_anthropic'):
+        updates['ANTHROPIC_API_KEY'] = ''
+    if data.get('clear_openai'):
+        updates['OPENAI_API_KEY'] = ''
+
+    if not updates:
+        return jsonify({'status': 'error', 'message': '未提供任何配置项'}), 400
+
+    # 读取现有 .env
+    existing = {}
+    if env_file.exists():
+        for line in env_file.read_text(encoding='utf-8').splitlines():
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                k, _, v = line.partition('=')
+                existing[k.strip()] = v.strip().strip('"').strip("'")
+
+    # 合并更新
+    existing.update(updates)
+
+    # 写回 .env
+    lines = [f"# Unity 游戏合规系统配置 - 自动生成，请勿手动修改\n"]
+    for k, v in existing.items():
+        if v:
+            lines.append(f'{k}={v}\n')
+
+    env_file.write_text(''.join(lines), encoding='utf-8')
+
+    # 即时生效（更新当前进程 os.environ）
+    for k, v in updates.items():
+        if v:
+            os.environ[k] = v
+        elif k in os.environ:
+            del os.environ[k]
+
+    # 返回最新配置状态
+    _root = str(Path(__file__).parent.parent)
+    if _root not in sys.path:
+        sys.path.insert(0, _root)
+    from engines.policy_diff_analyzer import check_llm_config
+    return jsonify({'status': 'success', 'config': check_llm_config()})
+
+
+@app.route('/api/v1/policies/run-check', methods=['POST'])
+def run_policy_check():
+    """
+    触发政策检查任务（RSS / 页面哈希 / LLM 分析），实时返回结果。
+    请求体：{ "check_type": "rss" | "pages" | "both" }
+    """
+    data = request.get_json() or {}
+    check_type = data.get('check_type', 'both')
+
+    _root = str(Path(__file__).parent.parent)
+    if _root not in sys.path:
+        sys.path.insert(0, _root)
+
+    from engines.policy_monitor import (
+        load_versions, save_versions, fetch_rss_alerts,
+        check_page_changes, save_alerts_log, analyze_freshness
+    )
+    import datetime as _dt
+
+    versions = load_versions()
+    results = {
+        'check_type': check_type,
+        'checked_at': _dt.datetime.now().isoformat(),
+        'rss_alerts': [],
+        'page_alerts': [],
+        'llm_analyses': [],
+        'summary': '',
+    }
+
+    if check_type in ('rss', 'both'):
+        try:
+            rss_alerts = fetch_rss_alerts(verbose=False)
+            results['rss_alerts'] = rss_alerts
+            if rss_alerts:
+                save_alerts_log(rss_alerts)
+        except Exception as e:
+            results['rss_error'] = str(e)
+
+    if check_type in ('pages', 'both'):
+        try:
+            page_alerts = check_page_changes(versions, verbose=False)
+            results['page_alerts'] = page_alerts
+            versions['_meta']['last_monitor_run'] = _dt.datetime.now().isoformat()
+            save_versions(versions)
+
+            # 如果有页面变化且 LLM 已配置，自动分析
+            if page_alerts and (os.environ.get('ANTHROPIC_API_KEY') or os.environ.get('OPENAI_API_KEY')):
+                from engines.policy_diff_analyzer import analyze_policy_diff
+                from engines.policy_monitor import cache_path_for_url, fetch_page_text
+
+                for alert in page_alerts[:3]:  # 最多分析3个
+                    url = alert.get('url', '')
+                    platform = alert.get('platform', '')
+                    cache_file = cache_path_for_url(url)
+                    # 旧内容在 cache 里，新内容重新抓
+                    old_text = cache_file.read_text(encoding='utf-8', errors='replace') if cache_file.exists() else ''
+                    new_text = fetch_page_text(url) or ''
+                    if old_text and new_text:
+                        try:
+                            analysis = analyze_policy_diff(old_text, new_text, platform, url)
+                            results['llm_analyses'].append(analysis)
+                        except Exception as e:
+                            results['llm_analyses'].append({'url': url, 'error': str(e)})
+
+            if page_alerts:
+                save_alerts_log(page_alerts)
+        except Exception as e:
+            results['page_error'] = str(e)
+
+    total = len(results['rss_alerts']) + len(results['page_alerts'])
+    if total == 0:
+        results['summary'] = '✅ 未发现新变化，所有监控项正常'
+    else:
+        results['summary'] = f'⚠️ 发现 {total} 个新变化（RSS {len(results["rss_alerts"])} 条，页面 {len(results["page_alerts"])} 个）'
+
+    return jsonify(results)
+
+
+@app.route('/api/v1/policies/llm-config', methods=['GET'])
+def llm_config_status():
+    """检查 LLM API Key 配置状态"""
+    try:
+        _root = str(Path(__file__).parent.parent)
+        if _root not in sys.path:
+            sys.path.insert(0, _root)
+        from engines.policy_diff_analyzer import check_llm_config
+        return jsonify(check_llm_config())
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v1/policies/analyze-change', methods=['POST'])
+def analyze_policy_change():
+    """
+    用 LLM 分析政策页面变化。
+    请求体：{ "url": "...", "platform": "apple_app_store" }
+    会从缓存中读取旧页面，抓取新页面，发给 LLM 分析。
+    """
+    try:
+        data = request.get_json() or {}
+        url = data.get('url', '')
+        platform = data.get('platform', '')
+        if not url:
+            return jsonify({'error': 'url 不能为空'}), 400
+
+        _root = str(Path(__file__).parent.parent)
+        if _root not in sys.path:
+            sys.path.insert(0, _root)
+        from engines.policy_monitor import fetch_page_text, cache_path_for_url, sha256_text
+        from engines.policy_diff_analyzer import analyze_policy_diff
+
+        cache_file = cache_path_for_url(url)
+        old_text = cache_file.read_text(encoding='utf-8', errors='replace') if cache_file.exists() else ''
+
+        new_text = fetch_page_text(url)
+        if new_text is None:
+            return jsonify({'error': '无法访问该页面，请检查网络连接'}), 502
+
+        if not old_text:
+            # 首次抓取，存缓存但无法分析差异
+            cache_file.write_text(new_text, encoding='utf-8')
+            return jsonify({
+                'status': 'first_fetch',
+                'message': '首次抓取页面，已存入缓存。下次检查时才能对比差异。',
+                'url': url,
+            })
+
+        if sha256_text(old_text) == sha256_text(new_text):
+            return jsonify({
+                'status': 'no_change',
+                'message': '页面内容无变化',
+                'url': url,
+            })
+
+        # 有变化，调 LLM 分析
+        result = analyze_policy_diff(old_text, new_text, platform, url)
+        cache_file.write_text(new_text, encoding='utf-8')
+        return jsonify({'status': 'analyzed', 'data': result})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v1/browse-folder', methods=['GET'])
+def browse_folder():
+    """打开系统原生文件夹选择对话框，返回所选路径（仅限本地使用）"""
+    try:
+        import subprocess
+        import platform
+
+        system = platform.system()
+
+        if system == 'Darwin':
+            # macOS：用 osascript 调起原生 Finder 文件夹选择框
+            script = 'tell application "Finder" to POSIX path of (choose folder with prompt "选择 Unity 项目根目录")'
+            result = subprocess.run(['osascript', '-e', script],
+                                    capture_output=True, text=True, timeout=60)
+            if result.returncode == 0:
+                path = result.stdout.strip()
+                # osascript 返回的路径末尾有斜杠，去掉
+                path = path.rstrip('/')
+                return jsonify({'status': 'success', 'path': path})
+            else:
+                # 用户取消选择
+                return jsonify({'status': 'cancelled', 'path': ''})
+
+        elif system == 'Windows':
+            script = (
+                'Add-Type -AssemblyName System.Windows.Forms;'
+                '$f = New-Object System.Windows.Forms.FolderBrowserDialog;'
+                '$f.Description = "选择 Unity 项目根目录";'
+                'if ($f.ShowDialog() -eq "OK") { $f.SelectedPath }'
+            )
+            result = subprocess.run(['powershell', '-Command', script],
+                                    capture_output=True, text=True, timeout=60)
+            path = result.stdout.strip()
+            if path:
+                return jsonify({'status': 'success', 'path': path})
+            return jsonify({'status': 'cancelled', 'path': ''})
+
+        elif system == 'Linux':
+            # 尝试 zenity（GNOME）或 kdialog（KDE）
+            for cmd in [['zenity', '--file-selection', '--directory', '--title=选择 Unity 项目目录'],
+                        ['kdialog', '--getexistingdirectory', '.']]:
+                try:
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+                    if result.returncode == 0:
+                        return jsonify({'status': 'success', 'path': result.stdout.strip()})
+                except FileNotFoundError:
+                    continue
+            return jsonify({'status': 'error', 'message': '未找到可用的文件夹选择工具（需要 zenity 或 kdialog）'})
+
+        else:
+            return jsonify({'status': 'error', 'message': f'不支持的操作系统: {system}'})
+
+    except subprocess.TimeoutExpired:
+        return jsonify({'status': 'cancelled', 'path': ''})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+
+@app.route('/api/v1/audit/game', methods=['POST'])
+def audit_game():
+    """Mode B：统一游戏合规审计（平台政策 + 法规 + 代码扫描合并报告）"""
+    try:
+        data = request.get_json() or {}
+        _root = str(Path(__file__).parent.parent)
+        if _root not in sys.path:
+            sys.path.insert(0, _root)
+        from engines.unified_audit import audit_game as _audit
+        result = _audit(
+            game_info=data.get('game_info', {}),
+            project_path=data.get('project_path'),
+            target_markets=data.get('target_markets', ['US', 'EU']),
+            target_platforms=data.get('target_platforms', ['ios', 'android']),
+        )
+        return jsonify({'status': 'success', 'data': result})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/policies/freshness', methods=['GET'])
+def policy_freshness():
+    """返回所有政策规则的新鲜度报告（无需 API Key）"""
+    try:
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.policy_monitor import load_versions, analyze_freshness
+        versions = load_versions()
+        if not versions:
+            return jsonify({'error': 'policy_versions.json 未找到'}), 404
+        report = analyze_freshness(versions)
+        return jsonify(report)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v1/compliance/platform-matrix', methods=['POST'])
+def platform_engineering_matrix():
+    """跨平台工程合规矩阵 - 返回 iOS/Android 各自需要实现的具体工程项"""
+    data = request.get_json() or {}
+
+    features = data.get('features', [])   # e.g. ['iap','ads','kids','social_login','location']
+    app_type = data.get('app_type', 'general')
+    target_ages = data.get('target_ages', [18])
+
+    min_age = min(target_ages) if target_ages else 18
+    has_kids = min_age < 13
+    has_iap = 'iap' in features
+    has_ads = 'ads' in features
+    has_social_login = 'social_login' in features
+    has_location = 'location' in features
+    has_ugc = 'ugc' in features
+    has_analytics = 'analytics' in features
+
+    # ── iOS 工程项 ──────────────────────────────────────────────────
+    ios_items = []
+
+    if has_iap:
+        ios_items.append({
+            'category': '应用内购买',
+            'priority': 'critical',
+            'guideline': 'App Store 3.1.1',
+            'what': '所有虚拟商品/订阅必须使用 StoreKit',
+            'how': 'import StoreKit; Product.purchase() / Transaction.updates 监听',
+            'server_side': '苹果收据验证：POST https://buy.itunes.apple.com/verifyReceipt',
+            'pitfall': '不得绕过 IAP 提供替代支付（包括引导用户到网页购买）'
+        })
+
+    ios_items.append({
+        'category': '隐私追踪授权 ATT',
+        'priority': 'critical',
+        'guideline': 'App Store 5.1.2 / iOS 14.5+',
+        'what': '使用 IDFA 或跨 App 追踪前必须请求用户授权',
+        'how': 'ATTrackingManager.requestTrackingAuthorization(completionHandler:)',
+        'server_side': '服务端须区分已授权/未授权用户，未授权时不得传 IDFA',
+        'pitfall': '弹出 ATT 前可先展示自定义预热页提升同意率；儿童 App 禁止弹出'
+    })
+
+    ios_items.append({
+        'category': '账户删除',
+        'priority': 'critical',
+        'guideline': 'App Store 5.1.1(v)，2022年6月起强制',
+        'what': 'App 内必须提供账户删除入口（不只是注销）',
+        'how': '设置页 → "删除账户" → 二次确认 → 调用后端 DELETE /api/user → 30天内彻底删除',
+        'server_side': '同步删除所有关联数据（含第三方服务）；保留法务必要数据需说明',
+        'pitfall': '账户删除≠注销；Apple 审核会专门测试此流程'
+    })
+
+    if has_social_login:
+        ios_items.append({
+            'category': 'Sign in with Apple',
+            'priority': 'critical',
+            'guideline': 'App Store 4.8',
+            'what': '提供任何第三方登录时，必须同时提供 Sign in with Apple',
+            'how': 'ASAuthorizationAppleIDProvider + ASAuthorizationController',
+            'server_side': '后端用 Apple 公钥验证 identity_token（JWT）；处理 email relay 隐藏邮箱',
+            'pitfall': '游戏中心登录不触发此要求；但 Google/Facebook 登录会触发'
+        })
+
+    if has_kids:
+        ios_items.append({
+            'category': '儿童类别合规',
+            'priority': 'critical',
+            'guideline': 'App Store 1.3',
+            'what': '家长门控、禁止行为追踪广告、禁止外部链接',
+            'how': '所有外部跳转前显示"家长门控"（随机数学题/复杂操作）；广告 SDK 启用儿童模式',
+            'server_side': 'COPPA：13岁以下用户不采集可识别个人信息',
+            'pitfall': '第三方 SDK（含分析/广告）须是 Apple 批准的 Families 适用版本'
+        })
+
+    if has_ads:
+        ios_items.append({
+            'category': '广告 SDK 配置',
+            'priority': 'high',
+            'guideline': 'App Store 1.3 / COPPA',
+            'what': '儿童用户禁止个性化广告',
+            'how': 'GADMobileAds.sharedInstance().requestConfiguration.tagForChildDirectedTreatment = true',
+            'server_side': '请求广告时传 tag_for_child_directed_treatment=1',
+            'pitfall': '全屏插屏广告在儿童 App 中完全禁止'
+        })
+
+    if has_location:
+        ios_items.append({
+            'category': '位置权限',
+            'priority': 'high',
+            'guideline': 'App Store 5.1.1',
+            'what': 'Info.plist 声明用途字符串，仅在需要时请求',
+            'how': 'NSLocationWhenInUseUsageDescription（前台）\nNSLocationAlwaysAndWhenInUseUsageDescription（后台，须充分理由）',
+            'server_side': '无',
+            'pitfall': '"始终允许"权限在审核中须演示真实后台使用场景'
+        })
+
+    ios_items.append({
+        'category': '隐私营养标签',
+        'priority': 'high',
+        'guideline': 'App Store Connect 必填',
+        'what': '上架前在 App Store Connect 填写数据收集声明',
+        'how': '登录 App Store Connect → App 隐私 → 按数据类型（位置/联系方式/标识符等）逐项声明',
+        'server_side': '声明须与代码实际行为完全一致，Apple 随机抽查',
+        'pitfall': '第三方 SDK 采集的数据也须在此声明'
+    })
+
+    # ── Android 工程项 ──────────────────────────────────────────────
+    android_items = []
+
+    if has_iap:
+        android_items.append({
+            'category': '应用内购买',
+            'priority': 'critical',
+            'guideline': 'Google Play 结算政策',
+            'what': '所有数字商品必须使用 Google Play Billing Library',
+            'how': 'implementation "com.android.billingclient:billing-ktx:6.x"\nBillingClient → launchBillingFlow() → PurchasesUpdatedListener',
+            'server_side': 'Google Play Developer API 验证购买令牌：GET purchases.products.get',
+            'pitfall': '不允许引导用户到外部网页购买（违规会下架）；实物商品无需走 Play Billing'
+        })
+
+    android_items.append({
+        'category': 'Target API Level',
+        'priority': 'critical',
+        'guideline': 'Google Play Target API 要求',
+        'what': '新应用须 targetSdkVersion ≥ 35（2025年要求）',
+        'how': 'build.gradle: targetSdkVersion 35\n同步更新 compileSdkVersion',
+        'server_side': '无',
+        'pitfall': '升级 targetSdk 后须全面测试权限、通知、后台限制等行为变化'
+    })
+
+    android_items.append({
+        'category': '账户删除',
+        'priority': 'critical',
+        'guideline': 'Google Play 账户删除政策，2024年5月强制',
+        'what': 'App 内提供删除入口，且必须提供网页版删除链接（供卸载后使用）',
+        'how': '应用内：设置 → 删除账户 → 调用后端 API\n网页：公开可访问的账户删除页（在 Play Console 填写 URL）',
+        'server_side': '彻底删除数据；在 Play Console 的"应用内容"填写网页删除链接',
+        'pitfall': '比 iOS 多一个网页删除链接要求，且需在 Play Console 填写'
+    })
+
+    android_items.append({
+        'category': '数据安全表单',
+        'priority': 'critical',
+        'guideline': 'Google Play 数据安全政策',
+        'what': 'Play Console 必须填写数据采集、共享、安全实践声明',
+        'how': 'Play Console → 应用内容 → 数据安全 → 按数据类型填写',
+        'server_side': '与实际代码行为保持一致；第三方 SDK 数据也须包含',
+        'pitfall': '与 iOS 的"隐私营养标签"类似但表单字段不同，需分别填写'
+    })
+
+    android_items.append({
+        'category': '隐私政策',
+        'priority': 'critical',
+        'guideline': 'Google Play 用户数据政策',
+        'what': '必须提供公开可访问的隐私政策 URL',
+        'how': 'Play Console → 商店设置 → 隐私权政策；App 内也须提供入口',
+        'server_side': '隐私政策页须 HTTPS、无登录门控、始终可访问',
+        'pitfall': '隐私政策须涵盖所有第三方 SDK 的数据行为'
+    })
+
+    if has_location:
+        android_items.append({
+            'category': '位置权限',
+            'priority': 'critical',
+            'guideline': 'Google Play 位置权限政策',
+            'what': 'AndroidManifest 声明，后台位置须额外申请且须充分理由',
+            'how': 'ACCESS_FINE_LOCATION（前台）\nACCESS_BACKGROUND_LOCATION（后台，Android 10+须单独请求）',
+            'server_side': '无',
+            'pitfall': '后台位置仅限导航/家庭安全等合理场景；需向 Google 提交说明表单'
+        })
+
+    android_items.append({
+        'category': 'IARC 内容分级',
+        'priority': 'high',
+        'guideline': 'Google Play 内容分级政策',
+        'what': '所有新应用必须完成 IARC 内容分级问卷',
+        'how': 'Play Console → 应用内容 → 内容分级 → 完成问卷获取分级',
+        'server_side': '无',
+        'pitfall': '与 iOS 的年龄分级问卷独立，需分别完成；问卷答案须与实际内容一致'
+    })
+
+    if has_ads:
+        android_items.append({
+            'category': '广告 SDK 配置',
+            'priority': 'high',
+            'guideline': 'Google Play 广告政策 / COPPA',
+            'what': '儿童用户禁止个性化广告',
+            'how': 'RequestConfiguration.Builder().setTagForChildDirectedTreatment(TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE)\n全屏插屏广告须有 X 关闭按钮（≥5秒后可关）',
+            'server_side': '广告请求添加 tag_for_child_directed_treatment=1',
+            'pitfall': '模拟系统 UI 的广告（如伪造通知栏）违规；全屏插屏不能在游戏关卡加载时弹出'
+        })
+
+    if has_ugc:
+        android_items.append({
+            'category': '用户生成内容 (UGC)',
+            'priority': 'high',
+            'guideline': 'Google Play 用户生成内容政策',
+            'what': '须有内容审核机制和举报功能',
+            'how': '实现举报按钮（每条 UGC 旁）；后台审核队列；AI 预过滤',
+            'server_side': '保留内容审核日志；响应举报须有 SLA',
+            'pitfall': 'iOS App Store 无此专项要求（但同样不允许违规内容）'
+        })
+
+    android_items.append({
+        'category': 'Android App Bundle',
+        'priority': 'medium',
+        'guideline': 'Google Play 技术要求，2021年8月起强制',
+        'what': '新应用须上传 .aab 而非 .apk',
+        'how': 'Android Studio: Build → Generate Signed Bundle/APK → Android App Bundle',
+        'server_side': '无',
+        'pitfall': 'iOS 对应无需操作（iOS 本身就是类似机制）'
+    })
+
+    if has_kids:
+        android_items.append({
+            'category': '儿童家庭政策',
+            'priority': 'critical',
+            'guideline': 'Google Play 家庭政策',
+            'what': '面向儿童 App 须遵守家庭政策；广告 SDK 须在 Families Approved 列表内',
+            'how': 'Play Console → 应用内容 → 目标受众 → 选儿童年龄段\n仅使用 Google 认证的儿童友好广告 SDK',
+            'server_side': 'COPPA/COPPA 等效合规',
+            'pitfall': '用了未经认证的 SDK（如某些分析 SDK）会导致下架'
+        })
+
+    # ── 共同需要的工程项 ────────────────────────────────────────────
+    shared_items = []
+
+    if has_iap:
+        shared_items.append({
+            'category': '收据/订单验证',
+            'what': '两个平台的收据均须在后端服务器验证，不能只在客户端验证',
+            'ios': 'POST https://buy.itunes.apple.com/verifyReceipt（沙盒：sandbox.itunes.apple.com）',
+            'android': 'Google Play Developer API：purchases.subscriptions.get / purchases.products.get',
+            'pitfall': '纯客户端验证易被破解；服务端须幂等处理重复通知'
+        })
+
+    shared_items.append({
+        'category': '隐私政策与条款',
+        'what': '两个平台均要求可公开访问的隐私政策',
+        'ios': 'App Store Connect 填写 URL + App 内入口',
+        'android': 'Play Console 填写 URL + App 内入口',
+        'pitfall': '同一份隐私政策文本须覆盖两个平台的数据行为'
+    })
+
+    shared_items.append({
+        'category': '账户删除',
+        'what': 'App 内删除账户流程',
+        'ios': 'App 内入口即可（无需网页版）',
+        'android': 'App 内入口 + 公开网页删除链接（在 Play Console 填写）',
+        'pitfall': 'Android 比 iOS 多一个网页版要求'
+    })
+
+    result = {
+        'summary': {
+            'total_ios_items': len(ios_items),
+            'total_android_items': len(android_items),
+            'shared_items': len(shared_items),
+            'critical_ios': sum(1 for i in ios_items if i['priority'] == 'critical'),
+            'critical_android': sum(1 for i in android_items if i['priority'] == 'critical'),
+        },
+        'ios_engineering': ios_items,
+        'android_engineering': android_items,
+        'shared_engineering': shared_items,
+        'key_differences': [
+            {
+                'area': '追踪授权',
+                'ios': 'ATT 弹窗强制（iOS 14.5+），儿童 App 完全禁止',
+                'android': 'Privacy Sandbox 逐步推进，目前 Advertising ID 仍可访问'
+            },
+            {
+                'area': '登录要求',
+                'ios': '有第三方登录必须同时提供 Sign in with Apple',
+                'android': '推荐 Google Sign-In，无强制第三方登录要求'
+            },
+            {
+                'area': '安装包格式',
+                'ios': 'Xcode 自动处理，上传 .ipa',
+                'android': '2021年后必须上传 .aab（非 .apk）'
+            },
+            {
+                'area': '账户删除',
+                'ios': 'App 内入口即可',
+                'android': 'App 内 + 网页版（卸载后仍可使用）'
+            },
+            {
+                'area': '儿童 SDK 审核',
+                'ios': 'Apple 无官方 Parental Gate SDK，需自实现数学题验证',
+                'android': 'Google Play 提供 Families Approved SDK 列表，须从中选用'
+            },
+            {
+                'area': 'UGC 政策',
+                'ios': '无专项 UGC 审核要求（违规内容不允许）',
+                'android': '有明确 UGC 政策，须实现举报+审核机制'
+            }
+        ]
+    }
+
+    return jsonify(result)
+
+
 def run_api_server(host='0.0.0.0', port=5000, debug=False):
     """运行API服务器"""
     print(f"""
@@ -660,6 +1389,10 @@ def run_api_server(host='0.0.0.0', port=5000, debug=False):
    • POST /api/v1/compliance/analyze - 完整分析
    • POST /api/v1/compliance/batch - 批量分析
    • POST /api/v1/compliance/quick-check - 快速检查
+   • POST /api/v1/compliance/platform-matrix - 跨平台工程合规矩阵
+   • POST /api/v1/compliance/generate-templates - 生成 Swift/Kotlin/Unity 合规代码模板
+   • POST /api/v1/compliance/scan-project - 扫描现有项目合规缺项
+   • GET  /api/v1/policies/freshness - 政策规则新鲜度报告
    • GET  /api/v1/dashboard/<app_id> - 可视化仪表板
    
 🎯 专业领域: 教育游戏应用全球合规

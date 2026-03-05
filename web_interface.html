@@ -1,878 +1,1421 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮📚 教育游戏应用全球合规专家系统</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        .main-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin: 20px;
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .form-section {
-            padding: 30px;
-        }
-        
-        .section-title {
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e9ecef;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .checkbox-item {
-            background: #f8f9fa;
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            transition: all 0.3s ease;
-        }
-        
-        .checkbox-item:hover {
-            background: #e9ecef;
-            border-color: #adb5bd;
-        }
-        
-        .checkbox-item input:checked + label {
-            color: #0d6efd;
-            font-weight: bold;
-        }
-        
-        .analyze-btn {
-            background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-            border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .analyze-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            color: white;
-        }
-        
-        .results-section {
-            margin-top: 30px;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            display: none;
-        }
-        
-        .risk-badge {
-            font-size: 12px;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .risk-critical { background: #dc3545; color: white; }
-        .risk-high { background: #fd7e14; color: white; }
-        .risk-medium { background: #ffc107; color: #212529; }
-        .risk-low { background: #28a745; color: white; }
-        
-        .progress-container {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        
-        .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 10px;
-            font-weight: bold;
-            color: #6c757d;
-        }
-        
-        .step.active {
-            background: #0d6efd;
-            color: white;
-        }
-        
-        .step.completed {
-            background: #28a745;
-            color: white;
-        }
-        
-        .feature-highlight {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .expert-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            background: #17a2b8;
-            color: white;
-            border-radius: 20px;
-            font-size: 12px;
-            margin: 2px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unity 游戏合规系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --card2: #22263a;
+  --border: #2e3347;
+  --accent: #6366f1;
+  --accent2: #818cf8;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f97316;
+  --yellow: #eab308;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --radius: 12px;
+}
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Header ── */
+header {
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+header .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+header .logo span { color: var(--accent2); }
+header .badge {
+  margin-left: auto; font-size: 11px; font-weight: 600;
+  background: rgba(99,102,241,0.15); color: var(--accent2);
+  padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.3);
+}
+header .policy-btn {
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: none; border: 1px solid var(--border);
+  color: var(--muted); padding: 5px 12px; border-radius: 20px;
+  transition: all .2s; margin-left: 10px;
+}
+header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+/* ── Policy Modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; width: 90%; max-width: 720px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.modal-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.modal-header h3 { font-size: 17px; font-weight: 700; flex: 1; }
+.modal-close {
+  background: none; border: none; color: var(--muted);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+  border-radius: 6px; transition: color .2s;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+/* Policy freshness items */
+.freshness-summary {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+}
+.freshness-stat {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; text-align: center;
+}
+.freshness-stat .num { font-size: 26px; font-weight: 700; }
+.freshness-stat .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.freshness-stat.ok .num { color: var(--green); }
+.freshness-stat.warn .num { color: var(--yellow); }
+.freshness-stat.danger .num { color: var(--red); }
+
+.rule-item {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.rule-item .rule-status { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.rule-item .rule-body { flex: 1; min-width: 0; }
+.rule-item .rule-title { font-size: 13px; font-weight: 600; }
+.rule-item .rule-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.rule-item .rule-link { font-size: 11px; color: var(--accent2); text-decoration: none; }
+.rule-item .rule-link:hover { text-decoration: underline; }
+.rule-item .rule-age { font-size: 11px; flex-shrink: 0; padding: 2px 7px; border-radius: 4px; }
+.rule-age.fresh  { background: rgba(34,197,94,0.15); color: var(--green); }
+.rule-age.warn   { background: rgba(234,179,8,0.15);  color: var(--yellow); }
+.rule-age.danger { background: rgba(239,68,68,0.15);  color: var(--red); }
+
+/* Modal tabs */
+.modal-tab {
+  padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
+  border: none; background: none; color: var(--muted); cursor: pointer; transition: all .15s;
+}
+.modal-tab.active { background: var(--accent); color: #fff; }
+.modal-tab:hover:not(.active) { color: var(--text); }
+
+/* Check action buttons */
+.check-action-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card2); color: var(--text); cursor: pointer;
+  font-size: 12px; text-align: center; transition: all .15s; line-height: 1.4;
+}
+.check-action-btn:hover { border-color: var(--accent); background: rgba(99,102,241,0.08); }
+.check-action-btn strong { font-size: 13px; }
+
+/* ── Landing (mode select) ── */
+#landing {
+  max-width: 900px; margin: 0 auto; padding: 60px 20px;
+  text-align: center;
+}
+#landing h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
+#landing p { color: var(--muted); font-size: 16px; margin-bottom: 48px; }
+.mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
+.mode-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px;
+  cursor: pointer; transition: all .2s;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.mode-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.mode-card .icon { font-size: 36px; }
+.mode-card h2 { font-size: 20px; font-weight: 700; }
+.mode-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.mode-card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; padding-bottom: 4px; }
+.mode-card .tag {
+  font-size: 11px; font-weight: 600; padding: 3px 8px;
+  border-radius: 6px; background: rgba(99,102,241,0.12); color: var(--accent2);
+}
+.mode-card .btn-enter {
+  margin-top: auto; padding: 10px 20px; border-radius: 8px;
+  background: var(--accent); color: #fff; font-weight: 600; font-size: 14px;
+  border: none; cursor: pointer; text-align: center; transition: background .2s;
+}
+.mode-card .btn-enter:hover { background: var(--accent2); }
+
+/* ── Form views ── */
+.view { display: none; max-width: 760px; margin: 0 auto; padding: 40px 20px; }
+.view.active { display: block; }
+
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--muted); font-size: 14px; cursor: pointer;
+  border: none; background: none; margin-bottom: 28px;
+  transition: color .2s;
+}
+.back-btn:hover { color: var(--text); }
+
+.view-header { margin-bottom: 32px; }
+.view-header h2 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.view-header p { color: var(--muted); font-size: 14px; }
+
+/* ── Form elements ── */
+.section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+.section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.field input[type=text], .field input[type=number], .field select {
+  width: 100%; background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; color: var(--text);
+  font-size: 14px; font-family: inherit; transition: border-color .2s;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+.field small { color: var(--muted); font-size: 12px; margin-top: 4px; display: block; }
+
+/* Checkbox grid */
+.cb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+.cb-item {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; cursor: pointer;
+  transition: all .15s; font-size: 13px; font-weight: 500;
+}
+.cb-item:hover { border-color: var(--accent); }
+.cb-item input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+.cb-item.checked { border-color: var(--accent); background: rgba(99,102,241,0.1); color: var(--accent2); }
+
+/* Submit button */
+.btn-submit {
+  width: 100%; padding: 14px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: #fff; font-weight: 700; font-size: 16px;
+  border: none; cursor: pointer; margin-top: 8px;
+  transition: opacity .2s; letter-spacing: 0.3px;
+}
+.btn-submit:hover { opacity: 0.9; }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Results ── */
+#results { display: none; max-width: 820px; margin: 0 auto; padding: 40px 20px; }
+#results.active { display: block; }
+
+.risk-banner {
+  border-radius: var(--radius); padding: 20px 24px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 16px;
+}
+.risk-banner.critical { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); }
+.risk-banner.high     { background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.3); }
+.risk-banner.medium   { background: rgba(234,179,8,0.12);  border: 1px solid rgba(234,179,8,0.3); }
+.risk-banner.low      { background: rgba(34,197,94,0.12);  border: 1px solid rgba(34,197,94,0.3); }
+.risk-banner .risk-icon { font-size: 32px; }
+.risk-banner .risk-text h3 { font-size: 18px; font-weight: 700; }
+.risk-banner .risk-text p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.risk-stats { display: flex; gap: 16px; margin-left: auto; }
+.risk-stat { text-align: center; }
+.risk-stat .num { font-size: 22px; font-weight: 700; }
+.risk-stat .lbl { font-size: 11px; color: var(--muted); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 4px; margin-bottom: 20px; }
+.tab-btn {
+  flex: 1; padding: 8px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  border: none; background: none; color: var(--muted); cursor: pointer; transition: all .15s;
+}
+.tab-btn.active { background: var(--accent); color: #fff; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Finding cards */
+.finding-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px;
+  border-left: 3px solid var(--border);
+}
+.finding-card.critical { border-left-color: var(--red); }
+.finding-card.high     { border-left-color: var(--orange); }
+.finding-card.medium   { border-left-color: var(--yellow); }
+.finding-card.low      { border-left-color: var(--green); }
+.finding-card.pass     { border-left-color: var(--green); opacity: 0.7; }
+
+.finding-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.finding-header .sev {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+  flex-shrink: 0; margin-top: 2px; text-transform: uppercase;
+}
+.sev.critical { background: rgba(239,68,68,0.2); color: #f87171; }
+.sev.high     { background: rgba(249,115,22,0.2); color: #fb923c; }
+.sev.medium   { background: rgba(234,179,8,0.2);  color: #fbbf24; }
+.sev.low      { background: rgba(34,197,94,0.2);  color: #4ade80; }
+.sev.pass     { background: rgba(34,197,94,0.2);  color: #4ade80; }
+
+.finding-header .platform-tag {
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+  background: rgba(99,102,241,0.15); color: var(--accent2); flex-shrink: 0; margin-top: 2px;
+}
+.finding-header h4 { font-size: 14px; font-weight: 600; flex: 1; }
+.finding-detail { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.finding-fix {
+  margin-top: 8px; padding: 8px 12px; background: var(--card2);
+  border-radius: 6px; font-size: 12px; color: var(--accent2);
+  border-left: 2px solid var(--accent);
+}
+
+/* Roadmap */
+.roadmap-step {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+  display: grid; grid-template-columns: 40px 1fr auto; gap: 16px; align-items: start;
+}
+.step-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; color: var(--accent2); flex-shrink: 0;
+}
+.step-body h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.step-body p  { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.step-items   { list-style: none; }
+.step-items li { font-size: 12px; color: var(--muted); padding: 2px 0; padding-left: 14px; position: relative; }
+.step-items li::before { content: '•'; position: absolute; left: 0; color: var(--accent2); }
+.step-meta { text-align: right; flex-shrink: 0; }
+.step-meta .effort { font-size: 11px; color: var(--muted); }
+.step-meta .prio {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+  display: inline-block; margin-bottom: 4px;
+}
+.prio.critical { background: rgba(239,68,68,0.2); color: #f87171; }
+.prio.high     { background: rgba(249,115,22,0.2); color: #fb923c; }
+.prio.medium   { background: rgba(234,179,8,0.2);  color: #fbbf24; }
+
+/* Checklist */
+.checklist-group { margin-bottom: 20px; }
+.checklist-group h4 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.checklist-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 6px;
+}
+.checklist-item input[type=checkbox] { accent-color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+.checklist-item span { font-size: 13px; line-height: 1.5; }
+.checklist-item .cat-tag {
+  font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px;
+  background: var(--card2); color: var(--muted); flex-shrink: 0; margin-top: 2px;
+}
+
+/* Warnings */
+.warning-bar {
+  background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.25);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;
+  font-size: 13px; color: #fb923c;
+}
+
+/* Loading */
+.loading {
+  text-align: center; padding: 60px 20px; color: var(--muted);
+}
+.spinner {
+  width: 40px; height: 40px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .mode-cards { grid-template-columns: 1fr; }
+  header { padding: 16px 20px; }
+  .roadmap-step { grid-template-columns: 36px 1fr; }
+  .step-meta { grid-column: 2; text-align: left; }
+}
+</style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="main-container">
-            <!-- Header -->
-            <div class="header">
-                <h1><i class="fas fa-shield-alt"></i> 教育游戏应用全球合规专家系统 v2.0</h1>
-                <p class="mb-0">一站式合规审核 • AI智能分析 • 完整解决方案</p>
-                <div class="mt-3">
-                    <span class="expert-badge"><i class="fas fa-child"></i> 儿童保护专家</span>
-                    <span class="expert-badge"><i class="fas fa-gamepad"></i> 游戏法规专家</span>
-                    <span class="expert-badge"><i class="fas fa-graduation-cap"></i> 教育合规专家</span>
-                    <span class="expert-badge"><i class="fas fa-lock"></i> 隐私法律专家</span>
-                    <span class="expert-badge"><i class="fas fa-store"></i> 平台政策专家</span>
-                </div>
-            </div>
 
-            <!-- Main Form -->
-            <div class="form-section">
-                <form id="complianceForm">
-                    
-                    <!-- 基本信息 -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h3 class="section-title"><i class="fas fa-info-circle"></i> 基本信息</h3>
-                            
-                            <div class="form-group">
-                                <label for="appName" class="form-label">应用/游戏名称 *</label>
-                                <input type="text" class="form-control" id="appName" placeholder="例如：数学冒险游戏" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="appType" class="form-label">应用类型 *</label>
-                                <select class="form-select" id="appType" required>
-                                    <option value="">请选择应用类型</option>
-                                    <option value="Educational Gaming">教育游戏</option>
-                                    <option value="Educational App">教育应用</option>
-                                    <option value="Gaming">纯游戏</option>
-                                    <option value="Learning Platform">学习平台</option>
-                                    <option value="Social Learning">社交学习</option>
-                                    <option value="Gamified Learning">游戏化学习</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="appVersion" class="form-label">版本号</label>
-                                <input type="text" class="form-control" id="appVersion" placeholder="例如：1.0.0">
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <h3 class="section-title"><i class="fas fa-users"></i> 用户信息</h3>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="minAge" class="form-label">最小用户年龄 *</label>
-                                        <input type="number" class="form-control" id="minAge" min="0" max="18" placeholder="例如：6" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="maxAge" class="form-label">最大用户年龄</label>
-                                        <input type="number" class="form-control" id="maxAge" min="0" max="100" placeholder="例如：16">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="targetAgeGroup" class="form-label">目标年龄组描述</label>
-                                <input type="text" class="form-control" id="targetAgeGroup" placeholder="例如：小学生(6-12岁)">
-                            </div>
-                        </div>
-                    </div>
+<header>
+  <span class="logo">🎮 Unity<span>合规</span></span>
+  <span class="badge">App Store · Google Play · GDPR · COPPA</span>
+  <button class="policy-btn" onclick="openPolicyModal()">📋 政策新鲜度</button>
+</header>
 
-                    <!-- 市场和平台 -->
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <h3 class="section-title"><i class="fas fa-globe"></i> 目标市场 *</h3>
-                            <p class="text-muted">选择您计划上架的国家/地区（影响合规要求）</p>
-                            <div class="checkbox-group">
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_us" name="target_markets" value="US">
-                                    <label for="market_us" class="form-check-label ms-2">🇺🇸 美国 (COPPA风险)</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_china" name="target_markets" value="China">
-                                    <label for="market_china" class="form-check-label ms-2">🇨🇳 中国 (防沉迷风险)</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_eu" name="target_markets" value="EU">
-                                    <label for="market_eu" class="form-check-label ms-2">🇪🇺 欧盟 (GDPR风险)</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_uk" name="target_markets" value="UK">
-                                    <label for="market_uk" class="form-check-label ms-2">🇬🇧 英国 (儿童设计准则)</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_korea" name="target_markets" value="Korea">
-                                    <label for="market_korea" class="form-check-label ms-2">🇰🇷 韩国 (游戏法规)</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_japan" name="target_markets" value="Japan">
-                                    <label for="market_japan" class="form-check-label ms-2">🇯🇵 日本 (扭蛋法规)</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_canada" name="target_markets" value="Canada">
-                                    <label for="market_canada" class="form-check-label ms-2">🇨🇦 加拿大</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="market_australia" name="target_markets" value="Australia">
-                                    <label for="market_australia" class="form-check-label ms-2">🇦🇺 澳大利亚</label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <h3 class="section-title"><i class="fas fa-mobile-alt"></i> 目标平台</h3>
-                            <div class="checkbox-group">
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="platform_ios" name="target_platforms" value="iOS">
-                                    <label for="platform_ios" class="form-check-label ms-2"><i class="fab fa-apple"></i> iOS App Store</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="platform_android" name="target_platforms" value="Android">
-                                    <label for="platform_android" class="form-check-label ms-2"><i class="fab fa-google-play"></i> Google Play</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="platform_web" name="target_platforms" value="Web">
-                                    <label for="platform_web" class="form-check-label ms-2"><i class="fas fa-globe"></i> Web浏览器</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="platform_windows" name="target_platforms" value="Windows">
-                                    <label for="platform_windows" class="form-check-label ms-2"><i class="fab fa-windows"></i> Windows应用商店</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<!-- ── Policy Freshness Modal ── -->
+<div class="modal-overlay" id="policy-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📋 政策规则新鲜度检查</h3>
+      <button class="modal-close" onclick="closePolicyModal()">✕</button>
+    </div>
+    <div class="modal-body" id="policy-modal-body">
+      <div class="loading"><div class="spinner"></div><p>正在加载...</p></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closePolicyModal()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:13px;">关闭</button>
+      <button onclick="loadFreshness()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔄 刷新</button>
+    </div>
+  </div>
+</div>
 
-                    <!-- 功能特性 -->
-                    <div class="mt-4">
-                        <h3 class="section-title"><i class="fas fa-cogs"></i> 应用功能特性</h3>
-                        <p class="text-muted">选择您应用具备的功能（直接影响合规复杂度）</p>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-coins"></i> 商业功能</h5>
-                                <div class="checkbox-group">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_iap" name="app_features" value="has_in_app_purchases">
-                                        <label for="feature_iap" class="form-check-label ms-2">💰 应用内购买 (高风险)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_ads" name="app_features" value="advertising_present">
-                                        <label for="feature_ads" class="form-check-label ms-2">📺 广告展示</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_subscription" name="app_features" value="subscription_model">
-                                        <label for="feature_subscription" class="form-check-label ms-2">📅 订阅模式</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_freemium" name="app_features" value="freemium_model">
-                                        <label for="feature_freemium" class="form-check-label ms-2">🎁 免费+付费模式</label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-users"></i> 社交功能</h5>
-                                <div class="checkbox-group">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_multiplayer" name="app_features" value="has_multiplayer">
-                                        <label for="feature_multiplayer" class="form-check-label ms-2">👥 多人游戏</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_chat" name="app_features" value="has_chat_messaging">
-                                        <label for="feature_chat" class="form-check-label ms-2">💬 聊天功能 (高风险)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_social" name="app_features" value="has_social_features">
-                                        <label for="feature_social" class="form-check-label ms-2">🤝 社交互动</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_ugc" name="app_features" value="user_generated_content">
-                                        <label for="feature_ugc" class="form-check-label ms-2">📝 用户生成内容</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-database"></i> 数据处理</h5>
-                                <div class="checkbox-group">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_educational_data" name="app_features" value="collects_educational_data">
-                                        <label for="feature_educational_data" class="form-check-label ms-2">📚 收集教育数据 (FERPA风险)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_cross_border" name="app_features" value="cross_border_data_transfer">
-                                        <label for="feature_cross_border" class="form-check-label ms-2">🌐 跨境数据传输 (高风险)</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_ai" name="app_features" value="uses_ai_algorithms">
-                                        <label for="feature_ai" class="form-check-label ms-2">🤖 AI算法推荐</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_third_party" name="app_features" value="data_sharing_third_parties">
-                                        <label for="feature_third_party" class="form-check-label ms-2">🔗 第三方数据分享</label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h5><i class="fas fa-shield-alt"></i> 安全控制</h5>
-                                <div class="checkbox-group">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_parental_controls" name="app_features" value="has_parental_controls">
-                                        <label for="feature_parental_controls" class="form-check-label ms-2">👨‍👩‍👧‍👦 家长控制功能</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_age_verification" name="app_features" value="has_age_verification">
-                                        <label for="feature_age_verification" class="form-check-label ms-2">🆔 年龄验证系统</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_content_moderation" name="app_features" value="content_moderation">
-                                        <label for="feature_content_moderation" class="form-check-label ms-2">🛡️ 内容审核</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="feature_time_limits" name="app_features" value="has_time_limits">
-                                        <label for="feature_time_limits" class="form-check-label ms-2">⏰ 使用时间限制</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<!-- ── 模式选择（首页） ── -->
+<div id="landing">
+  <h1>Unity 游戏合规系统</h1>
+  <p>面向 App Store & Google Play 发布，覆盖欧美市场法规（GDPR · COPPA · CCPA）</p>
+  <div class="mode-cards">
 
-                    <!-- 技术架构 -->
-                    <div class="mt-4">
-                        <h3 class="section-title"><i class="fas fa-server"></i> 技术架构</h3>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="checkbox-group">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="tech_cloud" name="tech_features" value="cloud_storage">
-                                        <label for="tech_cloud" class="form-check-label ms-2">☁️ 云存储</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="tech_offline" name="tech_features" value="offline_mode">
-                                        <label for="tech_offline" class="form-check-label ms-2">📱 离线模式</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="tech_location" name="tech_features" value="uses_location_services">
-                                        <label for="tech_location" class="form-check-label ms-2">📍 位置服务</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="checkbox-group">
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="tech_camera" name="tech_features" value="uses_camera_microphone">
-                                        <label for="tech_camera" class="form-check-label ms-2">📷 摄像头/麦克风</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="tech_push" name="tech_features" value="push_notifications">
-                                        <label for="tech_push" class="form-check-label ms-2">🔔 推送通知</label>
-                                    </div>
-                                    <div class="checkbox-item">
-                                        <input type="checkbox" id="tech_biometric" name="tech_features" value="biometric_data">
-                                        <label for="tech_biometric" class="form-check-label ms-2">👆 生物识别数据 (高风险)</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 补充信息 -->
-                    <div class="mt-4">
-                        <h3 class="section-title"><i class="fas fa-comment"></i> 补充信息</h3>
-                        <div class="form-group">
-                            <label for="additionalInfo" class="form-label">其他需要说明的特殊情况</label>
-                            <textarea class="form-control" id="additionalInfo" rows="4" 
-                                      placeholder="例如：与学校系统集成、特殊的数据处理需求、已知的合规问题等"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- 分析选项 -->
-                    <div class="mt-4">
-                        <h3 class="section-title"><i class="fas fa-sliders-h"></i> 分析选项</h3>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="option_detailed" checked>
-                                    <label class="form-check-label" for="option_detailed">
-                                        详细分析报告
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="option_predictions" checked>
-                                    <label class="form-check-label" for="option_predictions">
-                                        AI风险预测
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="option_solutions" checked>
-                                    <label class="form-check-label" for="option_solutions">
-                                        解决方案代码
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 提交按钮 -->
-                    <div class="text-center mt-5">
-                        <button type="submit" class="btn analyze-btn">
-                            <i class="fas fa-magic"></i> 开始智能合规分析
-                        </button>
-                        <p class="mt-3 text-muted">
-                            <i class="fas fa-clock"></i> 预计分析时间：30-60秒
-                        </p>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Progress Indicator -->
-            <div class="progress-container" id="progressContainer">
-                <div class="step-indicator">
-                    <div class="step active" id="step1">1</div>
-                    <div class="step" id="step2">2</div>
-                    <div class="step" id="step3">3</div>
-                    <div class="step" id="step4">4</div>
-                    <div class="step" id="step5">5</div>
-                </div>
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">分析中...</span>
-                </div>
-                <h4 class="mt-3">正在进行智能合规分析...</h4>
-                <p id="progressText">正在初始化专家系统...</p>
-            </div>
-
-            <!-- Results Section -->
-            <div class="results-section" id="resultsSection">
-                <h2><i class="fas fa-chart-line"></i> 合规分析结果</h2>
-                <div id="resultsContent">
-                    <!-- 结果将在这里显示 -->
-                </div>
-            </div>
-            
-        </div>
+    <div class="mode-card" onclick="showMode('guide')">
+      <div class="icon">🗺️</div>
+      <h2>开发新游戏</h2>
+      <p>告诉我你要做什么游戏，系统生成完整的合规开发路线图、Unity 代码模板和平台配置清单。</p>
+      <div class="tags">
+        <span class="tag">开发向导</span>
+        <span class="tag">代码模板</span>
+        <span class="tag">平台配置清单</span>
+        <span class="tag">法规要点</span>
+      </div>
+      <button class="btn-enter">开始规划 →</button>
     </div>
 
-    <!-- Feature Highlights -->
-    <div class="container mt-4">
-        <div class="feature-highlight">
-            <h4><i class="fas fa-star"></i> 为什么选择我们的合规系统？</h4>
-            <div class="row mt-3">
-                <div class="col-md-3 text-center">
-                    <i class="fas fa-brain fa-3x mb-2"></i>
-                    <h6>AI智能分析</h6>
-                    <p>25+ 法规自动识别</p>
-                </div>
-                <div class="col-md-3 text-center">
-                    <i class="fas fa-code fa-3x mb-2"></i>
-                    <h6>完整技术实现</h6>
-                    <p>75K+ 行可部署代码</p>
-                </div>
-                <div class="col-md-3 text-center">
-                    <i class="fas fa-dollar-sign fa-3x mb-2"></i>
-                    <h6>节省95%成本</h6>
-                    <p>vs 传统法律咨询</p>
-                </div>
-                <div class="col-md-3 text-center">
-                    <i class="fas fa-clock fa-3x mb-2"></i>
-                    <h6>24小时更新</h6>
-                    <p>法规变化实时反映</p>
-                </div>
-            </div>
-        </div>
+    <div class="mode-card" onclick="showMode('audit')">
+      <div class="icon">🔍</div>
+      <h2>检测已有游戏</h2>
+      <p>输入游戏信息（可选填项目路径做代码扫描），系统输出统一审计报告：平台政策 + 法规合规 + 代码缺项。</p>
+      <div class="tags">
+        <span class="tag">代码扫描</span>
+        <span class="tag">平台政策检测</span>
+        <span class="tag">法规合规检测</span>
+        <span class="tag">优先修复清单</span>
+      </div>
+      <button class="btn-enter">开始检测 →</button>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        document.getElementById('complianceForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // 显示进度指示器
-            document.querySelector('.form-section').style.display = 'none';
-            document.getElementById('progressContainer').style.display = 'block';
-            
-            // 收集表单数据
-            const formData = collectFormData();
-            
-            // 模拟分析步骤
-            await simulateAnalysis();
-            
-            // 调用API进行分析
-            try {
-                const response = await analyzeCompliance(formData);
-                displayResults(response);
-            } catch (error) {
-                displayError(error);
-            }
-        });
-        
-        function collectFormData() {
-            const form = document.getElementById('complianceForm');
-            const formData = new FormData(form);
-            
-            // 基本信息
-            const appProfile = {
-                name: document.getElementById('appName').value,
-                app_type: document.getElementById('appType').value,
-                version: document.getElementById('appVersion').value || '1.0.0',
-                min_user_age: parseInt(document.getElementById('minAge').value),
-                max_user_age: parseInt(document.getElementById('maxAge').value) || null,
-                target_age_group: document.getElementById('targetAgeGroup').value,
-                additional_info: document.getElementById('additionalInfo').value
-            };
-            
-            // 收集多选项
-            appProfile.target_markets = Array.from(document.querySelectorAll('input[name="target_markets"]:checked')).map(cb => cb.value);
-            appProfile.target_platforms = Array.from(document.querySelectorAll('input[name="target_platforms"]:checked')).map(cb => cb.value);
-            
-            // 功能特性
-            const features = Array.from(document.querySelectorAll('input[name="app_features"]:checked')).map(cb => cb.value);
-            const techFeatures = Array.from(document.querySelectorAll('input[name="tech_features"]:checked')).map(cb => cb.value);
-            
-            // 转换为布尔属性
-            features.forEach(feature => {
-                appProfile[feature] = true;
-            });
-            techFeatures.forEach(feature => {
-                appProfile[feature] = true;
-            });
-            
-            // 分析选项
-            const options = {
-                format: document.getElementById('option_detailed').checked ? 'detailed' : 'summary',
-                include_predictions: document.getElementById('option_predictions').checked,
-                include_solutions: document.getElementById('option_solutions').checked
-            };
-            
-            return { app_profile: appProfile, options: options };
-        }
-        
-        async function simulateAnalysis() {
-            const steps = [
-                '正在初始化专家系统...',
-                '正在分析应用特征...',
-                '正在评估法规适用性...',
-                '正在生成风险评估...',
-                '正在准备解决方案...'
-            ];
-            
-            for (let i = 0; i < steps.length; i++) {
-                document.getElementById('progressText').textContent = steps[i];
-                document.getElementById(`step${i + 1}`).classList.add('completed');
-                if (i < steps.length - 1) {
-                    document.getElementById(`step${i + 2}`).classList.add('active');
-                }
-                await new Promise(resolve => setTimeout(resolve, 800));
-            }
-        }
-        
-        async function analyzeCompliance(formData) {
-            // 这里调用实际的API
-            const response = await fetch('/api/v1/compliance/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-API-Key': 'demo-key'
-                },
-                body: JSON.stringify(formData)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API错误: ${response.status}`);
-            }
-            
-            return await response.json();
-        }
-        
-        function displayResults(response) {
-            document.getElementById('progressContainer').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'block';
-            
-            const results = response.results || response;
-            let html = '';
-            
-            // 风险摘要
-            if (results.risk_assessment) {
-                html += generateRiskSummary(results.risk_assessment);
-            }
-            
-            // 详细问题列表
-            if (results.compliance_results) {
-                html += generateIssuesList(results.compliance_results);
-            }
-            
-            // 推荐解决方案
-            if (results.recommendations) {
-                html += generateRecommendations(results.recommendations);
-            }
-            
-            // 实施指南
-            if (results.implementation_guide) {
-                html += generateImplementationGuide(results.implementation_guide);
-            }
-            
-            document.getElementById('resultsContent').innerHTML = html;
-            
-            // 滚动到结果区域
-            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function generateRiskSummary(riskAssessment) {
-            return `
-                <div class="alert alert-info">
-                    <h4><i class="fas fa-exclamation-triangle"></i> 风险评估摘要</h4>
-                    <div class="row">
-                        <div class="col-md-3 text-center">
-                            <h2 class="text-danger">${riskAssessment.critical_issues || 0}</h2>
-                            <span class="risk-badge risk-critical">严重问题</span>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <h2 class="text-warning">${riskAssessment.high_issues || 0}</h2>
-                            <span class="risk-badge risk-high">高风险</span>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <h2 class="text-info">${riskAssessment.medium_issues || 0}</h2>
-                            <span class="risk-badge risk-medium">中风险</span>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <h2 class="text-success">${riskAssessment.low_issues || 0}</h2>
-                            <span class="risk-badge risk-low">低风险</span>
-                        </div>
-                    </div>
-                    <p class="mt-3">
-                        <strong>整体风险等级：</strong> 
-                        <span class="risk-badge risk-${riskAssessment.risk_level}">${riskAssessment.risk_level?.toUpperCase()}</span>
-                        <strong>风险评分：</strong> ${riskAssessment.overall_score || 0}/1000
-                    </p>
-                </div>
-            `;
-        }
-        
-        function generateIssuesList(issues) {
-            if (!issues || issues.length === 0) {
-                return '<div class="alert alert-success"><i class="fas fa-check-circle"></i> 恭喜！未发现明显的合规问题。</div>';
-            }
-            
-            let html = '<h3><i class="fas fa-list-alt"></i> 详细问题分析</h3>';
-            
-            const groupedIssues = issues.reduce((groups, issue) => {
-                const severity = issue.severity || 'low';
-                if (!groups[severity]) groups[severity] = [];
-                groups[severity].push(issue);
-                return groups;
-            }, {});
-            
-            ['critical', 'high', 'medium', 'low'].forEach(severity => {
-                if (groupedIssues[severity]) {
-                    html += `<h4 class="mt-4"><span class="risk-badge risk-${severity}">${severity.toUpperCase()}</span> 级问题 (${groupedIssues[severity].length}个)</h4>`;
-                    
-                    groupedIssues[severity].forEach(issue => {
-                        html += `
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <span class="risk-badge risk-${severity}">${severity}</span>
-                                        ${issue.message || '合规问题'}
-                                    </h5>
-                                    <p class="card-text"><strong>法规要求：</strong> ${issue.requirement || '未指定'}</p>
-                                    <p class="card-text"><strong>解决方案：</strong> ${issue.solution || '联系合规专家'}</p>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <small class="text-muted"><strong>影响地区：</strong> ${issue.region || 'Global'}</small>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <small class="text-muted"><strong>预估成本：</strong> ${issue.remediation_cost || 'TBD'}</small>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <small class="text-muted"><strong>实施时间：</strong> ${issue.implementation_time || 'TBD'}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-            });
-            
-            return html;
-        }
-        
-        function generateRecommendations(recommendations) {
-            if (!recommendations || recommendations.length === 0) return '';
-            
-            let html = '<h3><i class="fas fa-lightbulb"></i> 优先建议</h3>';
-            
-            recommendations.forEach((rec, index) => {
-                html += `
-                    <div class="alert alert-warning">
-                        <h5><i class="fas fa-arrow-right"></i> ${rec.title || `建议 ${index + 1}`}</h5>
-                        <p>${rec.description || '详细建议内容'}</p>
-                        ${rec.priority ? `<span class="badge bg-primary">优先级: ${rec.priority}</span>` : ''}
-                        ${rec.category ? `<span class="badge bg-secondary ms-2">类别: ${rec.category}</span>` : ''}
-                    </div>
-                `;
-            });
-            
-            return html;
-        }
-        
-        function generateImplementationGuide(guide) {
-            return `
-                <div class="alert alert-success">
-                    <h4><i class="fas fa-tools"></i> 实施指南</h4>
-                    <p>我们已为您准备了完整的技术实现解决方案：</p>
-                    <ul>
-                        <li><strong>COPPA家长同意系统：</strong> templates/coppa_parental_consent.py (21K行)</li>
-                        <li><strong>中国防沉迷系统：</strong> templates/china_anti_addiction_system.py (33K行)</li>
-                        <li><strong>GDPR数据权利系统：</strong> templates/gdpr_data_subject_rights.py (42K行)</li>
-                        <li><strong>API集成方案：</strong> api/compliance_api.py</li>
-                        <li><strong>可视化监控：</strong> engines/compliance_visualizer.py</li>
-                    </ul>
-                    <p>所有代码均可直接部署，无需从零开发！</p>
-                </div>
-            `;
-        }
-        
-        function displayError(error) {
-            document.getElementById('progressContainer').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'block';
-            
-            document.getElementById('resultsContent').innerHTML = `
-                <div class="alert alert-danger">
-                    <h4><i class="fas fa-exclamation-circle"></i> 分析出现错误</h4>
-                    <p>抱歉，分析过程中出现了问题：${error.message}</p>
-                    <p>请检查：</p>
-                    <ul>
-                        <li>确保API服务器正在运行 (python3 launcher.py --mode api)</li>
-                        <li>检查网络连接</li>
-                        <li>验证输入的信息格式是否正确</li>
-                    </ul>
-                    <button class="btn btn-primary" onclick="location.reload()">
-                        <i class="fas fa-redo"></i> 重新尝试
-                    </button>
-                </div>
-            `;
-        }
-        
-        // 表单验证
-        document.getElementById('minAge').addEventListener('change', function() {
-            const minAge = parseInt(this.value);
-            const maxAgeInput = document.getElementById('maxAge');
-            
-            if (minAge < 13) {
-                document.querySelector('label[for="market_us"]').innerHTML = '🇺🇸 美国 (COPPA风险 - 强制要求)';
-                document.getElementById('market_us').parentElement.style.background = '#fff3cd';
-            }
-            
-            if (minAge < 18) {
-                document.querySelector('label[for="market_china"]').innerHTML = '🇨🇳 中国 (防沉迷风险 - 强制要求)';
-                document.getElementById('market_china').parentElement.style.background = '#fff3cd';
-            }
-        });
-        
-        // 实时风险提示
-        document.querySelectorAll('input[name="target_markets"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                updateRiskWarnings();
-            });
-        });
-        
-        function updateRiskWarnings() {
-            const selectedMarkets = Array.from(document.querySelectorAll('input[name="target_markets"]:checked')).map(cb => cb.value);
-            const minAge = parseInt(document.getElementById('minAge').value) || 18;
-            
-            let warnings = [];
-            
-            if (selectedMarkets.includes('US') && minAge < 13) {
-                warnings.push('🔴 美国市场需要COPPA合规');
-            }
-            
-            if (selectedMarkets.includes('China') && minAge < 18) {
-                warnings.push('🔴 中国市场需要防沉迷系统');
-            }
-            
-            if (selectedMarkets.includes('EU')) {
-                warnings.push('🟠 欧盟市场需要GDPR合规');
-            }
-            
-            // 在界面上显示预警（可选实现）
-        }
-    </script>
+  </div>
+</div>
+
+<!-- ── Mode A：开发向导表单 ── -->
+<div id="view-guide" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>🗺️ 合规开发向导</h2>
+    <p>填写游戏基本信息，生成专属的合规开发路线图和 Unity 代码模板</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏基本信息</div>
+    <div class="field">
+      <label>游戏名称</label>
+      <input type="text" id="g-name" placeholder="My Unity Game" value="My Unity Game">
+    </div>
+    <div class="field">
+      <label>游戏类型</label>
+      <select id="g-type">
+        <option value="casual">休闲游戏</option>
+        <option value="puzzle">益智游戏</option>
+        <option value="action">动作游戏</option>
+        <option value="rpg">RPG</option>
+        <option value="strategy">策略游戏</option>
+        <option value="simulation">模拟经营</option>
+        <option value="sports">体育游戏</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>最小用户年龄</label>
+      <input type="number" id="g-age" value="13" min="3" max="18">
+      <small>影响 COPPA（&lt;13岁）和儿童相关合规要求</small>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏功能（多选）</div>
+    <div class="cb-grid" id="g-features">
+      <label class="cb-item"><input type="checkbox" value="iap"> 应用内购买（IAP）</label>
+      <label class="cb-item"><input type="checkbox" value="ads"> 广告变现</label>
+      <label class="cb-item"><input type="checkbox" value="social_login"> 第三方登录</label>
+      <label class="cb-item"><input type="checkbox" value="multiplayer"> 多人联机</label>
+      <label class="cb-item"><input type="checkbox" value="leaderboard"> 排行榜</label>
+      <label class="cb-item"><input type="checkbox" value="ugc"> 用户生成内容</label>
+      <label class="cb-item"><input type="checkbox" value="analytics"> 数据分析</label>
+      <label class="cb-item"><input type="checkbox" value="push"> 推送通知</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">目标市场（多选）</div>
+    <div class="cb-grid" id="g-markets">
+      <label class="cb-item"><input type="checkbox" value="US" checked> 🇺🇸 美国（COPPA）</label>
+      <label class="cb-item"><input type="checkbox" value="EU" checked> 🇪🇺 欧盟（GDPR）</label>
+      <label class="cb-item"><input type="checkbox" value="UK"> 🇬🇧 英国（UK GDPR）</label>
+      <label class="cb-item"><input type="checkbox" value="AU"> 🇦🇺 澳大利亚</label>
+      <label class="cb-item"><input type="checkbox" value="CA"> 🇨🇦 加拿大</label>
+      <label class="cb-item"><input type="checkbox" value="JP"> 🇯🇵 日本</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">目标平台</div>
+    <div class="cb-grid" id="g-platforms">
+      <label class="cb-item"><input type="checkbox" value="ios" checked> 🍎 iOS App Store</label>
+      <label class="cb-item"><input type="checkbox" value="android" checked> 🤖 Google Play</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" id="btn-guide" onclick="submitGuide()">生成合规开发向导</button>
+</div>
+
+<!-- ── Mode B：审计检测表单 ── -->
+<div id="view-audit" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>🔍 游戏合规审计</h2>
+    <p>检测已有游戏是否满足平台政策和目标市场法规要求</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏信息</div>
+    <div class="field">
+      <label>游戏名称</label>
+      <input type="text" id="a-name" placeholder="My Unity Game" value="My Unity Game">
+    </div>
+    <div class="field">
+      <label>最小用户年龄</label>
+      <input type="number" id="a-age" value="13" min="3" max="18">
+    </div>
+    <div class="field">
+      <label>Unity 项目路径（可选，填写后将进行代码扫描）</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="a-path" placeholder="/Users/you/MyUnityGame" style="flex:1;">
+        <button id="browse-btn" onclick="browseFolder()" style="
+          padding:10px 16px;border-radius:8px;border:1px solid var(--border);
+          background:var(--card2);color:var(--text);font-size:13px;font-weight:600;
+          cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;">
+          📁 浏览
+        </button>
+      </div>
+      <small id="browse-hint">留空则进行问卷式检测（仅根据你填写的信息分析）</small>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏已有功能（多选）</div>
+    <div class="cb-grid" id="a-features">
+      <label class="cb-item"><input type="checkbox" value="iap"> 应用内购买（IAP）</label>
+      <label class="cb-item"><input type="checkbox" value="ads"> 广告</label>
+      <label class="cb-item"><input type="checkbox" value="social_login"> 第三方登录</label>
+      <label class="cb-item"><input type="checkbox" value="multiplayer"> 多人联机</label>
+      <label class="cb-item"><input type="checkbox" value="leaderboard"> 排行榜</label>
+      <label class="cb-item"><input type="checkbox" value="ugc"> 用户生成内容</label>
+      <label class="cb-item"><input type="checkbox" value="analytics"> 数据分析</label>
+      <label class="cb-item"><input type="checkbox" value="push"> 推送通知</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">目标市场（多选）</div>
+    <div class="cb-grid" id="a-markets">
+      <label class="cb-item"><input type="checkbox" value="US" checked> 🇺🇸 美国</label>
+      <label class="cb-item"><input type="checkbox" value="EU" checked> 🇪🇺 欧盟</label>
+      <label class="cb-item"><input type="checkbox" value="UK"> 🇬🇧 英国</label>
+      <label class="cb-item"><input type="checkbox" value="AU"> 🇦🇺 澳大利亚</label>
+      <label class="cb-item"><input type="checkbox" value="CA"> 🇨🇦 加拿大</label>
+      <label class="cb-item"><input type="checkbox" value="JP"> 🇯🇵 日本</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">目标平台</div>
+    <div class="cb-grid" id="a-platforms">
+      <label class="cb-item"><input type="checkbox" value="ios" checked> 🍎 iOS App Store</label>
+      <label class="cb-item"><input type="checkbox" value="android" checked> 🤖 Google Play</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" id="btn-audit" onclick="submitAudit()">开始合规审计</button>
+</div>
+
+<!-- ── 结果展示 ── -->
+<div id="results">
+  <button class="back-btn" onclick="backToForm()">← 返回修改</button>
+  <div id="results-content"></div>
+</div>
+
+<script>
+let currentMode = null;
+
+function getChecked(containerId) {
+  return [...document.querySelectorAll(`#${containerId} input:checked`)].map(el => el.value);
+}
+
+// checkbox 样式联动
+document.querySelectorAll('.cb-item input').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.parentElement.classList.toggle('checked', cb.checked);
+  });
+});
+
+function showLanding() {
+  document.getElementById('landing').style.display = '';
+  document.getElementById('view-guide').classList.remove('active');
+  document.getElementById('view-audit').classList.remove('active');
+  document.getElementById('results').classList.remove('active');
+}
+
+function showMode(mode) {
+  currentMode = mode;
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('view-guide').classList.toggle('active', mode === 'guide');
+  document.getElementById('view-audit').classList.toggle('active', mode === 'audit');
+  document.getElementById('results').classList.remove('active');
+}
+
+function backToForm() {
+  document.getElementById('results').classList.remove('active');
+  document.getElementById(`view-${currentMode}`).classList.add('active');
+}
+
+function showResults(html) {
+  document.getElementById('view-guide').classList.remove('active');
+  document.getElementById('view-audit').classList.remove('active');
+  document.getElementById('results-content').innerHTML = html;
+  document.getElementById('results').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showLoading(msg) {
+  showResults(`<div class="loading"><div class="spinner"></div><p>${msg}</p></div>`);
+}
+
+// ── Mode A Submit ────────────────────────────────────────────────
+
+async function submitGuide() {
+  const features  = getChecked('g-features');
+  const markets   = getChecked('g-markets');
+  const platforms = getChecked('g-platforms');
+  const age       = parseInt(document.getElementById('g-age').value) || 13;
+  const name      = document.getElementById('g-name').value || 'My Unity Game';
+  const type      = document.getElementById('g-type').value;
+
+  if (!markets.length || !platforms.length) {
+    alert('请至少选择一个目标市场和目标平台');
+    return;
+  }
+
+  showLoading('正在生成合规开发向导...');
+
+  try {
+    const res = await fetch('/api/v1/guide/new-game', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_name: name, game_type: type, features, min_user_age: age, target_markets: markets, target_platforms: platforms })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      showResults(renderGuide(data.data));
+    } else {
+      showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message}</p></div>`);
+    }
+  } catch (e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认 API 服务器已启动（python3 launcher.py --mode web）</p></div>`);
+  }
+}
+
+// ── Mode B Submit ────────────────────────────────────────────────
+
+async function submitAudit() {
+  const features  = getChecked('a-features');
+  const markets   = getChecked('a-markets');
+  const platforms = getChecked('a-platforms');
+  const age       = parseInt(document.getElementById('a-age').value) || 13;
+  const name      = document.getElementById('a-name').value || 'My Unity Game';
+  const path      = document.getElementById('a-path').value.trim();
+
+  if (!markets.length || !platforms.length) {
+    alert('请至少选择一个目标市场和目标平台');
+    return;
+  }
+
+  showLoading('正在进行合规审计' + (path ? '（含代码扫描）' : '') + '...');
+
+  try {
+    const res = await fetch('/api/v1/audit/game', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        game_info: { name, features, min_user_age: age },
+        project_path: path || null,
+        target_markets: markets,
+        target_platforms: platforms
+      })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      showResults(renderAudit(data.data));
+    } else {
+      showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message}</p></div>`);
+    }
+  } catch (e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认 API 服务器已启动</p></div>`);
+  }
+}
+
+// ── Render: Guide ────────────────────────────────────────────────
+
+function renderGuide(d) {
+  const risk = d.risk_level || 'medium';
+  const riskLabels = { critical: '高风险', high: '需要关注', medium: '中等', low: '风险较低' };
+  const riskIcons  = { critical: '🚨', high: '⚠️', medium: '⚡', low: '✅' };
+  const gi = d.game_info || {};
+
+  let html = `
+    <div class="view-header">
+      <h2>🗺️ ${gi.name || ''} — 合规开发向导</h2>
+      <p>平台：${(gi.target_platforms||[]).join(' & ')} ｜ 市场：${(gi.target_markets||[]).join(' / ')} ｜ 最低年龄：${gi.min_user_age}岁</p>
+    </div>`;
+
+  // 风险摘要
+  html += `<div class="risk-banner ${risk}">
+    <div class="risk-icon">${riskIcons[risk]}</div>
+    <div class="risk-text">
+      <h3>合规复杂度：${riskLabels[risk]}</h3>
+      <p>${gi.needs_coppa ? 'COPPA 适用 · ' : ''}${gi.needs_gdpr ? 'GDPR 适用 · ' : ''}${gi.has_kids ? '儿童游戏额外要求' : '成人/全年龄游戏'}</p>
+    </div>
+    <div class="risk-stats">
+      <div class="risk-stat">
+        <div class="num">${(d.roadmap||[]).length}</div>
+        <div class="lbl">开发步骤</div>
+      </div>
+      <div class="risk-stat">
+        <div class="num">${d.estimated_compliance_effort?.min_days || '?'}-${d.estimated_compliance_effort?.max_days || '?'}</div>
+        <div class="lbl">天工作量</div>
+      </div>
+    </div>
+  </div>`;
+
+  // 警告
+  (d.warnings || []).forEach(w => {
+    html += `<div class="warning-bar">${w}</div>`;
+  });
+
+  // Tabs
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('roadmap', this)">开发路线图</button>
+    <button class="tab-btn" onclick="switchTab('checklist', this)">平台配置清单</button>
+    <button class="tab-btn" onclick="switchTab('legal', this)">法规要点</button>
+    <button class="tab-btn" onclick="switchTab('templates', this)">代码模板</button>
+  </div>`;
+
+  // Tab: Roadmap
+  html += `<div id="tab-roadmap" class="tab-panel active">`;
+  (d.roadmap || []).forEach(step => {
+    html += `<div class="roadmap-step">
+      <div class="step-num">${step.step}</div>
+      <div class="step-body">
+        <h4>${step.title}</h4>
+        <p><strong>${step.phase}</strong> · ${step.desc}</p>
+        <ul class="step-items">${(step.items||[]).filter(Boolean).map(i => `<li>${i}</li>`).join('')}</ul>
+      </div>
+      <div class="step-meta">
+        <span class="prio ${step.priority}">${step.priority}</span><br>
+        <span class="effort">⏱ ${step.effort}</span>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab: Platform Checklist
+  html += `<div id="tab-checklist" class="tab-panel">`;
+  const cl = d.platform_checklist || {};
+  ['ios', 'android'].forEach(p => {
+    if (!(cl[p] && cl[p].length)) return;
+    const groups = {};
+    cl[p].forEach(item => {
+      if (!groups[item.category]) groups[item.category] = [];
+      groups[item.category].push(item);
+    });
+    html += `<div class="checklist-group"><h4>${p === 'ios' ? '🍎 App Store Connect（iOS）' : '🤖 Play Console（Android）'}</h4>`;
+    Object.entries(groups).forEach(([cat, items]) => {
+      items.forEach(item => {
+        html += `<div class="checklist-item">
+          <input type="checkbox">
+          <span>${item.item}</span>
+          <span class="cat-tag">${cat}</span>
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+
+  // Tab: Legal
+  html += `<div id="tab-legal" class="tab-panel">`;
+  const legal = d.legal_summary || {};
+  if (legal.applicable_laws && legal.applicable_laws.length) {
+    html += `<div class="section" style="margin-bottom:16px">
+      <div class="section-title">适用法规</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${legal.applicable_laws.map(l => `<span class="sev high">${l}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+  (legal.key_requirements || []).forEach(req => {
+    html += `<div class="finding-card high">
+      <div class="finding-header">
+        <span class="sev high">LAW</span>
+        <h4>${req.law}</h4>
+      </div>
+      <ul class="step-items">${(req.requirements||[]).map(r => `<li class="finding-detail">${r}</li>`).join('')}</ul>
+    </div>`;
+  });
+  if (!(legal.key_requirements && legal.key_requirements.length)) {
+    html += `<div class="finding-card low"><div class="finding-detail">所选市场法规要求较简单，按标准隐私政策执行即可。</div></div>`;
+  }
+  html += `</div>`;
+
+  // Tab: Templates
+  html += `<div id="tab-templates" class="tab-panel">`;
+  const templates = d.unity_templates?.templates || [];
+  if (templates.length === 0) {
+    html += `<div class="finding-card"><div class="finding-detail">请选择具体功能（IAP、广告等）以生成对应代码模板。</div></div>`;
+  }
+  templates.forEach(t => {
+    t.files.forEach(f => {
+      if (!f.code) return;
+      html += `<div class="section" style="margin-bottom:16px">
+        <div class="section-title">${t.title} — ${f.filename}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${t.guideline}</div>
+        <pre style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:11px;overflow-x:auto;color:#a5b4fc;line-height:1.6;white-space:pre-wrap;">${escHtml(f.code)}</pre>
+      </div>`;
+    });
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+// ── Render: Audit ────────────────────────────────────────────────
+
+function renderAudit(d) {
+  const s = d.audit_summary || {};
+  const risk = s.risk_level || 'medium';
+  const riskLabels = { critical: '严重问题', high: '高风险', medium: '中等风险', low: '基本合规' };
+  const riskIcons  = { critical: '🚨', high: '⚠️', medium: '⚡', low: '✅' };
+
+  let html = `<div class="view-header">
+    <h2>🔍 合规审计报告</h2>
+    <p>市场：${(s.target_markets||[]).join(' / ')} ｜ 平台：${(s.target_platforms||[]).join(' & ')} ｜ ${s.scan_performed ? '✅ 已执行代码扫描' : '📋 问卷式检测（未提供项目路径）'}</p>
+  </div>`;
+
+  html += `<div class="risk-banner ${risk}">
+    <div class="risk-icon">${riskIcons[risk]}</div>
+    <div class="risk-text">
+      <h3>${riskLabels[risk]}</h3>
+      <p>发现 ${s.total_issues || 0} 个合规问题，其中严重 ${s.critical || 0} 个</p>
+    </div>
+    <div class="risk-stats">
+      <div class="risk-stat"><div class="num" style="color:var(--red)">${s.critical||0}</div><div class="lbl">严重</div></div>
+      <div class="risk-stat"><div class="num" style="color:var(--orange)">${s.high||0}</div><div class="lbl">高风险</div></div>
+      <div class="risk-stat"><div class="num" style="color:var(--yellow)">${s.medium||0}</div><div class="lbl">中等</div></div>
+    </div>
+  </div>`;
+
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('priority', this)">优先修复清单</button>
+    <button class="tab-btn" onclick="switchTab('all-findings', this)">全部问题（${(d.findings||[]).length}）</button>
+  </div>`;
+
+  // Tab: Priority
+  html += `<div id="tab-priority" class="tab-panel active">`;
+  if (!(d.fix_priority_list && d.fix_priority_list.length)) {
+    html += `<div class="finding-card low"><div class="finding-detail">🎉 未发现明显合规问题！请确保平台配置表单也已填写完整。</div></div>`;
+  }
+  (d.fix_priority_list || []).forEach(item => {
+    const catLabel = { platform_policy: '平台政策', legal: '法规', code_scan: '代码缺项' }[item.category] || item.category;
+    html += `<div class="finding-card ${item.severity}">
+      <div class="finding-header">
+        <span class="sev ${item.severity}">${item.severity}</span>
+        <span class="platform-tag">${item.platform === 'all' ? '双平台' : item.platform.toUpperCase()}</span>
+        <span class="platform-tag">${catLabel}</span>
+        <h4>#${item.priority} ${item.title}</h4>
+      </div>
+      ${item.fix ? `<div class="finding-fix">✏️ ${item.fix}</div>` : ''}
+    </div>`;
+  });
+  if (d.note) html += `<div style="margin-top:12px;font-size:12px;color:var(--muted);padding:10px 14px;background:var(--card);border-radius:8px;">⚠️ ${d.note}</div>`;
+  html += `</div>`;
+
+  // Tab: All findings
+  html += `<div id="tab-all-findings" class="tab-panel">`;
+  const catGroups = {};
+  (d.findings || []).forEach(f => {
+    const cat = f.category || 'other';
+    if (!catGroups[cat]) catGroups[cat] = [];
+    catGroups[cat].push(f);
+  });
+  const catNames = { platform_policy: '平台政策', legal: '法规要求', code_scan: '代码扫描', other: '其他' };
+  Object.entries(catGroups).forEach(([cat, items]) => {
+    html += `<div class="checklist-group"><h4>${catNames[cat] || cat}（${items.length}）</h4>`;
+    items.forEach(f => {
+      html += `<div class="finding-card ${f.severity}">
+        <div class="finding-header">
+          <span class="sev ${f.severity}">${f.severity}</span>
+          <span class="platform-tag">${f.platform === 'all' ? '双平台' : f.platform?.toUpperCase()}</span>
+          <h4>${f.title}</h4>
+        </div>
+        <div class="finding-detail">${f.detail || ''}</div>
+        ${f.fix ? `<div class="finding-fix">✏️ ${f.fix}</div>` : ''}
+        ${f.guideline ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">参考：${f.guideline}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Policy Freshness Modal ───────────────────────────────────────
+
+function openPolicyModal() {
+  document.getElementById('policy-modal').classList.add('open');
+  loadFreshness();
+}
+
+function closePolicyModal() {
+  document.getElementById('policy-modal').classList.remove('open');
+}
+
+// 点弹窗外部关闭
+document.addEventListener('click', e => {
+  const modal = document.getElementById('policy-modal');
+  if (e.target === modal) closePolicyModal();
+});
+
+async function loadFreshness() {
+  const body = document.getElementById('policy-modal-body');
+  body.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在检查政策新鲜度...</p></div>';
+
+  try {
+    const res = await fetch('/api/v1/policies/freshness');
+    const data = await res.json();
+    body.innerHTML = renderFreshness(data);
+  } catch (e) {
+    body.innerHTML = '<div class="loading"><p style="color:var(--red)">加载失败，请确认服务器正在运行</p></div>';
+  }
+}
+
+function renderFreshness(d) {
+  const s = d.summary || {};
+  const statusIcon = { fresh: '✅', warning: '⚠️', critical: '🚨' }[d.overall_status] || '❓';
+  const statusText = { fresh: '所有规则均在有效期内', warning: '部分规则需要复核', critical: '有规则严重过期' }[d.overall_status] || '';
+
+  let html = `
+    <div style="margin-bottom:16px;padding:12px 16px;border-radius:8px;background:var(--card2);border:1px solid var(--border);font-size:13px;">
+      ${statusIcon} <strong>${statusText}</strong>
+      <span style="color:var(--muted);margin-left:8px;">过期阈值：${d.staleness_threshold_days} 天 ｜ 生成时间：${(d.generated_at||'').slice(0,19)}</span>
+    </div>
+    <div class="freshness-summary">
+      <div class="freshness-stat ok"><div class="num">${s.fresh||0}</div><div class="lbl">✅ 正常</div></div>
+      <div class="freshness-stat warn"><div class="num">${s.potentially_outdated||0}</div><div class="lbl">⚠️ 待复核</div></div>
+      <div class="freshness-stat danger"><div class="num">${s.outdated||0}</div><div class="lbl">🚨 严重过期</div></div>
+      <div class="freshness-stat"><div class="num">${s.total_rules||0}</div><div class="lbl">规则总计</div></div>
+    </div>`;
+
+  // 如果有需要复核的规则，优先展示
+  const outdated = d.outdated_rules || [];
+  if (outdated.length) {
+    html += `<div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">需要复核的规则</div>`;
+    outdated.forEach(r => {
+      const ageClass = r.severity === 'critical' ? 'danger' : 'warn';
+      const ageIcon = r.severity === 'critical' ? '🚨' : '⚠️';
+      html += `<div class="rule-item">
+        <span class="rule-status">${ageIcon}</span>
+        <div class="rule-body">
+          <div class="rule-title">${r.title}</div>
+          <div class="rule-meta">
+            上次验证：${r.last_verified || '未知'} · 已过 ${r.age_days ?? '?'} 天
+            ${r.source_url ? ` · <a class="rule-link" href="${r.source_url}" target="_blank">查看官方文档 ↗</a>` : ''}
+          </div>
+        </div>
+        <span class="rule-age ${ageClass}">${r.age_days ?? '?'}天</span>
+      </div>`;
+    });
+    html += `<div style="margin-top:12px;padding:10px 14px;background:var(--card2);border-radius:8px;font-size:12px;color:var(--muted);">
+      复核后在终端运行：<code style="color:var(--accent2)">python3 engines/policy_monitor.py --mark-verified PLATFORM:RULE_ID</code>
+    </div>`;
+  }
+
+  // 展示所有平台规则列表（可折叠）
+  const platforms = d.platforms || {};
+  Object.entries(platforms).forEach(([platform, pData]) => {
+    const label = platform === 'apple_app_store' ? '🍎 Apple App Store' : '🤖 Google Play';
+    const rules = pData.rule_details || [];
+    html += `<details style="margin-top:16px;">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600;padding:10px 0;color:var(--text);list-style:none;">
+        ${label} · ${pData.rules_fresh || 0} 个正常 / ${pData.rules_total || 0} 个规则
+      </summary>
+      <div style="margin-top:8px;">`;
+    rules.forEach(r => {
+      const ageClass = r.status === 'outdated' ? 'danger' : r.status === 'potentially_outdated' ? 'warn' : 'fresh';
+      const statusIcon = r.status === 'pass' || r.status === 'fresh' ? '✅' : r.status === 'potentially_outdated' ? '⚠️' : '🚨';
+      html += `<div class="rule-item">
+        <span class="rule-status">${statusIcon}</span>
+        <div class="rule-body">
+          <div class="rule-title">${r.title}</div>
+          <div class="rule-meta">
+            ${r.guideline_ref ? `规则：${r.guideline_ref} · ` : ''}上次验证：${r.last_verified || '未知'}
+            ${r.source_url ? ` · <a class="rule-link" href="${r.source_url}" target="_blank">官方文档 ↗</a>` : ''}
+          </div>
+        </div>
+        <span class="rule-age ${ageClass}">${r.age_days !== null && r.age_days !== undefined ? r.age_days+'天' : '?'}</span>
+      </div>`;
+    });
+    html += `</div></details>`;
+  });
+
+  return html;
+}
+
+// ── Policy Modal ─────────────────────────────────────────────────
+
+function openPolicyModal() {
+  document.getElementById('policy-modal').classList.add('open');
+  initPolicyModal();
+}
+function closePolicyModal() {
+  document.getElementById('policy-modal').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePolicyModal(); });
+
+async function initPolicyModal() {
+  // 先更新 modal header 为 tab 模式
+  document.querySelector('.modal-header').innerHTML = `
+    <h3>📋 政策管理</h3>
+    <div style="display:flex;gap:4px;margin-left:auto;margin-right:12px;">
+      <button class="modal-tab active" id="mtab-status" onclick="switchModalTab('status',this)">📊 状态</button>
+      <button class="modal-tab" id="mtab-config" onclick="switchModalTab('config',this)">⚙️ 配置</button>
+      <button class="modal-tab" id="mtab-check" onclick="switchModalTab('check',this)">🔍 检查</button>
+    </div>
+    <button class="modal-close" onclick="closePolicyModal()">✕</button>`;
+  document.querySelector('.modal-footer').innerHTML = `
+    <button onclick="closePolicyModal()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:13px;">关闭</button>
+    <button id="modal-action-btn" onclick="handleModalAction()" style="padding:8px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔄 刷新状态</button>`;
+  updateModalActionBtn();
+  await switchModalTab('status', document.getElementById('mtab-status'));
+}
+
+let _currentModalTab = 'status';
+let _llmConfig = null;
+
+const _tabActionMeta = {
+  status: { label: '🔄 刷新状态',     style: 'background:var(--accent)' },
+  config: { label: '💾 保存配置',     style: 'background:linear-gradient(135deg,var(--accent),#8b5cf6)' },
+  check:  { label: '⚡ 一键全部检查', style: 'background:linear-gradient(135deg,#f97316,#ef4444)' },
+};
+
+function updateModalActionBtn() {
+  const btn = document.getElementById('modal-action-btn');
+  if (!btn) return;
+  const meta = _tabActionMeta[_currentModalTab] || _tabActionMeta.status;
+  btn.textContent = meta.label;
+  btn.setAttribute('style', `padding:8px 20px;border-radius:8px;border:none;${meta.style};color:#fff;cursor:pointer;font-size:13px;font-weight:600;`);
+}
+
+function handleModalAction() {
+  if (_currentModalTab === 'status') loadModalTab();
+  else if (_currentModalTab === 'config') saveConfig();
+  else if (_currentModalTab === 'check') runCheck('both');
+}
+
+function switchModalTab(tab, btn) {
+  _currentModalTab = tab;
+  document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  updateModalActionBtn();
+  loadModalTab();
+}
+
+async function loadModalTab() {
+  const body = document.getElementById('policy-modal-body');
+  body.innerHTML = '<div class="loading"><div class="spinner"></div><p>加载中...</p></div>';
+  if (_currentModalTab === 'status') await loadStatusTab(body);
+  else if (_currentModalTab === 'config') await loadConfigTab(body);
+  else if (_currentModalTab === 'check') await loadCheckTab(body);
+}
+
+// ── 状态 Tab ─────────────────────────────────────────────────────
+
+async function loadStatusTab(body) {
+  try {
+    const [freshnessRes, llmRes] = await Promise.all([
+      fetch('/api/v1/policies/freshness'),
+      fetch('/api/v1/policies/llm-config'),
+    ]);
+    const freshness = await freshnessRes.json();
+    _llmConfig = await llmRes.json();
+    body.innerHTML = renderFreshnessPanel(freshness, _llmConfig);
+  } catch (e) {
+    body.innerHTML = `<div style="color:var(--red);padding:20px">加载失败</div>`;
+  }
+}
+
+async function loadFreshness() { await loadModalTab(); }
+
+function renderFreshnessPanel(f, llm) {
+  const s = f.summary || {};
+  const statusIcon = { fresh: '✅', warning: '⚠️', critical: '🚨' }[f.overall_status] || '❓';
+
+  let html = '';
+
+  // LLM 配置状态
+  html += `<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">🤖 LLM 自动分析配置</div>`;
+
+  if (llm.any_configured) {
+    const provider = llm.anthropic?.configured ? 'Anthropic Claude' : 'OpenAI GPT-4o';
+    const key = llm.anthropic?.configured ? llm.anthropic.key_prefix : llm.openai.key_prefix;
+    html += `<div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+      <span style="color:var(--green);font-size:16px;">✅</span>
+      <span>已配置 <strong>${provider}</strong>（${key}）</span>
+      <span style="color:var(--muted);font-size:11px;margin-left:auto;">检测到变化时可自动分析含义</span>
+    </div>`;
+  } else {
+    html += `<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">
+      ⚠️ 未配置 LLM —— 系统可检测到政策页面变化，但无法自动理解变化含义
+    </div>
+    <div style="background:var(--bg);border-radius:7px;padding:10px 12px;font-size:12px;font-family:monospace;color:var(--accent2);line-height:1.8;">
+      # 在终端设置（选一种）：<br>
+      export ANTHROPIC_API_KEY=sk-ant-xxx<br>
+      export OPENAI_API_KEY=sk-xxx<br>
+      # 然后重启服务器：python3 launcher.py --mode web
+    </div>`;
+  }
+  html += `</div>`;
+
+  // 整体状态
+  html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+    <span style="font-size:22px;">${statusIcon}</span>
+    <div>
+      <div style="font-size:15px;font-weight:700;">整体状态：${{ fresh: '✅ 全部新鲜', warning: '⚠️ 部分待复核', critical: '🚨 有规则严重过期' }[f.overall_status] || f.overall_status}</div>
+      <div style="font-size:12px;color:var(--muted);">过期阈值 ${f.staleness_threshold_days} 天 · 生成时间 ${(f.generated_at||'').slice(0,19)}</div>
+    </div>
+  </div>`;
+
+  // 统计卡
+  html += `<div class="freshness-summary">
+    <div class="freshness-stat ok"><div class="num">${s.total_rules||0}</div><div class="lbl">规则总数</div></div>
+    <div class="freshness-stat ok"><div class="num">${s.fresh||0}</div><div class="lbl">✅ 新鲜</div></div>
+    <div class="freshness-stat warn"><div class="num">${s.potentially_outdated||0}</div><div class="lbl">⚠️ 待复核</div></div>
+    <div class="freshness-stat danger"><div class="num">${s.outdated||0}</div><div class="lbl">🚨 严重过期</div></div>
+  </div>`;
+
+  // 待复核规则列表
+  const outdated = f.outdated_rules || [];
+  if (outdated.length) {
+    html += `<div style="font-size:13px;font-weight:600;margin-bottom:10px;">需要复核的规则：</div>`;
+    outdated.forEach(r => {
+      const ageClass = r.severity === 'critical' ? 'danger' : 'warn';
+      const icon = r.severity === 'critical' ? '🚨' : '⚠️';
+      html += `<div class="rule-item">
+        <div class="rule-status">${icon}</div>
+        <div class="rule-body">
+          <div class="rule-title">${r.title}</div>
+          <div class="rule-meta">最后验证：${r.last_verified || '未知'} · ${r.age_days ? r.age_days + '天前' : ''}</div>
+          ${r.source_url ? `<a class="rule-link" href="${r.source_url}" target="_blank">📎 查看官方文档</a>` : ''}
+        </div>
+        <span class="rule-age ${ageClass}">${r.age_days ? r.age_days + '天' : '?'}</span>
+      </div>`;
+    });
+
+    // 如果 LLM 已配置，显示分析按钮
+    if (llm.any_configured) {
+      html += `<div style="margin-top:12px;padding:12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;font-size:13px;">
+        💡 LLM 已配置：可在命令行运行以下命令，自动分析政策页面变化含义：<br>
+        <code style="display:block;margin-top:6px;font-family:monospace;color:var(--accent2);">python3 engines/policy_monitor.py --fetch --rss</code>
+      </div>`;
+    }
+  } else {
+    html += `<div style="text-align:center;padding:20px;color:var(--green);font-size:14px;">
+      ✅ 所有规则均在新鲜期内，无需复核
+    </div>`;
+  }
+
+  // 所有规则列表（折叠）
+  const platforms = f.platforms || {};
+  html += `<details style="margin-top:16px;">
+    <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);padding:8px 0;">查看全部规则详情</summary>
+    <div style="margin-top:10px;">`;
+  Object.entries(platforms).forEach(([platform, pdata]) => {
+    const label = platform === 'apple_app_store' ? '🍎 Apple App Store' : '🤖 Google Play Store';
+    html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 6px;">${label}</div>`;
+    (pdata.rule_details || []).forEach(rule => {
+      const statusIcon2 = rule.status === 'fresh' ? '✅' : rule.status === 'potentially_outdated' ? '⚠️' : '🚨';
+      const ageClass2 = rule.status === 'fresh' ? 'fresh' : rule.status === 'potentially_outdated' ? 'warn' : 'danger';
+      html += `<div class="rule-item">
+        <div class="rule-status" style="font-size:13px;">${statusIcon2}</div>
+        <div class="rule-body">
+          <div class="rule-title" style="font-size:12px;">${rule.title}</div>
+          <div class="rule-meta">${rule.guideline_ref || ''} · 验证于 ${rule.last_verified || '未知'}</div>
+          ${rule.source_url ? `<a class="rule-link" href="${rule.source_url}" target="_blank">官方文档 →</a>` : ''}
+        </div>
+        <span class="rule-age ${ageClass2}">${rule.age_days != null ? rule.age_days + '天' : '?'}</span>
+      </div>`;
+    });
+  });
+  html += `</div></details>`;
+
+  return html;
+}
+
+// ── 配置 Tab ─────────────────────────────────────────────────────
+
+async function loadConfigTab(body) {
+  try {
+    const res = await fetch('/api/v1/policies/llm-config');
+    _llmConfig = await res.json();
+  } catch(e) {}
+  const ac = _llmConfig?.anthropic || {};
+  const oc = _llmConfig?.openai || {};
+
+  body.innerHTML = `
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      配置 LLM API Key 后，系统检测到政策变化时可自动分析含义，无需手动阅读原文。
+      Key 保存在项目根目录 <code style="color:var(--accent2)">.env</code> 文件中，不会上传到任何服务器。
+    </div>
+
+    <div class="section" style="margin-bottom:14px;">
+      <div class="section-title" style="display:flex;align-items:center;gap:8px;">
+        🤖 Anthropic Claude
+        <span style="font-size:11px;padding:2px 7px;border-radius:4px;${ac.configured ? 'background:rgba(34,197,94,0.15);color:var(--green)' : 'background:var(--card2);color:var(--muted)'}">
+          ${ac.configured ? '✅ 已配置 · ' + ac.key_prefix : '未配置'}
+        </span>
+        <span style="font-size:11px;color:var(--muted);margin-left:4px;">推荐 · 模型: ${ac.model || 'claude-3-5-sonnet'}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
+        <input type="password" id="cfg-anthropic-key" placeholder="${ac.configured ? '已配置，输入新 Key 以更新' : 'sk-ant-api03-...'}"
+          style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:monospace;">
+        ${ac.configured ? `<button onclick="clearKey('anthropic')" style="padding:10px 14px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);color:#f87171;cursor:pointer;font-size:12px;white-space:nowrap;">清除</button>` : ''}
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:20px;">
+      <div class="section-title" style="display:flex;align-items:center;gap:8px;">
+        🧠 OpenAI GPT-4o
+        <span style="font-size:11px;padding:2px 7px;border-radius:4px;${oc.configured ? 'background:rgba(34,197,94,0.15);color:var(--green)' : 'background:var(--card2);color:var(--muted)'}">
+          ${oc.configured ? '✅ 已配置 · ' + oc.key_prefix : '未配置'}
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
+        <input type="password" id="cfg-openai-key" placeholder="${oc.configured ? '已配置，输入新 Key 以更新' : 'sk-proj-...'}"
+          style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:monospace;">
+        ${oc.configured ? `<button onclick="clearKey('openai')" style="padding:10px 14px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);color:#f87171;cursor:pointer;font-size:12px;white-space:nowrap;">清除</button>` : ''}
+      </div>
+    </div>
+
+    <button onclick="saveConfig()" style="width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;font-weight:700;font-size:14px;cursor:pointer;">
+      💾 保存配置（即时生效，无需重启）
+    </button>
+    <div id="cfg-result" style="margin-top:10px;font-size:13px;text-align:center;"></div>
+  `;
+}
+
+async function saveConfig() {
+  const anthropic_key = document.getElementById('cfg-anthropic-key')?.value?.trim();
+  const openai_key = document.getElementById('cfg-openai-key')?.value?.trim();
+  const resultEl = document.getElementById('cfg-result');
+  resultEl.innerHTML = '<span style="color:var(--muted)">保存中...</span>';
+
+  try {
+    const res = await fetch('/api/v1/policies/save-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ anthropic_key: anthropic_key || undefined, openai_key: openai_key || undefined }),
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      _llmConfig = data.config;
+      resultEl.innerHTML = '<span style="color:var(--green)">✅ 保存成功，LLM 已即时生效</span>';
+      setTimeout(() => loadConfigTab(document.getElementById('policy-modal-body')), 1200);
+    } else {
+      resultEl.innerHTML = `<span style="color:var(--red)">❌ ${data.message}</span>`;
+    }
+  } catch(e) {
+    resultEl.innerHTML = '<span style="color:var(--red)">❌ 请求失败</span>';
+  }
+}
+
+async function clearKey(provider) {
+  const body = { [provider === 'anthropic' ? 'clear_anthropic' : 'clear_openai']: true };
+  await fetch('/api/v1/policies/save-config', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  loadConfigTab(document.getElementById('policy-modal-body'));
+}
+
+// ── 检查 Tab ─────────────────────────────────────────────────────
+
+async function loadCheckTab(body) {
+  const llmReady = _llmConfig?.any_configured;
+  body.innerHTML = `
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      点击按钮主动触发政策检查。系统会联网抓取 Apple / Google 官方来源，对比是否有变化。
+      ${llmReady ? '<span style="color:var(--green)">✅ LLM 已配置，检测到变化时自动分析含义。</span>' : '<span style="color:var(--yellow)">⚠️ LLM 未配置，仅能检测变化，无法自动理解含义。前往「配置」Tab 设置。</span>'}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+      <button onclick="runCheck('rss')" class="check-action-btn">
+        <span style="font-size:20px;">📡</span>
+        <strong>RSS 公告</strong>
+        <span>抓取官方开发者博客，过滤政策相关公告</span>
+      </button>
+      <button onclick="runCheck('pages')" class="check-action-btn">
+        <span style="font-size:20px;">🔍</span>
+        <strong>页面变化检测</strong>
+        <span>对比官方政策页面内容哈希${llmReady ? ' + LLM 分析' : ''}</span>
+      </button>
+      <button onclick="runCheck('both')" class="check-action-btn" style="border-color:var(--accent);background:rgba(99,102,241,0.08);">
+        <span style="font-size:20px;">⚡</span>
+        <strong>全部检查</strong>
+        <span>RSS + 页面变化${llmReady ? ' + LLM 分析' : ''}，一键完成</span>
+      </button>
+    </div>
+
+    <div id="check-result"></div>
+  `;
+}
+
+async function runCheck(type) {
+  const resultEl = document.getElementById('check-result');
+  const labels = { rss: 'RSS 公告', pages: '页面变化检测', both: '全部检查' };
+  resultEl.innerHTML = `<div class="loading" style="padding:30px"><div class="spinner"></div><p>正在执行 ${labels[type]}，请稍候（需联网）...</p></div>`;
+
+  try {
+    const res = await fetch('/api/v1/policies/run-check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ check_type: type }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      resultEl.innerHTML = `<div style="color:var(--red);padding:16px">${data.error}</div>`;
+      return;
+    }
+    resultEl.innerHTML = renderCheckResult(data);
+  } catch(e) {
+    resultEl.innerHTML = `<div style="color:var(--red);padding:16px">请求失败：请确认服务器运行中且网络可访问</div>`;
+  }
+}
+
+function renderCheckResult(data) {
+  const hasAlerts = data.rss_alerts?.length || data.page_alerts?.length;
+  let html = `
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${data.summary}</div>
+      <div style="font-size:11px;color:var(--muted);">检查时间：${(data.checked_at||'').slice(0,19)}</div>
+    </div>`;
+
+  if (!hasAlerts) return html;
+
+  // RSS 告警
+  if (data.rss_alerts?.length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">📡 RSS 政策相关公告（${data.rss_alerts.length}）</div>`;
+    data.rss_alerts.forEach(a => {
+      html += `<div class="rule-item" style="margin-bottom:8px;">
+        <div class="rule-status">📢</div>
+        <div class="rule-body">
+          <div class="rule-title">${a.title || ''}</div>
+          <div class="rule-meta">${a.pub_date || ''} · ${a.source_name || ''}</div>
+          ${a.link ? `<a class="rule-link" href="${a.link}" target="_blank">阅读原文 →</a>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+
+  // 页面变化
+  if (data.page_alerts?.length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 8px;">🔍 页面内容变化（${data.page_alerts.length}）</div>`;
+    data.page_alerts.forEach(a => {
+      html += `<div class="rule-item" style="margin-bottom:8px;">
+        <div class="rule-status">⚠️</div>
+        <div class="rule-body">
+          <div class="rule-title">${a.platform || ''} · ${a.url_name || ''}</div>
+          <div class="rule-meta">${a.url || ''}</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  // LLM 分析结果
+  if (data.llm_analyses?.length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 8px;">🤖 LLM 自动分析结果</div>`;
+    data.llm_analyses.forEach(a => {
+      if (a.error) {
+        html += `<div style="color:var(--red);font-size:12px;padding:8px 12px;background:rgba(239,68,68,0.08);border-radius:7px;margin-bottom:8px;">分析失败: ${a.error}</div>`;
+        return;
+      }
+      const impactColor = { critical:'var(--red)', high:'var(--orange)', medium:'var(--yellow)', low:'var(--green)', none:'var(--muted)' }[a.impact_level] || 'var(--muted)';
+      html += `<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(99,102,241,0.15);color:var(--accent2);">${a.provider || 'LLM'}</span>
+          <span style="font-size:11px;font-weight:700;color:${impactColor};">影响等级: ${a.impact_level || '?'}</span>
+          ${a.has_policy_change ? '' : '<span style="font-size:11px;color:var(--muted);">（非实质性变化）</span>'}
+        </div>
+        ${a.change_summary ? `<div style="font-size:13px;font-weight:600;margin-bottom:6px;">📝 ${a.change_summary}</div>` : ''}
+        ${a.developer_impact ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">对你的游戏：${a.developer_impact}</div>` : ''}
+        ${a.action_required ? `<div style="font-size:12px;padding:6px 10px;background:rgba(249,115,22,0.1);border-radius:6px;color:var(--orange);">⚡ 建议操作：${a.action_required}</div>` : ''}
+        ${a.affected_areas?.length ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${a.affected_areas.map(ar=>`<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--card);color:var(--muted)">${ar}</span>`).join('')}</div>` : ''}
+      </div>`;
+    });
+  }
+
+  return html;
+}
+
+async function browseFolder() {
+  const btn = document.getElementById('browse-btn');
+  const hint = document.getElementById('browse-hint');
+  btn.disabled = true;
+  btn.textContent = '⏳ 等待选择...';
+  hint.textContent = '请在弹出的系统对话框中选择 Unity 项目根目录';
+  hint.style.color = 'var(--accent2)';
+
+  try {
+    const res = await fetch('/api/v1/browse-folder');
+    const data = await res.json();
+    if (data.status === 'success' && data.path) {
+      document.getElementById('a-path').value = data.path;
+      hint.textContent = '✅ 路径已选择，提交后将进行代码扫描';
+      hint.style.color = 'var(--green)';
+    } else if (data.status === 'cancelled') {
+      hint.textContent = '已取消选择，留空则进行问卷式检测';
+      hint.style.color = 'var(--muted)';
+    } else {
+      hint.textContent = '❌ ' + (data.message || '选择失败');
+      hint.style.color = 'var(--red)';
+    }
+  } catch (e) {
+    hint.textContent = '❌ 请求失败，请确认服务器正在运行';
+    hint.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📁 浏览';
+  }
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
 </body>
 </html>

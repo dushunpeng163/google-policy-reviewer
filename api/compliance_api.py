@@ -760,6 +760,26 @@ def guide_new_game():
             target_markets=data.get('target_markets', ['US', 'EU']),
             target_platforms=data.get('target_platforms', ['ios', 'android']),
         )
+        # 保存到审计历史
+        try:
+            roadmap = result.get('roadmap', {})
+            total_tasks = sum(len(phase.get('tasks', [])) for phase in roadmap.get('phases', []))
+            _save_audit_history({
+                'mode': 'guide',
+                'scanned_at': datetime.now().isoformat(),
+                'game_name': data.get('game_name', 'My Unity Game'),
+                'project_path': '',
+                'target_markets': data.get('target_markets', []),
+                'target_platforms': data.get('target_platforms', []),
+                'total_findings': total_tasks,
+                'critical': 0,
+                'high': 0,
+                'medium': 0,
+                'low': 0,
+                'risk_level': 'guide',
+            })
+        except Exception:
+            pass
         return jsonify({'status': 'success', 'data': result})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -782,6 +802,184 @@ def _load_dotenv():
 
 # 启动时加载 .env
 _load_dotenv()
+
+# ── 审计历史 ─────────────────────────────────────────────────────────────────
+
+_ROOT = Path(__file__).parent.parent
+_AUDIT_HISTORY_FILE = _ROOT / "data" / "audit_history.jsonl"
+_AUDIT_HISTORY_FILE.parent.mkdir(exist_ok=True)
+
+
+def _save_audit_history(entry: dict) -> None:
+    """追加一条审计记录到 JSONL 文件"""
+    with open(_AUDIT_HISTORY_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def _load_audit_history(limit: int = 50) -> list:
+    """读取最近 limit 条审计记录（最新在前）"""
+    if not _AUDIT_HISTORY_FILE.exists():
+        return []
+    lines = _AUDIT_HISTORY_FILE.read_text(encoding="utf-8").strip().splitlines()
+    records = []
+    for line in reversed(lines[-limit:]):
+        try:
+            records.append(json.loads(line))
+        except Exception:
+            pass
+    return records
+
+
+@app.route('/api/v1/audit/history', methods=['GET'])
+def audit_history():
+    """返回最近 50 条审计历史记录"""
+    limit = min(int(request.args.get('limit', 50)), 200)
+    return jsonify({'history': _load_audit_history(limit)})
+
+
+# ── 通知系统 ─────────────────────────────────────────────────────────────────
+
+_notification_store: list = []          # 内存中的未读通知列表
+_notification_lock = threading.Lock()
+
+
+def _push_notification(msg: str, level: str = "warning", source: str = "") -> None:
+    with _notification_lock:
+        _notification_store.append({
+            "id": len(_notification_store),
+            "message": msg,
+            "level": level,      # info / warning / critical
+            "source": source,
+            "created_at": datetime.now().isoformat(),
+            "read": False,
+        })
+        # 最多保留 100 条
+        if len(_notification_store) > 100:
+            _notification_store.pop(0)
+
+
+@app.route('/api/v1/notifications', methods=['GET'])
+def get_notifications():
+    """返回未读通知列表和未读数"""
+    with _notification_lock:
+        unread = [n for n in _notification_store if not n["read"]]
+    return jsonify({"unread_count": len(unread), "notifications": unread})
+
+
+@app.route('/api/v1/notifications/read', methods=['POST'])
+def mark_notifications_read():
+    """标记所有通知为已读"""
+    with _notification_lock:
+        for n in _notification_store:
+            n["read"] = True
+    return jsonify({"status": "ok"})
+
+
+# ── 定时监控调度器 ────────────────────────────────────────────────────────────
+
+_scheduler_thread: threading.Thread = None
+_scheduler_stop = threading.Event()
+
+
+def _run_scheduled_check():
+    """后台定时检查线程：每隔 POLICY_CHECK_INTERVAL 秒执行一次政策检查"""
+    import time as _time
+    _root = str(_ROOT)
+    if _root not in sys.path:
+        sys.path.insert(0, _root)
+
+    interval = int(os.environ.get("POLICY_CHECK_INTERVAL", "3600"))  # 默认1小时
+    # 启动后等待 30 秒再首次运行（给服务器初始化留时间）
+    _scheduler_stop.wait(30)
+
+    while not _scheduler_stop.is_set():
+        try:
+            from engines.policy_monitor import (
+                load_versions, save_versions, fetch_rss_alerts,
+                check_page_changes, save_alerts_log
+            )
+            import datetime as _dt
+
+            versions = load_versions()
+            all_alerts = []
+
+            rss_alerts = fetch_rss_alerts(verbose=False)
+            all_alerts.extend(rss_alerts)
+
+            page_alerts = check_page_changes(versions, verbose=False)
+            all_alerts.extend(page_alerts)
+
+            versions["_meta"]["last_monitor_run"] = _dt.datetime.now().isoformat()
+            save_versions(versions)
+
+            if all_alerts:
+                save_alerts_log(all_alerts)
+                msg = f"发现 {len(all_alerts)} 个政策变化（RSS {len(rss_alerts)} 条，页面 {len(page_alerts)} 个）"
+                level = "critical" if page_alerts else "warning"
+                _push_notification(msg, level=level, source="scheduler")
+
+        except Exception as e:
+            _push_notification(f"定时检查出错: {e}", level="info", source="scheduler")
+
+        _scheduler_stop.wait(interval)
+
+
+def start_scheduler():
+    """启动后台定时监控线程"""
+    global _scheduler_thread
+    if _scheduler_thread and _scheduler_thread.is_alive():
+        return
+    _scheduler_stop.clear()
+    _scheduler_thread = threading.Thread(target=_run_scheduled_check, daemon=True, name="PolicyScheduler")
+    _scheduler_thread.start()
+
+
+@app.route('/api/v1/policies/scheduler', methods=['GET', 'POST'])
+def scheduler_control():
+    """查询或控制定时监控调度器"""
+    if request.method == 'GET':
+        alive = _scheduler_thread is not None and _scheduler_thread.is_alive()
+        interval = int(os.environ.get("POLICY_CHECK_INTERVAL", "3600"))
+        return jsonify({
+            "running": alive,
+            "interval_seconds": interval,
+            "interval_label": _seconds_to_label(interval),
+        })
+    # POST：更新调度间隔
+    data = request.get_json() or {}
+    new_interval = data.get("interval_seconds")
+    if new_interval:
+        os.environ["POLICY_CHECK_INTERVAL"] = str(int(new_interval))
+        # 更新 .env 持久化
+        env_file = _ROOT / ".env"
+        lines = []
+        replaced = False
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                if line.startswith("POLICY_CHECK_INTERVAL="):
+                    lines.append(f"POLICY_CHECK_INTERVAL={new_interval}")
+                    replaced = True
+                else:
+                    lines.append(line)
+        if not replaced:
+            lines.append(f"POLICY_CHECK_INTERVAL={new_interval}")
+        env_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    return jsonify({"status": "ok", "interval_seconds": int(os.environ.get("POLICY_CHECK_INTERVAL", "3600"))})
+
+
+def _seconds_to_label(s: int) -> str:
+    if s < 3600:
+        return f"{s // 60} 分钟"
+    if s < 86400:
+        return f"{s // 3600} 小时"
+    if s < 604800:
+        return f"{s // 86400} 天"
+    return f"{s // 604800} 周"
+
+
+# 启动时自动开启调度器
+start_scheduler()
 
 
 @app.route('/api/v1/policies/save-config', methods=['POST'])
@@ -1055,6 +1253,22 @@ def audit_game():
             target_markets=data.get('target_markets', ['US', 'EU']),
             target_platforms=data.get('target_platforms', ['ios', 'android']),
         )
+        # 保存审计历史
+        summary = result.get('summary', {})
+        _save_audit_history({
+            'mode': 'audit',
+            'scanned_at': datetime.now().isoformat(),
+            'game_name': data.get('game_info', {}).get('name', '未命名'),
+            'project_path': data.get('project_path', ''),
+            'target_markets': data.get('target_markets', []),
+            'target_platforms': data.get('target_platforms', []),
+            'total_findings': summary.get('total_findings', 0),
+            'critical': summary.get('critical', 0),
+            'high': summary.get('high', 0),
+            'medium': summary.get('medium', 0),
+            'low': summary.get('low', 0),
+            'risk_level': summary.get('overall_risk', ''),
+        })
         return jsonify({'status': 'success', 'data': result})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500

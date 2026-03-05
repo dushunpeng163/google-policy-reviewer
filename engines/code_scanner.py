@@ -85,6 +85,33 @@ def grep_in_files(files: List[Path], pattern: str, flags: int = re.IGNORECASE) -
     return matches
 
 
+def grep_any(files: List[Path], patterns: List[str], flags: int = re.IGNORECASE) -> bool:
+    """项目中任意文件匹配任意 pattern 即返回 True（快速存在性检测）"""
+    regexes = [re.compile(p, flags) for p in patterns]
+    for f in files:
+        content = read_file_safe(f)
+        for rgx in regexes:
+            if rgx.search(content):
+                return True
+    return False
+
+
+def detect_account_system(all_files: List[Path]) -> bool:
+    """
+    判断项目是否有账号体系（登录/注册/用户认证），
+    只有存在账号体系时才检查账号删除功能是否实现。
+    """
+    account_patterns = [
+        r"login|sign\s*in|sign\s*up|register|auth(?:entication|orize)?",
+        r"username|password|email.*account|account.*email",
+        r"UserInfo|UserProfile|CurrentUser|LoggedIn",
+        r"Firebase\.Auth|PlayFabClient\.Login|Photon\.Authenticate",
+        r"GameCenter|GKLocalPlayer|PlayGames\.SignIn",
+        r"ASAuthorizationAppleIDProvider|GIDSignIn|FBSDKLoginKit",
+    ]
+    return grep_any(all_files, account_patterns)
+
+
 # ── 扫描结果构建 ─────────────────────────────────────────────────────────────
 
 def make_finding(
@@ -249,25 +276,37 @@ def scan_ios(project_path: Path) -> List[Dict]:
             guideline="App Store 4.8",
         ))
 
-    # ── 账户删除 ──────────────────────────────────────────────────
+    # ── 账户删除（仅当检测到账号体系时才检查）────────────────────
 
-    delete_account = grep_in_files(swift_files, r"delete.*account|deleteAccount|account.*delet",
-                                   re.IGNORECASE)
-    if delete_account:
-        findings.append(make_finding(
-            rule_id="ios_account_deletion_found", platform="ios",
-            title="账户删除功能", severity="pass", status="found",
-            detail="✅ 检测到账户删除相关代码",
-            guideline="App Store 5.1.1(v)",
-        ))
+    all_files = swift_files + plists
+    has_account = detect_account_system(all_files)
+    if has_account:
+        delete_account = grep_in_files(
+            swift_files, r"delete.*account|deleteAccount|account.*delet|revokeToken",
+            re.IGNORECASE
+        )
+        if delete_account:
+            findings.append(make_finding(
+                rule_id="ios_account_deletion_found", platform="ios",
+                title="账户删除功能", severity="pass", status="found",
+                detail="✅ 检测到账户删除相关代码",
+                guideline="App Store 5.1.1(v)",
+            ))
+        else:
+            findings.append(make_finding(
+                rule_id="ios_account_deletion_missing", platform="ios",
+                title="账户删除功能缺失",
+                severity="critical", status="missing",
+                detail="检测到账号登录体系，但未发现账户删除实现（App Store 2022年6月起强制）",
+                guideline="App Store 5.1.1(v)",
+                fix="在设置页添加账户删除入口，参见 AccountDeletionView.swift 模板",
+            ))
     else:
         findings.append(make_finding(
-            rule_id="ios_account_deletion_missing", platform="ios",
-            title="账户删除功能缺失",
-            severity="critical", status="missing",
-            detail="未发现账户删除相关代码（deleteAccount / delete account）",
-            guideline="App Store 5.1.1(v)，2022年6月起强制",
-            fix="在设置页添加账户删除入口，参见 AccountDeletionView.swift 模板",
+            rule_id="ios_account_deletion_skipped", platform="ios",
+            title="账户删除检查（已跳过）", severity="low", status="skipped",
+            detail="未检测到账号登录体系，无需账户删除功能。如后续添加账号功能请重新扫描。",
+            guideline="App Store 5.1.1(v)",
         ))
 
     return findings
@@ -391,25 +430,34 @@ def scan_android(project_path: Path) -> List[Dict]:
                 fix="确保在使用功能时（非启动时）请求权限，并提供清晰的用途说明",
             ))
 
-    # ── 账户删除 ──────────────────────────────────────────────────
+    # ── 账户删除（仅当检测到账号体系时检查）─────────────────────
 
-    delete_account = grep_in_files(kotlin_files, r"delete.*account|deleteAccount|account.*delet",
-                                   re.IGNORECASE)
-    if delete_account:
-        findings.append(make_finding(
-            rule_id="android_account_deletion", platform="android",
-            title="账户删除功能", severity="pass", status="found",
-            detail="✅ 检测到账户删除相关代码",
-            guideline="Google Play 账户删除政策",
-        ))
+    has_account = detect_account_system(kotlin_files)
+    if has_account:
+        delete_account = grep_in_files(kotlin_files, r"delete.*account|deleteAccount|account.*delet",
+                                       re.IGNORECASE)
+        if delete_account:
+            findings.append(make_finding(
+                rule_id="android_account_deletion", platform="android",
+                title="账户删除功能", severity="pass", status="found",
+                detail="✅ 检测到账户删除相关代码",
+                guideline="Google Play 账户删除政策",
+            ))
+        else:
+            findings.append(make_finding(
+                rule_id="android_account_deletion_missing", platform="android",
+                title="账户删除功能缺失",
+                severity="critical", status="missing",
+                detail="检测到账号登录体系，但未发现账户删除实现（Google Play 2024年5月起强制）",
+                guideline="Google Play 账户删除政策，2024年5月起强制",
+                fix="添加账户删除入口，参见 AccountDeletionActivity.kt 模板；还需在 Play Console 填写网页版删除 URL",
+            ))
     else:
         findings.append(make_finding(
-            rule_id="android_account_deletion_missing", platform="android",
-            title="账户删除功能缺失",
-            severity="critical", status="missing",
-            detail="未发现账户删除相关代码",
-            guideline="Google Play 账户删除政策，2024年5月起强制",
-            fix="添加账户删除入口，参见 AccountDeletionActivity.kt 模板；还需在 Play Console 填写网页版删除 URL",
+            rule_id="android_account_deletion_skipped", platform="android",
+            title="账户删除检查（已跳过）", severity="low", status="skipped",
+            detail="未检测到账号登录体系，无需实现账户删除。如后续加入账号功能请重新扫描。",
+            guideline="Google Play 账户删除政策",
         ))
 
     # ── 隐私政策 ──────────────────────────────────────────────────
@@ -513,25 +561,34 @@ def scan_unity(project_path: Path) -> List[Dict]:
             fix="参见 ParentalGate.cs 中的 AdsPrivacyConfig.ConfigureChildDirectedAds() 实现",
         ))
 
-    # ── 账户删除 ──────────────────────────────────────────────────
+    # ── 账户删除（仅当检测到账号体系时才检查）────────────────────
 
-    delete_account = grep_in_files(cs_files, r"delete.*account|deleteAccount|account.*delet|DeleteAccount",
-                                   re.IGNORECASE)
-    if delete_account:
-        findings.append(make_finding(
-            rule_id="unity_account_deletion", platform="unity",
-            title="账户删除功能", severity="pass", status="found",
-            detail="✅ 检测到账户删除相关代码",
-            guideline="App Store 5.1.1(v) / Google Play 账户删除政策",
-        ))
+    has_account = detect_account_system(cs_files)
+    if has_account:
+        delete_account = grep_in_files(cs_files, r"delete.*account|deleteAccount|account.*delet|DeleteAccount",
+                                       re.IGNORECASE)
+        if delete_account:
+            findings.append(make_finding(
+                rule_id="unity_account_deletion", platform="unity",
+                title="账户删除功能", severity="pass", status="found",
+                detail="✅ 检测到账户删除相关代码",
+                guideline="App Store 5.1.1(v) / Google Play 账户删除政策",
+            ))
+        else:
+            findings.append(make_finding(
+                rule_id="unity_account_deletion_missing", platform="unity",
+                title="账户删除功能缺失",
+                severity="critical", status="missing",
+                detail="检测到账号登录体系，但未发现账户删除实现（iOS/Android 双平台均要求）",
+                guideline="App Store 5.1.1(v) / Google Play 账户删除政策",
+                fix="参见 AccountDeletionUI.cs 模板",
+            ))
     else:
         findings.append(make_finding(
-            rule_id="unity_account_deletion_missing", platform="unity",
-            title="账户删除功能缺失",
-            severity="critical", status="missing",
-            detail="未发现账户删除相关代码（iOS 和 Android 均要求）",
+            rule_id="unity_account_deletion_skipped", platform="unity",
+            title="账户删除检查（已跳过）", severity="low", status="skipped",
+            detail="未检测到账号登录体系，无需账户删除功能。如后续添加账号功能请重新扫描。",
             guideline="App Store 5.1.1(v) / Google Play 账户删除政策",
-            fix="参见 AccountDeletionUI.cs 模板",
         ))
 
     # ── 家长门控 ──────────────────────────────────────────────────

@@ -73,24 +73,110 @@ def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+_BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/122.0.0.0 Safari/537.36"
+)
+
+# 已知需要 JS 渲染、urllib 无法有效抓取的页面
+_JS_REQUIRED_DOMAINS = [
+    "play.google.com",
+    "support.google.com",
+]
+
+
+def _is_js_heavy(content: str) -> bool:
+    """粗判断页面是否为 JS 渲染壳（正文极少，script 标签很多）"""
+    text_len = len(re.sub(r"<[^>]+>", "", content))
+    script_count = content.count("<script")
+    return text_len < 500 and script_count > 3
+
+
 def fetch_page_text(url: str, timeout: int = 15) -> Optional[str]:
-    """抓取页面文本内容（仅用于哈希对比，不解析 HTML）"""
+    """抓取页面文本（向后兼容接口，内部调用 fetch_page_smart）"""
+    result = fetch_page_smart(url, timeout=timeout)
+    return result.get("content") if result["status"] == "ok" else None
+
+
+def fetch_page_smart(
+    url: str,
+    timeout: int = 15,
+    etag: Optional[str] = None,
+    last_modified: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    智能页面抓取，支持 HTTP 缓存协商（ETag / Last-Modified）。
+
+    返回字典：
+      status      : 'ok' | 'not_modified' | 'failed' | 'js_required'
+      content     : 页面文本（status='ok' 时有值）
+      etag        : 响应 ETag（可存储供下次使用）
+      last_modified: 响应 Last-Modified
+      error       : 错误信息（status='failed' 时有值）
+    """
+    result: Dict[str, Any] = {
+        "status": "failed",
+        "content": None,
+        "etag": None,
+        "last_modified": None,
+        "error": None,
+    }
+
     if not HAS_URLLIB:
-        return None
+        result["error"] = "urllib 不可用"
+        return result
+
+    # 已知 JS 渲染页面，直接跳过
+    from urllib.parse import urlparse
+    domain = urlparse(url).netloc
+    if any(js_domain in domain for js_domain in _JS_REQUIRED_DOMAINS):
+        result["status"] = "js_required"
+        result["error"] = "该页面需要 JavaScript 渲染，urllib 无法有效抓取"
+        return result
+
     try:
-        req = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 (compatible; PolicyMonitor/1.0; "
-                    "+https://github.com/your-repo)"
-                )
-            },
-        )
+        headers = {
+            "User-Agent": _BROWSER_UA,
+            "Accept": "text/html,application/xhtml+xml,*/*",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        # 发送缓存协商头，如果服务器支持会返回 304
+        if etag:
+            headers["If-None-Match"] = etag
+        if last_modified:
+            headers["If-Modified-Since"] = last_modified
+
+        req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.read().decode("utf-8", errors="replace")
+            content = resp.read().decode("utf-8", errors="replace")
+            resp_etag = resp.getheader("ETag")
+            resp_lm = resp.getheader("Last-Modified")
+
+            # 判断是否 JS 渲染壳
+            if _is_js_heavy(content):
+                result["status"] = "js_required"
+                result["error"] = "页面内容为 JS 渲染壳，哈希检测不可靠"
+                result["etag"] = resp_etag
+                result["last_modified"] = resp_lm
+                return result
+
+            result["status"] = "ok"
+            result["content"] = content
+            result["etag"] = resp_etag
+            result["last_modified"] = resp_lm
+
+    except urllib.error.HTTPError as e:
+        if e.code == 304:
+            result["status"] = "not_modified"
+        else:
+            result["status"] = "failed"
+            result["error"] = f"HTTP {e.code}: {e.reason}"
     except Exception as e:
-        return None
+        result["status"] = "failed"
+        result["error"] = str(e)
+
+    return result
 
 
 def cache_path_for_url(url: str) -> Path:
@@ -203,59 +289,101 @@ def analyze_freshness(versions: Dict[str, Any]) -> Dict[str, Any]:
 # ── 页面变化检测 ─────────────────────────────────────────────────────────────
 def check_page_changes(versions: Dict[str, Any], verbose: bool = True) -> List[Dict]:
     """
-    抓取官方政策页面，对比上次缓存的哈希值，返回发生变化的页面列表。
-    需要联网。
+    抓取官方政策页面，对比哈希，返回发生变化的页面列表。
+    - 成功抓取且内容无变化 → 更新 last_verified（确认规则仍有效）
+    - 成功抓取且内容变化   → 告警，不更新 last_verified（需人工复核）
+    - 抓取失败 / JS页面    → 记录失败状态，不更新任何验证时间
     """
     alerts = []
+    now_iso = datetime.datetime.now().isoformat()
+    today = datetime.date.today().isoformat()
 
     for platform_key in ("apple_app_store", "google_play_store"):
         platform_data = versions.get(platform_key, {})
         source_urls = platform_data.get("source_urls", {})
         stored_hashes = platform_data.get("page_hashes", {})
+        # 存储每个 URL 的 ETag / Last-Modified / 检查状态
+        url_meta = platform_data.setdefault("url_check_meta", {})
 
         for url_name, url in source_urls.items():
             if verbose:
-                print(f"  正在检查: {url_name} ({url[:60]}...)")
+                print(f"  正在检查: {url_name} ({url[:70]})")
 
-            page_text = fetch_page_text(url)
-            if page_text is None:
-                if verbose:
-                    print(f"    ⚠️  无法访问（网络受限或超时）")
-                continue
+            meta = url_meta.get(url_name, {})
+            fetch_res = fetch_page_smart(
+                url,
+                etag=meta.get("etag"),
+                last_modified=meta.get("last_modified"),
+            )
 
-            current_hash = sha256_text(page_text)
-            stored_hash = stored_hashes.get(url_name)
+            # 记录本次检查时间
+            meta["last_check_attempted"] = now_iso
+            meta["check_status"] = fetch_res["status"]
 
-            if stored_hash is None:
-                # 首次记录
-                versions[platform_key]["page_hashes"][url_name] = current_hash
-                cached = cache_path_for_url(url)
-                cached.write_text(page_text, encoding="utf-8")
+            if fetch_res["status"] == "not_modified":
+                # 服务器确认内容未变（304），可信赖地更新 last_verified
+                meta["etag"] = fetch_res.get("etag") or meta.get("etag")
+                meta["last_modified"] = fetch_res.get("last_modified") or meta.get("last_modified")
+                _mark_rules_verified(versions, platform_key, today, source="page_304")
                 if verbose:
-                    print(f"    ✅ 首次记录哈希: {current_hash[:12]}...")
-            elif stored_hash != current_hash:
-                alert = {
-                    "platform": platform_key,
-                    "url_name": url_name,
-                    "url": url,
-                    "previous_hash": stored_hash,
-                    "current_hash": current_hash,
-                    "detected_at": datetime.datetime.now().isoformat(),
-                    "action_required": "⚠️ 页面内容已变化，需人工复核是否有政策更新",
-                }
-                alerts.append(alert)
-                versions[platform_key]["page_hashes"][url_name] = current_hash
-                cached = cache_path_for_url(url)
-                cached.write_text(page_text, encoding="utf-8")
+                    print(f"    ✅ 服务器确认未变化（304 Not Modified）→ last_verified 已更新")
+
+            elif fetch_res["status"] == "ok":
+                page_text = fetch_res["content"]
+                meta["etag"] = fetch_res.get("etag") or meta.get("etag")
+                meta["last_modified"] = fetch_res.get("last_modified") or meta.get("last_modified")
+                current_hash = sha256_text(page_text)
+                stored_hash = stored_hashes.get(url_name)
+
+                if stored_hash is None:
+                    stored_hashes[url_name] = current_hash
+                    cache_path_for_url(url).write_text(page_text, encoding="utf-8")
+                    _mark_rules_verified(versions, platform_key, today, source="page_first")
+                    if verbose:
+                        print(f"    ✅ 首次记录哈希，last_verified 已设置")
+                elif stored_hash == current_hash:
+                    _mark_rules_verified(versions, platform_key, today, source="page_hash_match")
+                    if verbose:
+                        print(f"    ✅ 内容无变化 ({current_hash[:12]}…) → last_verified 已更新")
+                else:
+                    # 内容变化：告警，不更新 last_verified，等待人工复核
+                    old_cache = cache_path_for_url(url)
+                    alerts.append({
+                        "platform": platform_key,
+                        "url_name": url_name,
+                        "url": url,
+                        "previous_hash": stored_hash,
+                        "current_hash": current_hash,
+                        "detected_at": now_iso,
+                        "action_required": "页面内容已变化，需人工复核后手动调用 --mark-verified 更新",
+                    })
+                    stored_hashes[url_name] = current_hash
+                    old_cache.write_text(page_text, encoding="utf-8")
+                    if verbose:
+                        print(f"    🚨 内容变化！last_verified 未更新（需人工复核）")
+
+            elif fetch_res["status"] == "js_required":
+                meta["check_status"] = "js_required"
                 if verbose:
-                    print(f"    🚨 内容变化！需要人工复核")
-                    print(f"       旧哈希: {stored_hash[:12]}...")
-                    print(f"       新哈希: {current_hash[:12]}...")
+                    print(f"    ⚠️  JS 渲染页面，需浏览器抓取（已跳过）")
             else:
                 if verbose:
-                    print(f"    ✅ 无变化 ({current_hash[:12]}...)")
+                    print(f"    ❌ 抓取失败: {fetch_res.get('error', '未知错误')}")
+
+            url_meta[url_name] = meta
+        versions[platform_key]["url_check_meta"] = url_meta
+        versions[platform_key]["page_hashes"] = stored_hashes
 
     return alerts
+
+
+def _mark_rules_verified(versions: Dict, platform_key: str, today: str, source: str = "page") -> None:
+    """将平台下所有规则的 last_verified 更新为 today（仅当页面检查确认无变化时调用）"""
+    rules = versions.get(platform_key, {}).get("rules", {})
+    for rule in rules.values():
+        if rule.get("verified_by", "manual") != "manual_bulk_override":
+            rule["last_verified"] = today
+            rule["verified_by"] = source
 
 
 # ── RSS 自动监控 ─────────────────────────────────────────────────────────────

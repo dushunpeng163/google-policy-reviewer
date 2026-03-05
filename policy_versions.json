@@ -2,7 +2,7 @@
   "_meta": {
     "description": "每条合规规则的最后人工验证时间、来源 URL 和页面内容哈希。超过 staleness_days 未验证的规则会在 API 响应中标记为 potentially_outdated。",
     "staleness_days": 90,
-    "last_monitor_run": null,
+    "last_monitor_run": "2026-03-05T17:55:21.246117",
     "monitor_version": "1.0.0"
   },
   "apple_app_store": {
@@ -96,6 +96,20 @@
         "source_url": "https://developer.apple.com/app-store/review/guidelines/#performance",
         "status": "active",
         "notes": "App 须为完整功能版本，不得存在隐藏功能"
+      }
+    },
+    "url_check_meta": {
+      "review_guidelines": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "failed"
+      },
+      "human_interface_guidelines": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "failed"
+      },
+      "news_updates": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "failed"
       }
     }
   },
@@ -231,6 +245,32 @@
         "source_url": "https://support.google.com/googleplay/android-developer/answer/9893335",
         "status": "active",
         "notes": "只能使用 Families Approved 列表内的广告/分析 SDK"
+      }
+    },
+    "url_check_meta": {
+      "policy_center": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "js_required"
+      },
+      "developer_program_policies": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "js_required"
+      },
+      "target_api": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "js_required"
+      },
+      "data_safety": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "js_required"
+      },
+      "families_policy": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "js_required"
+      },
+      "billing_policy": {
+        "last_check_attempted": "2026-03-05T17:55:07.573305",
+        "check_status": "js_required"
       }
     }
   }

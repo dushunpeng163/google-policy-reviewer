@@ -342,14 +342,18 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 <header>
   <span class="logo">🎮 Unity<span>合规</span></span>
   <span class="badge">App Store · Google Play · GDPR · COPPA</span>
-  <button class="policy-btn" onclick="openPolicyModal()">📋 政策新鲜度</button>
+  <button class="policy-btn" onclick="openPolicyModal()" id="policy-btn" style="position:relative;">
+    📋 政策管理
+    <span id="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;line-height:16px;text-align:center;">!</span>
+  </button>
+  <button class="policy-btn" onclick="showHistoryModal()" style="margin-left:6px;">📜 历史记录</button>
 </header>
 
 <!-- ── Policy Freshness Modal ── -->
 <div class="modal-overlay" id="policy-modal">
   <div class="modal-box">
     <div class="modal-header">
-      <h3>📋 政策规则新鲜度检查</h3>
+      <h3>📋 政策管理</h3>
       <button class="modal-close" onclick="closePolicyModal()">✕</button>
     </div>
     <div class="modal-body" id="policy-modal-body">
@@ -357,7 +361,23 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
     </div>
     <div class="modal-footer">
       <button onclick="closePolicyModal()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:13px;">关闭</button>
-      <button onclick="loadFreshness()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔄 刷新</button>
+      <button id="modal-action-btn" onclick="handleModalAction()" style="padding:8px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔄 刷新状态</button>
+    </div>
+  </div>
+</div>
+
+<!-- 历史记录 Modal -->
+<div class="modal-overlay" id="history-modal">
+  <div class="modal-box" style="max-width:700px;">
+    <div class="modal-header">
+      <h3>📜 审计历史记录</h3>
+      <button class="modal-close" onclick="closeHistoryModal()">✕</button>
+    </div>
+    <div class="modal-body" id="history-modal-body">
+      <div class="loading"><div class="spinner"></div><p>加载中...</p></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeHistoryModal()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:13px;">关闭</button>
     </div>
   </div>
 </div>
@@ -884,33 +904,17 @@ function switchTab(id, btn) {
   btn.classList.add('active');
 }
 
-// ── Policy Freshness Modal ───────────────────────────────────────
+// ── Policy Freshness Modal (旧版兼容占位，实际逻辑在下方新版) ────
 
-function openPolicyModal() {
-  document.getElementById('policy-modal').classList.add('open');
-  loadFreshness();
-}
-
-function closePolicyModal() {
-  document.getElementById('policy-modal').classList.remove('open');
-}
-
-// 点弹窗外部关闭
-document.addEventListener('click', e => {
-  const modal = document.getElementById('policy-modal');
-  if (e.target === modal) closePolicyModal();
-});
-
-async function loadFreshness() {
+async function loadFreshness_legacy() {
   const body = document.getElementById('policy-modal-body');
-  body.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在检查政策新鲜度...</p></div>';
-
+  body.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在检查...</p></div>';
   try {
     const res = await fetch('/api/v1/policies/freshness');
     const data = await res.json();
     body.innerHTML = renderFreshness(data);
   } catch (e) {
-    body.innerHTML = '<div class="loading"><p style="color:var(--red)">加载失败，请确认服务器正在运行</p></div>';
+    body.innerHTML = '<div class="loading"><p style="color:var(--red)">加载失败</p></div>';
   }
 }
 
@@ -1005,6 +1009,7 @@ async function initPolicyModal() {
       <button class="modal-tab active" id="mtab-status" onclick="switchModalTab('status',this)">📊 状态</button>
       <button class="modal-tab" id="mtab-config" onclick="switchModalTab('config',this)">⚙️ 配置</button>
       <button class="modal-tab" id="mtab-check" onclick="switchModalTab('check',this)">🔍 检查</button>
+      <button class="modal-tab" id="mtab-schedule" onclick="switchModalTab('schedule',this)">⏰ 定时</button>
     </div>
     <button class="modal-close" onclick="closePolicyModal()">✕</button>`;
   document.querySelector('.modal-footer').innerHTML = `
@@ -1018,9 +1023,10 @@ let _currentModalTab = 'status';
 let _llmConfig = null;
 
 const _tabActionMeta = {
-  status: { label: '🔄 刷新状态',     style: 'background:var(--accent)' },
-  config: { label: '💾 保存配置',     style: 'background:linear-gradient(135deg,var(--accent),#8b5cf6)' },
-  check:  { label: '⚡ 一键全部检查', style: 'background:linear-gradient(135deg,#f97316,#ef4444)' },
+  status:   { label: '🔄 刷新状态',     style: 'background:var(--accent)' },
+  config:   { label: '💾 保存配置',     style: 'background:linear-gradient(135deg,var(--accent),#8b5cf6)' },
+  check:    { label: '⚡ 一键全部检查', style: 'background:linear-gradient(135deg,#f97316,#ef4444)' },
+  schedule: { label: '🔄 刷新状态',    style: 'background:var(--accent)' },
 };
 
 function updateModalActionBtn() {
@@ -1035,6 +1041,7 @@ function handleModalAction() {
   if (_currentModalTab === 'status') loadModalTab();
   else if (_currentModalTab === 'config') saveConfig();
   else if (_currentModalTab === 'check') runCheck('both');
+  else if (_currentModalTab === 'schedule') loadModalTab();
 }
 
 function switchModalTab(tab, btn) {
@@ -1051,6 +1058,7 @@ async function loadModalTab() {
   if (_currentModalTab === 'status') await loadStatusTab(body);
   else if (_currentModalTab === 'config') await loadConfigTab(body);
   else if (_currentModalTab === 'check') await loadCheckTab(body);
+  else if (_currentModalTab === 'schedule') await loadScheduleTab(body);
 }
 
 // ── 状态 Tab ─────────────────────────────────────────────────────
@@ -1381,6 +1389,214 @@ function renderCheckResult(data) {
 
   return html;
 }
+
+// ── 定时 Tab ─────────────────────────────────────────────────────
+
+async function loadScheduleTab(body) {
+  let sched = null, notifs = null;
+  try {
+    const [schedRes, notifRes] = await Promise.all([
+      fetch('/api/v1/policies/scheduler'),
+      fetch('/api/v1/notifications'),
+    ]);
+    sched = await schedRes.json();
+    notifs = await notifRes.json();
+  } catch(e) {
+    body.innerHTML = `<div style="color:var(--red);padding:20px">加载失败：${e.message}</div>`;
+    return;
+  }
+
+  const running = sched.running;
+  const interval = sched.interval_seconds || 3600;
+  const intervalLabel = sched.interval_label || `${interval}秒`;
+  const unread = notifs.unread_count || 0;
+  const allNotifs = notifs.notifications || [];
+
+  // 间隔选项
+  const intervalOptions = [
+    { value: 900,    label: '15 分钟' },
+    { value: 1800,   label: '30 分钟' },
+    { value: 3600,   label: '1 小时（默认）' },
+    { value: 21600,  label: '6 小时' },
+    { value: 86400,  label: '24 小时' },
+    { value: 604800, label: '每周一次' },
+  ];
+
+  body.innerHTML = `
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      后台自动定时抓取 Apple / Google RSS 及官方政策页面，检测到变化时在右上角
+      <strong style="color:var(--red)">红点</strong>提醒。
+    </div>
+
+    <!-- 调度器状态卡 -->
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-size:22px;">${running ? '🟢' : '🔴'}</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;">后台调度器：${running ? '运行中' : '未启动'}</div>
+          <div style="font-size:12px;color:var(--muted);">当前间隔：${intervalLabel}</div>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">调整检查频率</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        ${intervalOptions.map(opt => `
+          <button onclick="setScheduleInterval(${opt.value}, this)"
+            style="padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;
+                   border:1px solid ${opt.value === interval ? 'var(--accent)' : 'var(--border)'};
+                   background:${opt.value === interval ? 'rgba(99,102,241,0.15)' : 'var(--card)'};
+                   color:${opt.value === interval ? 'var(--accent2)' : 'var(--muted)'};
+                   font-weight:${opt.value === interval ? '700' : '400'};">
+            ${opt.label}${opt.value === interval ? ' ✓' : ''}
+          </button>`).join('')}
+      </div>
+      <div id="schedule-save-result" style="margin-top:8px;font-size:12px;"></div>
+    </div>
+
+    <!-- 通知列表 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;">
+        🔔 通知记录
+        ${unread > 0 ? `<span style="margin-left:6px;background:#ef4444;color:#fff;border-radius:10px;padding:2px 7px;font-size:11px;">${unread} 未读</span>` : '<span style="margin-left:6px;font-size:11px;color:var(--muted)">全部已读</span>'}
+      </div>
+      ${allNotifs.length > 0 ? `<button onclick="markAllNotifsRead()" style="font-size:12px;padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;">全部标为已读</button>` : ''}
+    </div>
+
+    ${allNotifs.length === 0 ? `
+      <div style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">
+        暂无通知。调度器检测到变化时会在此显示。
+      </div>` : allNotifs.slice().reverse().map(n => {
+        const levelColor = { critical: 'var(--red)', warning: 'var(--orange)', info: 'var(--muted)' }[n.level] || 'var(--muted)';
+        const levelIcon = { critical: '🚨', warning: '⚠️', info: 'ℹ️' }[n.level] || 'ℹ️';
+        return `<div style="display:flex;gap:10px;padding:10px 12px;border-radius:9px;margin-bottom:6px;
+                             background:${n.read ? 'var(--card)' : 'var(--card2)'};
+                             border:1px solid ${n.read ? 'var(--border)' : 'rgba(99,102,241,0.25)'};">
+          <span style="font-size:16px;line-height:1.4;">${levelIcon}</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;color:${n.read ? 'var(--muted)' : 'var(--text)'};font-weight:${n.read ? '400' : '600'};">${n.message}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${(n.created_at||'').slice(0,19)} · ${n.source || 'system'}</div>
+          </div>
+          ${!n.read ? '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;margin-top:5px;flex-shrink:0;"></span>' : ''}
+        </div>`;
+      }).join('')}
+  `;
+}
+
+async function setScheduleInterval(seconds, btn) {
+  const resultEl = document.getElementById('schedule-save-result');
+  resultEl.innerHTML = '<span style="color:var(--muted)">保存中...</span>';
+  try {
+    const res = await fetch('/api/v1/policies/scheduler', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ interval_seconds: seconds }),
+    });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      resultEl.innerHTML = `<span style="color:var(--green)">✅ 已更新为每 ${data.interval_seconds < 3600 ? Math.round(data.interval_seconds/60) + ' 分钟' : Math.round(data.interval_seconds/3600) + ' 小时'} 检查一次</span>`;
+      setTimeout(() => loadModalTab(), 1200);
+    } else {
+      resultEl.innerHTML = `<span style="color:var(--red)">❌ 保存失败</span>`;
+    }
+  } catch(e) {
+    resultEl.innerHTML = `<span style="color:var(--red)">❌ 请求失败</span>`;
+  }
+}
+
+async function markAllNotifsRead() {
+  await fetch('/api/v1/notifications/read', { method: 'POST' });
+  const badge = document.getElementById('notif-badge');
+  if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
+  loadModalTab();
+}
+
+// ── 历史记录 Modal ───────────────────────────────────────────────
+
+async function showHistoryModal() {
+  document.getElementById('history-modal').classList.add('open');
+  const body = document.getElementById('history-modal-body');
+  body.innerHTML = '<div class="loading"><div class="spinner"></div><p>加载中...</p></div>';
+  try {
+    const res = await fetch('/api/v1/audit/history?limit=50');
+    const data = await res.json();
+    body.innerHTML = renderHistoryPanel(data.history || []);
+  } catch(e) {
+    body.innerHTML = '<div style="color:var(--red);padding:20px">加载失败</div>';
+  }
+}
+
+function closeHistoryModal() {
+  document.getElementById('history-modal').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeHistoryModal(); });
+
+function renderHistoryPanel(history) {
+  if (!history.length) {
+    return `<div style="text-align:center;padding:40px;color:var(--muted);">
+      暂无记录。完成一次游戏检测后记录会出现在这里。
+    </div>`;
+  }
+  const riskColor = { critical:'var(--red)', high:'var(--orange)', medium:'var(--yellow)', low:'var(--green)', '':'var(--muted)' };
+  return history.map(h => `
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:14px;font-weight:700;">${escHtml(h.game_name || '未命名游戏')}</span>
+        <span style="font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700;
+          background:rgba(99,102,241,0.15);color:${riskColor[h.risk_level]||'var(--muted)'};">
+          风险: ${h.risk_level || '?'}
+        </span>
+        <span style="margin-left:auto;font-size:11px;color:var(--muted);">${(h.scanned_at||'').slice(0,16).replace('T',' ')}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+        ${h.project_path ? `📁 ${escHtml(h.project_path)}` : ''}
+        ${h.target_markets?.length ? `　🌍 ${h.target_markets.join(' · ')}` : ''}
+        ${h.target_platforms?.length ? `　📱 ${h.target_platforms.join(' · ')}` : ''}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${h.critical ? `<span style="font-size:11px;padding:3px 9px;border-radius:5px;background:rgba(239,68,68,0.12);color:var(--red);font-weight:600;">🔴 critical: ${h.critical}</span>` : ''}
+        ${h.high ? `<span style="font-size:11px;padding:3px 9px;border-radius:5px;background:rgba(249,115,22,0.12);color:var(--orange);font-weight:600;">🟠 high: ${h.high}</span>` : ''}
+        ${h.medium ? `<span style="font-size:11px;padding:3px 9px;border-radius:5px;background:rgba(234,179,8,0.12);color:var(--yellow);font-weight:600;">🟡 medium: ${h.medium}</span>` : ''}
+        ${h.low ? `<span style="font-size:11px;padding:3px 9px;border-radius:5px;background:rgba(34,197,94,0.12);color:var(--green);font-weight:600;">🟢 low: ${h.low}</span>` : ''}
+        ${!h.critical && !h.high && !h.medium && !h.low ? '<span style="font-size:11px;color:var(--muted);">无问题记录</span>' : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ── 通知红点轮询 ─────────────────────────────────────────────────
+
+async function pollNotifications() {
+  try {
+    const res = await fetch('/api/v1/notifications');
+    const data = await res.json();
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+      if (data.unread_count > 0) {
+        badge.style.display = 'block';
+        badge.textContent = data.unread_count > 99 ? '99+' : String(data.unread_count);
+        badge.title = data.notifications.map(n => n.message).join('\n');
+      } else {
+        badge.style.display = 'none';
+        badge.textContent = '';
+      }
+    }
+  } catch(e) {}
+}
+
+// 页面加载后立即检查一次，之后每60秒轮询
+pollNotifications();
+setInterval(pollNotifications, 60000);
+
+// 打开政策弹窗时清除红点
+const _origOpenPolicyModal = openPolicyModal;
+openPolicyModal = async function() {
+  await _origOpenPolicyModal();
+  // 标记通知已读
+  fetch('/api/v1/notifications/read', { method: 'POST' }).then(() => {
+    const badge = document.getElementById('notif-badge');
+    if (badge) badge.style.display = 'none';
+  });
+};
 
 async function browseFolder() {
   const btn = document.getElementById('browse-btn');

@@ -298,6 +298,136 @@ def _legal_findings(game_info: Dict, markets: List[str]) -> List[Dict]:
     return results
 
 
+# ── 系统架构映射 ─────────────────────────────────────────────────────────────
+# 每个系统定义：id / 名称 / 描述 / 对应 finding ids / 依赖的其他系统id
+_SYSTEM_DEFS = [
+    {
+        "id": "privacy_consent",
+        "name": "隐私与同意系统",
+        "icon": "🔐",
+        "description": "在任何数据收集或广告行为之前，向用户展示同意弹窗并记录同意状态。所有其他系统的前置条件。",
+        "finding_ids": ["ios_att", "gdpr_consent", "gdpr_privacy_policy", "ccpa_do_not_sell",
+                        "aadc_default_privacy", "android_privacy_policy"],
+        "depends_on": [],
+        "required_before": ["ads", "analytics", "account", "iap"],
+    },
+    {
+        "id": "child_protection",
+        "name": "儿童保护系统",
+        "icon": "👶",
+        "description": "面向 13 岁以下用户的强制合规层：家长门控、COPPA 同意、禁止追踪广告、儿童认证 SDK。",
+        "finding_ids": ["ios_parental_gate", "ios_kids_sdk", "android_kids_policy",
+                        "coppa_parental_consent", "coppa_no_behavioral_ads", "coppa_no_pii"],
+        "depends_on": ["privacy_consent"],
+        "required_before": ["ads", "iap"],
+    },
+    {
+        "id": "iap",
+        "name": "内购系统",
+        "icon": "💳",
+        "description": "通过平台官方支付渠道（StoreKit / Play Billing）处理所有虚拟商品购买，禁止引导外部支付。",
+        "finding_ids": ["ios_iap_storekit", "android_play_billing"],
+        "depends_on": ["privacy_consent"],
+        "required_before": [],
+    },
+    {
+        "id": "ads",
+        "name": "广告系统",
+        "icon": "📢",
+        "description": "合规展示广告：ATT 授权后才可个性化，儿童用户必须关闭行为追踪，插屏须有关闭按钮。",
+        "finding_ids": ["ios_att", "coppa_no_behavioral_ads", "android_ads_policy"],
+        "depends_on": ["privacy_consent", "child_protection"],
+        "required_before": [],
+    },
+    {
+        "id": "account",
+        "name": "账户与身份系统",
+        "icon": "👤",
+        "description": "用户注册 / 第三方登录 / 账户彻底删除（含数据）。有第三方登录时必须提供 Sign in with Apple。",
+        "finding_ids": ["ios_account_deletion", "android_account_deletion", "ios_sign_in_apple"],
+        "depends_on": ["privacy_consent"],
+        "required_before": ["user_rights"],
+    },
+    {
+        "id": "user_rights",
+        "name": "用户数据权利系统",
+        "icon": "⚖️",
+        "description": "GDPR 要求的查看 / 更正 / 删除数据入口，及随时撤回同意的机制。",
+        "finding_ids": ["gdpr_data_rights", "gdpr_consent_withdrawal", "coppa_no_pii"],
+        "depends_on": ["account", "privacy_consent"],
+        "required_before": [],
+    },
+    {
+        "id": "platform_config",
+        "name": "平台配置与发布合规",
+        "icon": "🏪",
+        "description": "在 App Store Connect / Play Console 填写的表单类合规：数据安全、内容分级、隐私营养标签等。必须在其他系统全部实现后再填写，否则声明内容与实际不符。",
+        "finding_ids": ["android_data_safety", "ios_privacy_labels", "android_iarc",
+                        "android_aab", "android_target_api"],
+        "depends_on": ["privacy_consent", "iap", "ads", "account", "child_protection", "user_rights"],
+        "required_before": [],
+    },
+]
+
+
+def _build_required_systems(findings: List[Dict]) -> List[Dict]:
+    """
+    把 findings 按「必要系统」分组，标注依赖关系和优先级。
+    只输出至少有一条 finding 命中的系统。
+    """
+    finding_ids_in_report = {f.get("id") for f in findings}
+    systems = []
+    for sdef in _SYSTEM_DEFS:
+        matched = [f for f in findings if f.get("id") in sdef["finding_ids"]]
+        if not matched:
+            continue
+        critical_count = sum(1 for f in matched if f.get("severity") == "critical")
+        high_count = sum(1 for f in matched if f.get("severity") == "high")
+        # 系统整体严重程度
+        if critical_count:
+            system_severity = "critical"
+        elif high_count:
+            system_severity = "high"
+        else:
+            system_severity = "medium"
+        systems.append({
+            "id": sdef["id"],
+            "name": sdef["name"],
+            "icon": sdef["icon"],
+            "description": sdef["description"],
+            "severity": system_severity,
+            "issue_count": len(matched),
+            "critical_count": critical_count,
+            "high_count": high_count,
+            # 依赖：仅列出实际也出现在本报告中的系统
+            "depends_on": [
+                s for s in sdef["depends_on"]
+                if any(sd["id"] == s and
+                       any(f.get("id") in sd["finding_ids"] for f in findings)
+                       for sd in _SYSTEM_DEFS)
+            ],
+            "required_before": sdef["required_before"],
+            "findings": [
+                {"id": f.get("id"), "title": f.get("title"), "severity": f.get("severity")}
+                for f in matched
+            ],
+        })
+    # 按依赖顺序排序（没有依赖的排前面）
+    ordered, remaining = [], list(systems)
+    visited = set()
+    max_iter = len(systems) * 2
+    i = 0
+    while remaining and i < max_iter:
+        i += 1
+        for s in list(remaining):
+            if all(dep in visited for dep in s["depends_on"]):
+                ordered.append(s)
+                visited.add(s["id"])
+                remaining.remove(s)
+    ordered.extend(remaining)  # 兜底：有循环依赖时直接追加
+    return ordered
+
+
 def audit_game(
     game_info: Dict,
     project_path: Optional[str] = None,
@@ -352,6 +482,8 @@ def audit_game(
 
     risk_level = "critical" if critical else ("high" if high else ("medium" if medium else "low"))
 
+    required_systems = _build_required_systems(all_findings)
+
     return {
         "audit_summary": {
             "risk_level": risk_level,
@@ -364,6 +496,7 @@ def audit_game(
             "target_markets": target_markets,
             "target_platforms": target_platforms,
         },
+        "required_systems": required_systems,
         "findings": all_findings,
         "fix_priority_list": [
             {

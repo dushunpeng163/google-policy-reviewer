@@ -879,6 +879,67 @@ function renderAudit(d) {
     </div>
   </div>`;
 
+  // ── 必要系统架构 ──────────────────────────────────────────────────
+  const systems = d.required_systems || [];
+  if (systems.length) {
+    const sevColor = { critical: 'var(--red)', high: 'var(--orange)', medium: 'var(--yellow)', low: 'var(--green)' };
+    const sevLabel = { critical: '严重', high: '高', medium: '中', low: '低' };
+    html += `<div style="margin:20px 0;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">🏗️ 你需要构建的合规系统</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+        以下系统按实现顺序排列（有箭头 → 表示依赖关系，依赖项必须先实现）
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">`;
+
+    systems.forEach((sys, idx) => {
+      const color = sevColor[sys.severity] || 'var(--muted)';
+      const deps = sys.depends_on || [];
+      const depsHtml = deps.length
+        ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">→ 依赖：${deps.map(d => {
+            const found = systems.find(s => s.id === d);
+            return found ? `${found.icon} ${found.name}` : d;
+          }).join('、')}</div>`
+        : `<div style="font-size:11px;color:var(--green);margin-top:6px;">✅ 无前置依赖，可立即开始</div>`;
+
+      html += `<div style="background:var(--card2);border:1px solid var(--border);border-left:3px solid ${color};border-radius:10px;padding:14px;position:relative;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:20px;">${sys.icon}</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;">${sys.name}</div>
+            <div style="font-size:11px;font-weight:700;color:${color};">${sevLabel[sys.severity] || sys.severity} · ${sys.issue_count} 项要求</div>
+          </div>
+          <div style="font-size:18px;font-weight:700;color:var(--muted);opacity:0.3;">${idx + 1}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px;">${sys.description}</div>
+        ${depsHtml}
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;font-size:11px;color:var(--accent2);font-weight:600;">查看包含的具体要求 (${sys.findings.length})</summary>
+          <div style="margin-top:6px;">
+            ${sys.findings.map(f => `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;border-bottom:1px solid var(--border);">
+              <span style="color:${sevColor[f.severity]||'var(--muted)'};font-weight:700;flex-shrink:0;">${sevLabel[f.severity]||f.severity}</span>
+              <span style="color:var(--text);">${f.title}</span>
+            </div>`).join('')}
+          </div>
+        </details>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+
+    // 依赖关系图（文字版）
+    const hasDepChain = systems.some(s => (s.depends_on || []).length > 0);
+    if (hasDepChain) {
+      html += `<div style="margin-bottom:20px;padding:12px 16px;background:var(--card2);border:1px solid var(--border);border-radius:10px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">实现顺序建议</div>
+        <div style="font-size:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">`;
+      systems.forEach((s, i) => {
+        html += `<span style="padding:4px 10px;border-radius:6px;background:rgba(99,102,241,0.12);border:1px solid var(--border);font-weight:600;">${s.icon} ${s.name}</span>`;
+        if (i < systems.length - 1) html += `<span style="color:var(--muted);font-size:16px;">→</span>`;
+      });
+      html += `</div></div>`;
+    }
+  }
+
   html += `<div class="tabs">
     <button class="tab-btn active" onclick="switchTab('priority', this)">优先修复清单</button>
     <button class="tab-btn" onclick="switchTab('all-findings', this)">全部问题（${(d.findings||[]).length}）</button>

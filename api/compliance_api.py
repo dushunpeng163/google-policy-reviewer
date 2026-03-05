@@ -1104,14 +1104,13 @@ def save_llm_config():
     return jsonify({'status': 'success', 'config': check_llm_config()})
 
 
-@app.route('/api/v1/policies/run-check', methods=['POST'])
-def run_policy_check():
-    """
-    触发政策检查任务（RSS / 页面哈希 / LLM 分析），实时返回结果。
-    请求体：{ "check_type": "rss" | "pages" | "both" }
-    """
-    data = request.get_json() or {}
-    check_type = data.get('check_type', 'both')
+# ── 后台检查任务状态存储（内存，进程内有效）──────────────────────────────
+_check_jobs: dict = {}   # job_id -> { status, result, started_at }
+
+
+def _do_policy_check_bg(job_id: str, check_type: str):
+    """在后台线程里真正执行政策检查，结果写入 _check_jobs[job_id]。"""
+    import datetime as _dt
 
     _root = str(Path(__file__).parent.parent)
     if _root not in sys.path:
@@ -1119,11 +1118,9 @@ def run_policy_check():
 
     from engines.policy_monitor import (
         load_versions, save_versions, fetch_rss_alerts,
-        check_page_changes, save_alerts_log, analyze_freshness
+        check_page_changes, save_alerts_log,
     )
-    import datetime as _dt
 
-    versions = load_versions()
     results = {
         'check_type': check_type,
         'checked_at': _dt.datetime.now().isoformat(),
@@ -1133,59 +1130,98 @@ def run_policy_check():
         'summary': '',
     }
 
-    if check_type in ('rss', 'both'):
-        try:
-            rss_alerts = fetch_rss_alerts(verbose=False)
-            results['rss_alerts'] = rss_alerts
-            if rss_alerts:
-                save_alerts_log(rss_alerts)
-        except Exception as e:
-            results['rss_error'] = str(e)
+    try:
+        versions = load_versions()
 
-    if check_type in ('pages', 'both'):
-        try:
-            page_alerts = check_page_changes(versions, verbose=False)
-            results['page_alerts'] = page_alerts
-            versions['_meta']['last_monitor_run'] = _dt.datetime.now().isoformat()
-            save_versions(versions)
+        if check_type in ('rss', 'both'):
+            try:
+                rss_alerts = fetch_rss_alerts(verbose=False)
+                results['rss_alerts'] = rss_alerts
+                if rss_alerts:
+                    save_alerts_log(rss_alerts)
+            except Exception as e:
+                results['rss_error'] = str(e)
 
-            # 如果有页面变化且 LLM 已配置，自动分析并写回规则版本文件
-            if page_alerts and (os.environ.get('ANTHROPIC_API_KEY') or os.environ.get('OPENAI_API_KEY')):
-                from engines.policy_diff_analyzer import analyze_policy_diff, apply_analysis_to_versions
-                from engines.policy_monitor import cache_path_for_url, fetch_page_text
+        if check_type in ('pages', 'both'):
+            try:
+                page_alerts = check_page_changes(versions, verbose=False)
+                results['page_alerts'] = page_alerts
+                versions['_meta']['last_monitor_run'] = _dt.datetime.now().isoformat()
+                save_versions(versions)
 
-                for alert in page_alerts[:3]:  # 最多分析3个
-                    url = alert.get('url', '')
-                    platform = alert.get('platform', '')
-                    cache_file = cache_path_for_url(url)
-                    # 旧内容在 cache 里，新内容重新抓
-                    old_text = cache_file.read_text(encoding='utf-8', errors='replace') if cache_file.exists() else ''
-                    new_text = fetch_page_text(url) or ''
-                    if old_text and new_text:
-                        try:
-                            analysis = analyze_policy_diff(old_text, new_text, platform, url)
-                            results['llm_analyses'].append(analysis)
-                            # ← 新增：把受影响规则写回 policy_versions.json
-                            if analysis.get('has_policy_change'):
-                                apply_res = apply_analysis_to_versions(analysis, versions, platform)
-                                analysis['auto_marked_rules'] = apply_res.get('marked', [])
-                                if apply_res.get('marked'):
-                                    save_versions(versions)
-                        except Exception as e:
-                            results['llm_analyses'].append({'url': url, 'error': str(e)})
+                if page_alerts and (os.environ.get('ANTHROPIC_API_KEY') or os.environ.get('OPENAI_API_KEY')):
+                    from engines.policy_diff_analyzer import analyze_policy_diff, apply_analysis_to_versions
+                    from engines.policy_monitor import cache_path_for_url, fetch_page_text
 
-            if page_alerts:
-                save_alerts_log(page_alerts)
-        except Exception as e:
-            results['page_error'] = str(e)
+                    for alert in page_alerts[:3]:
+                        url = alert.get('url', '')
+                        platform = alert.get('platform', '')
+                        cache_file = cache_path_for_url(url)
+                        old_text = cache_file.read_text(encoding='utf-8', errors='replace') if cache_file.exists() else ''
+                        new_text = fetch_page_text(url) or ''
+                        if old_text and new_text:
+                            try:
+                                analysis = analyze_policy_diff(old_text, new_text, platform, url)
+                                results['llm_analyses'].append(analysis)
+                                if analysis.get('has_policy_change'):
+                                    apply_res = apply_analysis_to_versions(analysis, versions, platform)
+                                    analysis['auto_marked_rules'] = apply_res.get('marked', [])
+                                    if apply_res.get('marked'):
+                                        save_versions(versions)
+                            except Exception as e:
+                                results['llm_analyses'].append({'url': url, 'error': str(e)})
 
-    total = len(results['rss_alerts']) + len(results['page_alerts'])
-    if total == 0:
-        results['summary'] = '✅ 未发现新变化，所有监控项正常'
-    else:
-        results['summary'] = f'⚠️ 发现 {total} 个新变化（RSS {len(results["rss_alerts"])} 条，页面 {len(results["page_alerts"])} 个）'
+                if page_alerts:
+                    save_alerts_log(page_alerts)
+            except Exception as e:
+                results['page_error'] = str(e)
 
-    return jsonify(results)
+        total = len(results['rss_alerts']) + len(results['page_alerts'])
+        results['summary'] = (
+            '✅ 未发现新变化，所有监控项正常' if total == 0
+            else f'⚠️ 发现 {total} 个新变化（RSS {len(results["rss_alerts"])} 条，页面 {len(results["page_alerts"])} 个）'
+        )
+        _check_jobs[job_id]['status'] = 'done'
+        _check_jobs[job_id]['result'] = results
+    except Exception as e:
+        _check_jobs[job_id]['status'] = 'error'
+        _check_jobs[job_id]['result'] = {'error': str(e)}
+
+
+@app.route('/api/v1/policies/run-check', methods=['POST'])
+def run_policy_check():
+    """
+    触发政策检查任务（异步后台执行），立即返回 job_id。
+    请求体：{ "check_type": "rss" | "pages" | "both" }
+    """
+    import uuid, datetime as _dt
+    data = request.get_json() or {}
+    check_type = data.get('check_type', 'both')
+    job_id = str(uuid.uuid4())[:8]
+    _check_jobs[job_id] = {
+        'status': 'running',
+        'check_type': check_type,
+        'started_at': _dt.datetime.now().isoformat(),
+        'result': None,
+    }
+    t = threading.Thread(target=_do_policy_check_bg, args=(job_id, check_type), daemon=True)
+    t.start()
+    return jsonify({'job_id': job_id, 'status': 'running'})
+
+
+@app.route('/api/v1/policies/check-status/<job_id>', methods=['GET'])
+def check_job_status(job_id):
+    """轮询检查任务状态。status: running | done | error"""
+    job = _check_jobs.get(job_id)
+    if not job:
+        return jsonify({'error': '任务不存在'}), 404
+    return jsonify({
+        'job_id': job_id,
+        'status': job['status'],
+        'check_type': job.get('check_type'),
+        'started_at': job.get('started_at'),
+        'result': job.get('result'),
+    })
 
 
 @app.route('/api/v1/policies/llm-config', methods=['GET'])

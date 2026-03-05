@@ -1465,23 +1465,57 @@ async function loadCheckTab(body) {
 async function runCheck(type) {
   const resultEl = document.getElementById('check-result');
   const labels = { rss: 'RSS 公告', pages: '页面变化检测', both: '全部检查' };
-  resultEl.innerHTML = `<div class="loading" style="padding:30px"><div class="spinner"></div><p>正在执行 ${labels[type]}，请稍候（需联网）...</p></div>`;
 
+  // 提交任务，立即返回 job_id
+  let jobId;
   try {
     const res = await fetch('/api/v1/policies/run-check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ check_type: type }),
     });
-    const data = await res.json();
-    if (data.error) {
-      resultEl.innerHTML = `<div style="color:var(--red);padding:16px">${data.error}</div>`;
+    const d = await res.json();
+    if (d.error) { resultEl.innerHTML = `<div style="color:var(--red);padding:16px">${d.error}</div>`; return; }
+    jobId = d.job_id;
+  } catch(e) {
+    resultEl.innerHTML = `<div style="color:var(--red);padding:16px">请求失败：请确认服务器运行中</div>`;
+    return;
+  }
+
+  // 轮询状态——切 Tab 也不会中断，后台一直在跑
+  let elapsed = 0;
+  const pollInterval = 2000;
+  const maxWait = 120000; // 最多等 2 分钟
+
+  const poll = async () => {
+    resultEl.innerHTML = `<div class="loading" style="padding:30px"><div class="spinner"></div>
+      <p>正在执行 ${labels[type]}（需联网）…已等待 ${Math.round(elapsed/1000)} 秒</p>
+      <p style="font-size:11px;color:var(--muted);margin-top:6px;">切换标签页不会中断检查，可随时回来查看结果</p>
+    </div>`;
+
+    try {
+      const r = await fetch(`/api/v1/policies/check-status/${jobId}`);
+      const job = await r.json();
+
+      if (job.status === 'done') {
+        resultEl.innerHTML = renderCheckResult(job.result);
+        return;
+      }
+      if (job.status === 'error') {
+        resultEl.innerHTML = `<div style="color:var(--red);padding:16px">检查出错：${job.result?.error || '未知错误'}</div>`;
+        return;
+      }
+    } catch(e) { /* 网络抖动，继续轮询 */ }
+
+    elapsed += pollInterval;
+    if (elapsed >= maxWait) {
+      resultEl.innerHTML = `<div style="color:var(--orange);padding:16px">⏱ 检查超时（2分钟），请稍后刷新或重试</div>`;
       return;
     }
-    resultEl.innerHTML = renderCheckResult(data);
-  } catch(e) {
-    resultEl.innerHTML = `<div style="color:var(--red);padding:16px">请求失败：请确认服务器运行中且网络可访问</div>`;
-  }
+    setTimeout(poll, pollInterval);
+  };
+
+  setTimeout(poll, pollInterval);
 }
 
 function renderCheckResult(data) {

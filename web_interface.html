@@ -414,6 +414,19 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
       <button class="btn-enter">开始检测 →</button>
     </div>
 
+    <div class="mode-card" onclick="showMode('templates')" style="grid-column:1/-1;max-width:480px;margin:0 auto;">
+      <div class="icon">📦</div>
+      <h2>合规代码模板库</h2>
+      <p>直接下载可用的合规实现代码：COPPA 家长同意、GDPR 数据主体权利、中国防沉迷系统。</p>
+      <div class="tags">
+        <span class="tag">COPPA</span>
+        <span class="tag">GDPR</span>
+        <span class="tag">中国防沉迷</span>
+        <span class="tag">Python 实现</span>
+      </div>
+      <button class="btn-enter">浏览模板 →</button>
+    </div>
+
   </div>
 </div>
 
@@ -557,6 +570,18 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
   <button class="btn-submit" id="btn-audit" onclick="submitAudit()">开始合规审计</button>
 </div>
 
+<!-- ── Mode C：代码模板库 ── -->
+<div id="view-templates" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>📦 合规代码模板库</h2>
+    <p>可直接使用的合规实现代码，覆盖主流法规要求</p>
+  </div>
+  <div id="templates-content">
+    <div class="loading"><div class="spinner"></div><p>加载中…</p></div>
+  </div>
+</div>
+
 <!-- ── 结果展示 ── -->
 <div id="results">
   <button class="back-btn" onclick="backToForm()">← 返回修改</button>
@@ -581,6 +606,7 @@ function showLanding() {
   document.getElementById('landing').style.display = '';
   document.getElementById('view-guide').classList.remove('active');
   document.getElementById('view-audit').classList.remove('active');
+  document.getElementById('view-templates').classList.remove('active');
   document.getElementById('results').classList.remove('active');
 }
 
@@ -589,7 +615,9 @@ function showMode(mode) {
   document.getElementById('landing').style.display = 'none';
   document.getElementById('view-guide').classList.toggle('active', mode === 'guide');
   document.getElementById('view-audit').classList.toggle('active', mode === 'audit');
+  document.getElementById('view-templates').classList.toggle('active', mode === 'templates');
   document.getElementById('results').classList.remove('active');
+  if (mode === 'templates') loadTemplates();
 }
 
 function backToForm() {
@@ -673,6 +701,8 @@ async function submitAudit() {
     });
     const data = await res.json();
     if (data.status === 'success') {
+      // 保存游戏名，供仪表板链接使用
+      window._lastAuditAppName = name;
       showResults(renderAudit(data.data));
     } else {
       showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message}</p></div>`);
@@ -824,9 +854,16 @@ function renderAudit(d) {
   const riskLabels = { critical: '严重问题', high: '高风险', medium: '中等风险', low: '基本合规' };
   const riskIcons  = { critical: '🚨', high: '⚠️', medium: '⚡', low: '✅' };
 
-  let html = `<div class="view-header">
-    <h2>🔍 合规审计报告</h2>
-    <p>市场：${(s.target_markets||[]).join(' / ')} ｜ 平台：${(s.target_platforms||[]).join(' & ')} ｜ ${s.scan_performed ? '✅ 已执行代码扫描' : '📋 问卷式检测（未提供项目路径）'}</p>
+  const appName = window._lastAuditAppName || d.app_profile?.name || 'game';
+  const dashUrl = `/api/v1/dashboard/${encodeURIComponent(appName)}`;
+  let html = `<div class="view-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+    <div>
+      <h2>🔍 合规审计报告</h2>
+      <p>市场：${(s.target_markets||[]).join(' / ')} ｜ 平台：${(s.target_platforms||[]).join(' & ')} ｜ ${s.scan_performed ? '✅ 已执行代码扫描' : '📋 问卷式检测（未提供项目路径）'}</p>
+    </div>
+    <a href="${dashUrl}" target="_blank" style="flex-shrink:0;margin-top:4px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--accent2);font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
+      📊 可视化仪表板 →
+    </a>
   </div>`;
 
   html += `<div class="risk-banner ${risk}">
@@ -1117,6 +1154,12 @@ function renderFreshnessPanel(f, llm) {
       <div style="font-size:15px;font-weight:700;">整体状态：${{ fresh: '✅ 全部新鲜', warning: '⚠️ 部分待复核', critical: '🚨 有规则严重过期' }[f.overall_status] || f.overall_status}</div>
       <div style="font-size:12px;color:var(--muted);">过期阈值 ${f.staleness_threshold_days} 天 · 生成时间 ${(f.generated_at||'').slice(0,19)}</div>
     </div>
+  </div>
+  <div style="margin-bottom:16px;padding:10px 14px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted);line-height:1.7;">
+    ℹ️ <strong>「上次验证」自动更新机制：</strong>
+    每次「检查」Tab 执行页面哈希检测，若页面内容与上次一致（无变化），对应规则的验证时间自动更新为今天。
+    若检测到页面变化且配置了 LLM，LLM 会分析受影响规则并将其标为「待复核」。
+    未配置 LLM 时，有变化的规则验证时间不会自动更新，需人工判断后点击「标记已复核」。
   </div>`;
 
   // 统计卡
@@ -1334,6 +1377,63 @@ async function markRuleVerified(platform, ruleId, mode) {
 }
 
 // ── 轻量 Toast 提示 ───────────────────────────────────────────────
+// ── 代码模板库 ─────────────────────────────────────────────────────
+async function loadTemplates() {
+  const el = document.getElementById('templates-content');
+  try {
+    const r = await fetch('/api/v1/templates');
+    const d = await r.json();
+    const tmpl = d.available_templates || {};
+    const labels = {
+      coppa_parental_consent:  { icon: '👶', law: 'COPPA', color: 'var(--orange)' },
+      china_realname_auth:     { icon: '🇨🇳', law: '中国防沉迷', color: 'var(--red)' },
+      gdpr_data_subject_rights:{ icon: '🇪🇺', law: 'GDPR', color: 'var(--accent2)' },
+    };
+    let html = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px;">`;
+    Object.entries(tmpl).forEach(([id, t]) => {
+      const meta = labels[id] || { icon: '📄', law: '', color: 'var(--muted)' };
+      html += `<div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="font-size:28px;margin-bottom:8px;">${meta.icon}</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">${t.name}</div>
+        <div style="font-size:11px;font-weight:700;color:${meta.color};margin-bottom:8px;">${meta.law}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;">${t.description}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+          复杂度：${t.complexity} · 预计工期：${t.estimated_implementation}
+        </div>
+        <button onclick="downloadTemplate('${id}')"
+          style="width:100%;padding:8px;border-radius:7px;border:1px solid var(--accent);background:rgba(99,102,241,0.1);color:var(--accent2);font-size:12px;font-weight:600;cursor:pointer;">
+          ⬇️ 下载模板代码
+        </button>
+      </div>`;
+    });
+    html += `</div>`;
+    html += `<div style="padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--muted);">
+      💡 模板为 Python 参考实现，展示核心逻辑和 API 调用方式，需根据你的技术栈适配。
+      如需 Unity C# / iOS Swift / Android Kotlin 版本，可在「开发新游戏」模式中生成。
+    </div>`;
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">加载失败：${e.message}</div>`;
+  }
+}
+
+async function downloadTemplate(templateId) {
+  try {
+    const r = await fetch(`/api/v1/templates/${templateId}`);
+    if (!r.ok) { showToast('模板文件未找到', 'error'); return; }
+    const d = await r.json();
+    const blob = new Blob([d.code || ''], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${templateId}.py`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast(`✅ 已下载 ${templateId}.py`, 'success');
+  } catch(e) {
+    showToast('下载失败：' + e.message, 'error');
+  }
+}
+
 function showToast(msg, type) {
   const existing = document.getElementById('_toast');
   if (existing) existing.remove();

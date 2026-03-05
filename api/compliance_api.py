@@ -36,72 +36,17 @@ try:
     from engines.advanced_rule_engine import AdvancedRuleEngine
     from engines.compliance_visualizer import ComplianceVisualizationEngine
 except ImportError as _e1:
-    print(f"[WARNING] engines import failed: {_e1}", flush=True)
-    # 如果在engines目录中运行，使用相对导入
+    print(f"[WARNING] engines import failed: {_e1}, trying direct import", flush=True)
+    # 如果在 engines 目录中运行，使用相对导入
     try:
         from advanced_rule_engine import AdvancedRuleEngine
         from compliance_visualizer import ComplianceVisualizationEngine
     except ImportError as _e2:
-        print(f"[WARNING] fallback import failed: {_e2}", flush=True)
-        # 如果都失败，提供简化版本
-        class AdvancedRuleEngine:
-            def __init__(self):
-                self.rules_version = "2.0.0"
-            
-            async def analyze_compliance_async(self, app_profile):
-                return self._generate_mock_analysis(app_profile)
-            
-            def _generate_mock_analysis(self, app_profile):
-                return {
-                    'app_profile': app_profile,
-                    'risk_assessment': {
-                        'risk_level': 'high',
-                        'overall_score': 250.0,
-                        'critical_issues': 2,
-                        'high_issues': 1,
-                        'medium_issues': 1,
-                        'low_issues': 0
-                    },
-                    'compliance_results': [
-                        {
-                            'rule_id': 'demo_rule',
-                            'severity': 'critical',
-                            'status': 'failed',
-                            'message': '这是一个演示分析结果',
-                            'requirement': '请部署完整系统获取真实分析',
-                            'solution': '参考技术实现模板',
-                            'region': 'Global',
-                            'remediation_cost': 'TBD',
-                            'implementation_time': 'TBD'
-                        }
-                    ],
-                    'recommendations': [
-                        {
-                            'category': '系统部署',
-                            'priority': 'high',
-                            'title': '部署完整合规系统',
-                            'description': '当前为演示模式，请部署完整的专家引擎'
-                        }
-                    ],
-                    'timestamp': datetime.now().isoformat()
-                }
-        
-        class ComplianceVisualizationEngine:
-            def generate_dashboard(self, results):
-                return """
-                <html>
-                <head><title>演示模式</title></head>
-                <body style="font-family: Arial; padding: 20px;">
-                    <h1>🎮📚 合规分析演示结果</h1>
-                    <div style="background: #f0f8ff; padding: 20px; border-radius: 10px;">
-                        <h2>当前为演示模式</h2>
-                        <p>要获取完整的可视化仪表板，请部署完整的系统组件。</p>
-                        <p>演示分析结果:</p>
-                        <pre>{}</pre>
-                    </div>
-                </body>
-                </html>
-                """.format(json.dumps(results, indent=2, ensure_ascii=False))
+        raise ImportError(
+            f"无法加载核心引擎模块。请确保从项目根目录运行：python3 launcher.py --mode web\n"
+            f"错误详情: {_e2}"
+        ) from _e2
+
 
 app = Flask(__name__)
 CORS(app)
@@ -303,24 +248,29 @@ def batch_analyze():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/v1/dashboard/<app_id>', methods=['GET'])
-@require_api_key  
 def get_dashboard(app_id: str):
-    """获取仪表板HTML"""
+    """返回最近一次该游戏审计结果的可视化 HTML 仪表板（无需 API Key）"""
     try:
-        # 从数据库获取最新的分析结果
-        # 这里简化处理，实际需要从数据库查询
-        
-        # 模拟数据
-        results = {
-            'app_profile': {'name': app_id},
-            'risk_assessment': {'risk_level': 'medium', 'overall_score': 150},
-            'compliance_results': []
-        }
-        
+        # 从审计历史中查找该 app_id 的最近一次结果
+        history = _load_audit_history(limit=100)
+        matched = next(
+            (e for e in history if e.get('app_name', '').lower() == app_id.lower()
+             or e.get('app_id', '') == app_id),
+            None
+        )
+        if matched and matched.get('result'):
+            results = matched['result']
+        else:
+            return (
+                f"<html><body style='font-family:sans-serif;padding:40px'>"
+                f"<h2>未找到游戏「{app_id}」的审计记录</h2>"
+                f"<p>请先在主界面完成一次合规审计，再访问此仪表板。</p>"
+                f"<p><a href='/'>← 返回主界面</a></p></body></html>",
+                404,
+                {'Content-Type': 'text/html; charset=utf-8'},
+            )
         dashboard_html = visualizer.generate_dashboard(results)
-        
         return dashboard_html, 200, {'Content-Type': 'text/html; charset=utf-8'}
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -400,7 +350,6 @@ def get_code_templates():
     })
 
 @app.route('/api/v1/templates/<template_id>', methods=['GET'])
-@require_api_key
 def get_code_template(template_id: str):
     """获取具体的代码模板"""
     try:
@@ -422,57 +371,7 @@ def get_code_template(template_id: str):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/v1/market-intelligence', methods=['GET'])
-def get_market_intelligence():
-    """获取市场监管情报"""
-    intelligence = {
-        'regulatory_updates': [
-            {
-                'region': 'China',
-                'law': '游戏防沉迷规定',
-                'update_date': '2025-12-15',
-                'impact_level': 'high',
-                'summary': '进一步收紧未成年人游戏时间限制',
-                'action_required': True
-            },
-            {
-                'region': 'EU', 
-                'law': 'AI Act',
-                'update_date': '2025-08-01',
-                'impact_level': 'medium',
-                'summary': 'AI系统分类和风险评估要求',
-                'action_required': True
-            }
-        ],
-        'enforcement_trends': {
-            'GDPR': {
-                'total_fines_2025': '€1.2 billion',
-                'average_fine': '€8.2 million', 
-                'common_violations': ['lack_of_consent', 'inadequate_security', 'data_breach_notification']
-            },
-            'COPPA': {
-                'total_fines_2025': '$180 million',
-                'recent_cases': ['TikTok settlement', 'YouTube Kids fine'],
-                'enforcement_focus': ['age_verification', 'parental_consent', 'data_minimization']
-            }
-        },
-        'emerging_regulations': [
-            {
-                'name': 'US Federal Privacy Law',
-                'expected_date': '2026-2027',
-                'probability': 0.6,
-                'impact': 'May supersede state privacy laws'
-            },
-            {
-                'name': 'China AI Law',
-                'expected_date': '2026',
-                'probability': 0.8,
-                'impact': 'New requirements for AI in education'
-            }
-        ]
-    }
-    
-    return jsonify(intelligence)
+# /api/v1/market-intelligence 已移除（原为硬编码静态数据，无真实数据源）
 
 @app.route('/api/v1/compliance/quick-check', methods=['POST'])
 @limiter.limit("30 per minute")

@@ -1129,27 +1129,59 @@ function renderFreshnessPanel(f, llm) {
 
   // 待复核规则列表
   const outdated = f.outdated_rules || [];
-  if (outdated.length) {
+  // 把 change_alert 规则排到最前面
+  const sortedOutdated = [...outdated].sort((a, b) => {
+    if (a.change_alert && !b.change_alert) return -1;
+    if (!a.change_alert && b.change_alert) return 1;
+    return 0;
+  });
+  if (sortedOutdated.length) {
     html += `<div style="font-size:13px;font-weight:600;margin-bottom:10px;">需要复核的规则：</div>`;
-    outdated.forEach(r => {
-      const ageClass = r.severity === 'critical' ? 'danger' : 'warn';
-      const icon = r.severity === 'critical' ? '🚨' : '⚠️';
-      html += `<div class="rule-item">
-        <div class="rule-status">${icon}</div>
-        <div class="rule-body">
-          <div class="rule-title">${r.title}</div>
-          <div class="rule-meta">最后验证：${r.last_verified || '未知'} · ${r.age_days ? r.age_days + '天前' : ''}</div>
-          ${r.source_url ? `<a class="rule-link" href="${r.source_url}" target="_blank">📎 查看官方文档</a>` : ''}
-        </div>
-        <span class="rule-age ${ageClass}">${r.age_days ? r.age_days + '天' : '?'}</span>
+    sortedOutdated.forEach(r => {
+      const hasAlert = !!r.change_alert;
+      const ageClass = hasAlert ? 'danger' : (r.severity === 'critical' ? 'danger' : 'warn');
+      const icon = hasAlert ? '🔴' : (r.severity === 'critical' ? '🚨' : '⚠️');
+      const alert = r.change_alert || {};
+      html += `<div class="rule-item" style="${hasAlert ? 'display:block;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.05);border-radius:10px;padding:12px 14px;margin-bottom:8px;' : ''}">
+        ${hasAlert ? `
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:18px;flex-shrink:0;">🔴</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:700;color:var(--red);">${r.title}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">最后验证：${r.last_verified || '已清除（待复核）'} · 平台：${r.platform || ''}</div>
+              <div style="margin-top:8px;padding:8px 10px;background:rgba(239,68,68,0.08);border-radius:7px;font-size:12px;line-height:1.7;">
+                <div style="font-weight:700;color:var(--red);margin-bottom:4px;">🤖 LLM 检测到政策实质变化</div>
+                <div style="color:var(--text);">${alert.change_summary || ''}</div>
+                ${alert.developer_impact ? `<div style="color:var(--muted);margin-top:4px;"><strong>影响：</strong>${alert.developer_impact}</div>` : ''}
+                ${alert.action_required ? `<div style="margin-top:5px;padding:4px 8px;background:rgba(249,115,22,0.1);border-radius:5px;color:var(--orange);font-weight:600;">⚡ 建议操作：${alert.action_required}</div>` : ''}
+                <div style="color:var(--muted);margin-top:4px;font-size:11px;">检测时间：${(alert.detected_at||'').slice(0,19)} · 来源：${alert.llm_provider || 'LLM'}</div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                ${r.source_url ? `<a class="rule-link" href="${r.source_url}" target="_blank" style="font-size:12px;">📎 官方文档</a>` : ''}
+                <button onclick="markRuleVerified('${r.platform}','${r.rule_id}')" 
+                  style="padding:5px 12px;border-radius:6px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer;">
+                  ✅ 已评估，规则无需修改
+                </button>
+                <button onclick="markRuleVerified('${r.platform}','${r.rule_id}','updated')" 
+                  style="padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:12px;cursor:pointer;">
+                  ✏️ 已修改规则，清除告警
+                </button>
+              </div>
+            </div>
+          </div>` : `
+          <div class="rule-status">${icon}</div>
+          <div class="rule-body" style="flex:1;">
+            <div class="rule-title">${r.title}</div>
+            <div class="rule-meta">最后验证：${r.last_verified || '未知'} · ${r.age_days ? r.age_days + '天前' : '未知'}</div>
+            ${r.source_url ? `<a class="rule-link" href="${r.source_url}" target="_blank">📎 查看官方文档</a>` : ''}
+          </div>
+          <span class="rule-age ${ageClass}">${r.age_days ? r.age_days + '天' : '?'}</span>`}
       </div>`;
     });
 
-    // 如果 LLM 已配置，显示分析按钮
-    if (llm.any_configured) {
-      html += `<div style="margin-top:12px;padding:12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;font-size:13px;">
-        💡 LLM 已配置：可在命令行运行以下命令，自动分析政策页面变化含义：<br>
-        <code style="display:block;margin-top:6px;font-family:monospace;color:var(--accent2);">python3 engines/policy_monitor.py --fetch --rss</code>
+    if (!llm.any_configured) {
+      html += `<div style="margin-top:12px;padding:12px;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);border-radius:8px;font-size:12px;color:var(--orange);">
+        ⚠️ 未配置 LLM API Key。配置后，每次检测到页面变化时系统会自动分析影响范围并标记受影响规则。前往「配置」Tab 设置。
       </div>`;
     }
   } else {
@@ -1167,16 +1199,18 @@ function renderFreshnessPanel(f, llm) {
     const label = platform === 'apple_app_store' ? '🍎 Apple App Store' : '🤖 Google Play Store';
     html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 6px;">${label}</div>`;
     (pdata.rule_details || []).forEach(rule => {
-      const statusIcon2 = rule.status === 'fresh' ? '✅' : rule.status === 'potentially_outdated' ? '⚠️' : '🚨';
-      const ageClass2 = rule.status === 'fresh' ? 'fresh' : rule.status === 'potentially_outdated' ? 'warn' : 'danger';
+      const hasAlert = !!rule.change_alert;
+      const statusIcon2 = hasAlert ? '🔴' : (rule.status === 'fresh' ? '✅' : rule.status === 'potentially_outdated' ? '⚠️' : '🚨');
+      const ageClass2 = hasAlert ? 'danger' : (rule.status === 'fresh' ? 'fresh' : rule.status === 'potentially_outdated' ? 'warn' : 'danger');
       html += `<div class="rule-item">
         <div class="rule-status" style="font-size:13px;">${statusIcon2}</div>
         <div class="rule-body">
-          <div class="rule-title" style="font-size:12px;">${rule.title}</div>
-          <div class="rule-meta">${rule.guideline_ref || ''} · 验证于 ${rule.last_verified || '未知'}</div>
+          <div class="rule-title" style="font-size:12px;${hasAlert ? 'color:var(--red);' : ''}">${rule.title}</div>
+          <div class="rule-meta">${rule.guideline_ref || ''} · 验证于 ${rule.last_verified || '未知（待复核）'}</div>
+          ${hasAlert ? `<div style="font-size:11px;color:var(--red);margin-top:2px;">🤖 LLM 检测变化：${(rule.change_alert.change_summary||'').slice(0,60)}…</div>` : ''}
           ${rule.source_url ? `<a class="rule-link" href="${rule.source_url}" target="_blank">官方文档 →</a>` : ''}
         </div>
-        <span class="rule-age ${ageClass2}">${rule.age_days != null ? rule.age_days + '天' : '?'}</span>
+        <span class="rule-age ${ageClass2}">${hasAlert ? '待复核' : (rule.age_days != null ? rule.age_days + '天' : '?')}</span>
       </div>`;
     });
   });
@@ -1189,9 +1223,26 @@ function renderFreshnessPanel(f, llm) {
 
 async function loadConfigTab(body) {
   try {
-    const res = await fetch('/api/v1/policies/llm-config');
-    _llmConfig = await res.json();
-  } catch(e) {}
+    const [llmRes, rulesRes] = await Promise.all([
+      fetch('/api/v1/policies/llm-config'),
+      fetch('/api/v1/rules/update'),
+    ]);
+    _llmConfig = await llmRes.json();
+    const rulesInfo = await rulesRes.json();
+    // 渲染规则版本信息（在 innerHTML 构建完后注入）
+    setTimeout(() => {
+      const el = document.getElementById('rules-version-info');
+      if (el && rulesInfo) {
+        const src = rulesInfo.remote_url_configured
+          ? `远程 URL <span style="color:var(--accent2)">${rulesInfo.remote_url_preview}</span>`
+          : '本地文件';
+        el.innerHTML = `当前版本：<code style="color:var(--accent2)">${rulesInfo.current_version || '—'}</code>
+          &nbsp;·&nbsp; 来源：${src}`;
+      }
+    }, 50);
+  } catch(e) {
+    _llmConfig = {};
+  }
   const ac = _llmConfig?.anthropic || {};
   const oc = _llmConfig?.openai || {};
 
@@ -1234,7 +1285,115 @@ async function loadConfigTab(body) {
       💾 保存配置（即时生效，无需重启）
     </button>
     <div id="cfg-result" style="margin-top:10px;font-size:13px;text-align:center;"></div>
+
+    <div class="section" style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+      <div class="section-title">🔄 合规规则热更新</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+        无需重启服务器即可更新合规规则：<br>
+        · <strong>本地模式</strong>：直接编辑 <code style="color:var(--accent2)">config/compliance-rules.yaml</code>，点击下方按钮即时重载<br>
+        · <strong>远程模式</strong>：填写远程 YAML 文件 URL，每次检查时自动拉取
+      </div>
+      <div id="rules-version-info" style="font-size:12px;color:var(--muted);margin-bottom:10px;">加载中...</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <input type="text" id="cfg-rules-url" placeholder="https://example.com/compliance-rules.yaml（留空则使用本地文件）"
+          style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:12px;font-family:monospace;">
+        <button onclick="saveRulesUrl()" style="padding:10px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:12px;white-space:nowrap;">保存 URL</button>
+      </div>
+      <button onclick="triggerRulesUpdate()" id="rules-update-btn"
+        style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">
+        🔍 检查并热更新规则
+      </button>
+      <div id="rules-update-result" style="margin-top:8px;font-size:12px;text-align:center;"></div>
+    </div>
   `;
+}
+
+// ── 标记单条规则已复核 ────────────────────────────────────────────
+async function markRuleVerified(platform, ruleId, mode) {
+  if (!platform || !ruleId) { alert('参数错误'); return; }
+  try {
+    const r = await fetch('/api/v1/policies/mark-verified', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({platform, rule_id: ruleId})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      // 重新加载新鲜度面板，清除告警展示
+      await loadModalTab();
+      const msg = mode === 'updated'
+        ? `✅ 规则 ${ruleId} 已标记：已修改规则并复核`
+        : `✅ 规则 ${ruleId} 已标记为无需修改`;
+      showToast(msg, 'success');
+    } else {
+      showToast('标记失败：' + (d.error || '未知错误'), 'error');
+    }
+  } catch(e) {
+    showToast('网络错误：' + e.message, 'error');
+  }
+}
+
+// ── 轻量 Toast 提示 ───────────────────────────────────────────────
+function showToast(msg, type) {
+  const existing = document.getElementById('_toast');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.id = '_toast';
+  const bg = type === 'success' ? 'var(--green)' : type === 'error' ? 'var(--red)' : 'var(--accent)';
+  el.style.cssText = `position:fixed;bottom:30px;right:30px;z-index:9999;padding:12px 20px;border-radius:10px;background:${bg};color:#fff;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:360px;`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+async function saveRulesUrl() {
+  const url = document.getElementById('cfg-rules-url')?.value?.trim() ?? '';
+  const resultEl = document.getElementById('rules-update-result');
+  resultEl.innerHTML = '<span style="color:var(--muted)">保存中...</span>';
+  try {
+    const res = await fetch('/api/v1/policies/save-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(url ? { rules_update_url: url } : { clear_rules_url: true }),
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      resultEl.innerHTML = url
+        ? `<span style="color:var(--green)">✅ 远程 URL 已保存，下次检查时生效</span>`
+        : `<span style="color:var(--muted)">已清除远程 URL，改用本地文件</span>`;
+      setTimeout(() => loadConfigTab(document.getElementById('policy-modal-body')), 800);
+    } else {
+      resultEl.innerHTML = `<span style="color:var(--red)">❌ 保存失败</span>`;
+    }
+  } catch(e) {
+    resultEl.innerHTML = `<span style="color:var(--red)">❌ 请求失败</span>`;
+  }
+}
+
+async function triggerRulesUpdate() {
+  const btn = document.getElementById('rules-update-btn');
+  const resultEl = document.getElementById('rules-update-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ 检查中...';
+  resultEl.innerHTML = '';
+  try {
+    const res = await fetch('/api/v1/rules/update', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) {
+      resultEl.innerHTML = `<span style="color:var(--red)">❌ ${data.error}</span>`;
+    } else if (data.status === 'updated') {
+      resultEl.innerHTML = `<span style="color:var(--green)">✅ ${data.message}</span>`;
+      // 刷新版本号显示
+      setTimeout(() => loadConfigTab(document.getElementById('policy-modal-body')), 800);
+    } else {
+      resultEl.innerHTML = `<span style="color:var(--muted)">✅ ${data.message}（版本 ${data.current_version}）</span>`;
+    }
+  } catch(e) {
+    resultEl.innerHTML = `<span style="color:var(--red)">❌ 请求失败</span>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 检查并热更新规则';
+  }
 }
 
 async function saveConfig() {

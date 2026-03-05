@@ -123,33 +123,58 @@ class AdvancedRuleEngine:
             raise
     
     def check_for_rule_updates(self) -> bool:
-        """检查规则更新"""
+        """
+        检查规则是否有更新，优先级：
+        1. 远程 URL（环境变量 RULES_UPDATE_URL 配置，可选）
+        2. 本地文件修改时间（不需要任何配置，始终生效）
+        """
+        import os, time as _time
+
+        # ── 优先：远程 URL ────────────────────────────────────────────
+        remote_url = os.environ.get("RULES_UPDATE_URL", "").strip()
+        if remote_url:
+            try:
+                response = requests.get(remote_url, timeout=10)
+                if response.status_code == 200:
+                    remote_hash = hashlib.md5(response.content).hexdigest()[:8]
+                    if remote_hash != self.rules_version:
+                        self.logger.info(f"远程规则已更新: {self.rules_version} → {remote_hash}")
+                        # 将远程内容写入本地文件，reload_rules() 从文件读取
+                        self.config_path.write_bytes(response.content)
+                        return True
+                    self.logger.info("远程规则无更新")
+                    return False
+            except Exception as e:
+                self.logger.warning(f"远程规则检查失败，降级为本地文件检查: {e}")
+
+        # ── 兜底：本地文件修改时间 ────────────────────────────────────
         try:
-            # 这里可以从GitHub或其他源检查更新
-            # 示例：从GitHub API检查文件更新时间
-            github_api_url = "https://api.github.com/repos/your-org/compliance-rules/contents/compliance-rules.yaml"
-            response = requests.get(github_api_url, timeout=10)
-            
-            if response.status_code == 200:
-                remote_sha = response.json().get('sha', '')
-                if remote_sha != self.rules_version:
-                    self.logger.info("Rule updates available")
-                    return True
-            
+            current_mtime = self.config_path.stat().st_mtime
+            if not hasattr(self, '_last_mtime'):
+                self._last_mtime = current_mtime
+                return False
+            if current_mtime != self._last_mtime:
+                self.logger.info(f"检测到本地规则文件已修改（{self.config_path.name}）")
+                return True
         except Exception as e:
-            self.logger.warning(f"Failed to check for updates: {e}")
-        
+            self.logger.warning(f"本地规则检查失败: {e}")
+
         return False
-    
+
     def reload_rules(self):
-        """热重载规则"""
+        """热重载规则（从本地文件重新加载）"""
         old_version = self.rules_version
         self._load_rules()
-        
+        # 更新上次加载时的 mtime，避免下次误判
+        try:
+            self._last_mtime = self.config_path.stat().st_mtime
+        except Exception:
+            pass
         if old_version != self.rules_version:
             self.rules_cache.clear()
             self.results_cache.clear()
-            self.logger.info(f"Rules reloaded: {old_version} -> {self.rules_version}")
+            self.logger.info(f"规则已热重载: {old_version} → {self.rules_version}")
+        return self.rules_version
     
     def _get_cache_key(self, app_info: Dict) -> str:
         """生成缓存键"""
@@ -234,7 +259,7 @@ class AdvancedRuleEngine:
         risk_assessment = self._calculate_advanced_risk(app_info, all_results)
         
         # 生成预测和建议
-        predictions = self._generate_predictions(app_info, all_results)
+        predictions = self._predict_compliance_trends(app_info, all_results)
         
         # 构建最终结果
         final_result = {

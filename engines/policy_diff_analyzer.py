@@ -270,6 +270,56 @@ def analyze_policy_diff(
     return result
 
 
+def apply_analysis_to_versions(
+    analysis: Dict[str, Any],
+    versions: Dict[str, Any],
+    platform: str,
+) -> Dict[str, Any]:
+    """
+    将 LLM 分析结果写回 policy_versions.json：
+    - 对每个受影响的 rule_id，清空 last_verified（使其出现在"需要复核"列表）
+    - 附加 change_alert 字段记录变化摘要，供 freshness 报告展示
+    返回实际被标记的 rule_id 列表。
+    """
+    if not analysis.get("has_policy_change"):
+        return {"marked": []}
+    if analysis.get("impact_level", "none") in ("none", "low"):
+        return {"marked": []}
+
+    rule_ids = analysis.get("rule_ids_to_review", [])
+    if not rule_ids:
+        return {"marked": []}
+
+    # 规则 id 在 policy_versions.json 里可能分属不同平台，搜索两个平台
+    platforms_to_search = ["apple_app_store", "google_play_store"]
+    if platform and "apple" in platform.lower():
+        platforms_to_search = ["apple_app_store", "google_play_store"]
+    elif platform and "google" in platform.lower():
+        platforms_to_search = ["google_play_store", "apple_app_store"]
+
+    alert = {
+        "detected_at": analysis.get("analyzed_at", datetime.datetime.now().isoformat()),
+        "change_summary": analysis.get("change_summary", ""),
+        "developer_impact": analysis.get("developer_impact", ""),
+        "action_required": analysis.get("action_required"),
+        "impact_level": analysis.get("impact_level", "medium"),
+        "source_url": analysis.get("url", ""),
+        "llm_provider": analysis.get("provider", ""),
+    }
+
+    marked = []
+    for pid in platforms_to_search:
+        rules = versions.get(pid, {}).get("rules", {})
+        for rule_id in rule_ids:
+            if rule_id in rules:
+                rules[rule_id]["last_verified"] = None   # 清空 → 出现在 unknown/待复核
+                rules[rule_id]["change_alert"] = alert   # 记录变化摘要
+                rules[rule_id]["needs_review"] = True
+                marked.append(f"{pid}:{rule_id}")
+
+    return {"marked": marked, "alert": alert}
+
+
 def check_llm_config() -> Dict[str, Any]:
     """检查 LLM 配置状态，返回当前可用的提供商"""
     status = {

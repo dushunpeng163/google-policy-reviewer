@@ -224,9 +224,27 @@ def analyze_freshness(versions: Dict[str, Any]) -> Dict[str, Any]:
         for rule_id, rule in rules.items():
             last_verified = rule.get("last_verified")
             age_days = days_since(last_verified)
+            change_alert = rule.get("change_alert")  # LLM 自动写入的变化告警
+            needs_review = rule.get("needs_review", False)
             report["summary"]["total_rules"] += 1
 
-            if age_days is None:
+            # 有 change_alert 的规则强制视为 unknown（最高优先级展示）
+            if change_alert or needs_review:
+                status = "policy_changed"   # 新状态：LLM 检测到政策实质变化
+                report["summary"]["unknown"] += 1
+                platform_report["rules_unknown"] += 1
+                report["outdated_rules"].append({
+                    "platform": platform_key,
+                    "rule_id": rule_id,
+                    "title": rule.get("title", rule_id),
+                    "status": "policy_changed",
+                    "last_verified": last_verified,
+                    "age_days": age_days,
+                    "source_url": rule.get("source_url", ""),
+                    "severity": "critical",
+                    "change_alert": change_alert,
+                })
+            elif age_days is None:
                 status = "unknown"
                 report["summary"]["unknown"] += 1
                 platform_report["rules_unknown"] += 1
@@ -238,10 +256,12 @@ def analyze_freshness(versions: Dict[str, Any]) -> Dict[str, Any]:
                     "platform": platform_key,
                     "rule_id": rule_id,
                     "title": rule.get("title", rule_id),
+                    "status": "outdated",
                     "last_verified": last_verified,
                     "age_days": age_days,
                     "source_url": rule.get("source_url", ""),
                     "severity": "critical",
+                    "change_alert": None,
                 })
             elif age_days >= staleness_threshold:
                 status = "potentially_outdated"
@@ -251,10 +271,12 @@ def analyze_freshness(versions: Dict[str, Any]) -> Dict[str, Any]:
                     "platform": platform_key,
                     "rule_id": rule_id,
                     "title": rule.get("title", rule_id),
+                    "status": "potentially_outdated",
                     "last_verified": last_verified,
                     "age_days": age_days,
                     "source_url": rule.get("source_url", ""),
                     "severity": "warning",
+                    "change_alert": None,
                 })
             else:
                 status = "fresh"
@@ -271,12 +293,14 @@ def analyze_freshness(versions: Dict[str, Any]) -> Dict[str, Any]:
                 "source_url": rule.get("source_url", ""),
                 "notes": rule.get("notes", ""),
                 "deadline_notes": rule.get("deadline_notes", ""),
+                "change_alert": change_alert,
             })
 
         report["platforms"][platform_key] = platform_report
 
-    # 计算整体状态
-    if report["summary"]["outdated"] > 0:
+    # 计算整体状态（policy_changed 规则 → critical）
+    has_policy_changed = any(r.get("change_alert") for r in report["outdated_rules"])
+    if has_policy_changed or report["summary"]["outdated"] > 0:
         report["overall_status"] = "critical"
     elif report["summary"]["potentially_outdated"] > 0:
         report["overall_status"] = "warning"
@@ -384,6 +408,9 @@ def _mark_rules_verified(versions: Dict, platform_key: str, today: str, source: 
         if rule.get("verified_by", "manual") != "manual_bulk_override":
             rule["last_verified"] = today
             rule["verified_by"] = source
+            # 人工确认无变化，清除待复核告警
+            rule.pop("change_alert", None)
+            rule.pop("needs_review", None)
 
 
 # ── RSS 自动监控 ─────────────────────────────────────────────────────────────

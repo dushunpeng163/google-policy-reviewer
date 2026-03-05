@@ -27,15 +27,22 @@ import threading
 from functools import wraps
 from pathlib import Path
 
+# 确保项目根目录在 sys.path 中（以脚本方式运行时 api/ 目录会成为 sys.path[0]）
+_PROJECT_ROOT = str(Path(__file__).parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 try:
     from engines.advanced_rule_engine import AdvancedRuleEngine
     from engines.compliance_visualizer import ComplianceVisualizationEngine
-except ImportError:
+except ImportError as _e1:
+    print(f"[WARNING] engines import failed: {_e1}", flush=True)
     # 如果在engines目录中运行，使用相对导入
     try:
         from advanced_rule_engine import AdvancedRuleEngine
         from compliance_visualizer import ComplianceVisualizationEngine
-    except ImportError:
+    except ImportError as _e2:
+        print(f"[WARNING] fallback import failed: {_e2}", flush=True)
         # 如果都失败，提供简化版本
         class AdvancedRuleEngine:
             def __init__(self):
@@ -317,28 +324,46 @@ def get_dashboard(app_id: str):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/v1/rules/update', methods=['POST'])
-@require_api_key
+@app.route('/api/v1/rules/update', methods=['GET', 'POST'])
 def update_rules():
-    """更新规则API"""
+    """
+    GET  - 查询当前规则版本 & 热更新配置（无需 API Key）
+    POST - 触发规则热更新检查（无需 API Key，方便 Web UI 调用）
+    """
+    import os as _os
+    remote_url = _os.environ.get("RULES_UPDATE_URL", "").strip()
+
+    if request.method == 'GET':
+        return jsonify({
+            'current_version': rule_engine.rules_version,
+            'rules_file': str(rule_engine.config_path),
+            'remote_url_configured': bool(remote_url),
+            'remote_url_preview': (remote_url[:40] + '…') if len(remote_url) > 40 else remote_url,
+            'hot_reload_support': True,
+        })
+
+    # POST：触发检查
     try:
-        # 检查并更新规则
+        old_version = rule_engine.rules_version
         has_updates = rule_engine.check_for_rule_updates()
-        
+
         if has_updates:
-            rule_engine.reload_rules()
+            new_version = rule_engine.reload_rules()
             return jsonify({
                 'status': 'updated',
-                'new_rules_version': rule_engine.rules_version,
-                'message': 'Rules successfully updated'
+                'old_version': old_version,
+                'new_version': new_version or rule_engine.rules_version,
+                'source': 'remote_url' if remote_url else 'local_file',
+                'message': f'规则已热重载：{old_version} → {rule_engine.rules_version}',
             })
         else:
             return jsonify({
                 'status': 'no_updates',
                 'current_version': rule_engine.rules_version,
-                'message': 'Rules are already up to date'
+                'source': 'remote_url' if remote_url else 'local_file',
+                'message': '规则文件无变化，当前版本已是最新',
             })
-            
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -896,27 +921,65 @@ def _run_scheduled_check():
         try:
             from engines.policy_monitor import (
                 load_versions, save_versions, fetch_rss_alerts,
-                check_page_changes, save_alerts_log
+                check_page_changes, save_alerts_log, cache_path_for_url, fetch_page_text
             )
+            from engines.policy_diff_analyzer import analyze_policy_diff, apply_analysis_to_versions
             import datetime as _dt
 
             versions = load_versions()
             all_alerts = []
+            versions_dirty = False
 
+            # ── RSS 公告检测 ──────────────────────────────────────────
             rss_alerts = fetch_rss_alerts(verbose=False)
             all_alerts.extend(rss_alerts)
 
+            # ── 页面哈希变化检测 ──────────────────────────────────────
             page_alerts = check_page_changes(versions, verbose=False)
             all_alerts.extend(page_alerts)
+            if page_alerts:
+                versions_dirty = True
+
+            # ── LLM 分析：自动把受影响规则标为待复核 ─────────────────
+            llm_ready = bool(os.environ.get('ANTHROPIC_API_KEY') or os.environ.get('OPENAI_API_KEY'))
+            marked_rules_total = 0
+            if page_alerts and llm_ready:
+                for alert in page_alerts[:3]:
+                    url = alert.get('url', '')
+                    platform = alert.get('platform', '')
+                    cache_file = cache_path_for_url(url)
+                    old_text = cache_file.read_text(encoding='utf-8', errors='replace') if cache_file.exists() else ''
+                    new_text = fetch_page_text(url) or ''
+                    if old_text and new_text:
+                        try:
+                            analysis = analyze_policy_diff(old_text, new_text, platform, url)
+                            if analysis.get('has_policy_change'):
+                                apply_res = apply_analysis_to_versions(analysis, versions, platform)
+                                marked = apply_res.get('marked', [])
+                                marked_rules_total += len(marked)
+                                if marked:
+                                    versions_dirty = True
+                        except Exception:
+                            pass
 
             versions["_meta"]["last_monitor_run"] = _dt.datetime.now().isoformat()
             save_versions(versions)
 
             if all_alerts:
                 save_alerts_log(all_alerts)
-                msg = f"发现 {len(all_alerts)} 个政策变化（RSS {len(rss_alerts)} 条，页面 {len(page_alerts)} 个）"
+                parts = [f"RSS {len(rss_alerts)} 条" if rss_alerts else "",
+                         f"页面变化 {len(page_alerts)} 个" if page_alerts else ""]
+                detail = "、".join(p for p in parts if p)
+                if marked_rules_total:
+                    detail += f"，{marked_rules_total} 条规则已自动标为待复核"
+                msg = f"⚠️ 发现政策变化（{detail}）"
                 level = "critical" if page_alerts else "warning"
                 _push_notification(msg, level=level, source="scheduler")
+            elif not llm_ready and page_alerts:
+                _push_notification(
+                    "检测到页面变化，但未配置 LLM Key，无法自动分析影响范围。请在「配置」Tab 设置 API Key。",
+                    level="warning", source="scheduler"
+                )
 
         except Exception as e:
             _push_notification(f"定时检查出错: {e}", level="info", source="scheduler")
@@ -993,11 +1056,15 @@ def save_llm_config():
         updates['ANTHROPIC_API_KEY'] = data['anthropic_key'].strip()
     if data.get('openai_key'):
         updates['OPENAI_API_KEY'] = data['openai_key'].strip()
+    if 'rules_update_url' in data:
+        updates['RULES_UPDATE_URL'] = data['rules_update_url'].strip()
     # 允许清空某个 key
     if data.get('clear_anthropic'):
         updates['ANTHROPIC_API_KEY'] = ''
     if data.get('clear_openai'):
         updates['OPENAI_API_KEY'] = ''
+    if data.get('clear_rules_url'):
+        updates['RULES_UPDATE_URL'] = ''
 
     if not updates:
         return jsonify({'status': 'error', 'message': '未提供任何配置项'}), 400
@@ -1082,9 +1149,9 @@ def run_policy_check():
             versions['_meta']['last_monitor_run'] = _dt.datetime.now().isoformat()
             save_versions(versions)
 
-            # 如果有页面变化且 LLM 已配置，自动分析
+            # 如果有页面变化且 LLM 已配置，自动分析并写回规则版本文件
             if page_alerts and (os.environ.get('ANTHROPIC_API_KEY') or os.environ.get('OPENAI_API_KEY')):
-                from engines.policy_diff_analyzer import analyze_policy_diff
+                from engines.policy_diff_analyzer import analyze_policy_diff, apply_analysis_to_versions
                 from engines.policy_monitor import cache_path_for_url, fetch_page_text
 
                 for alert in page_alerts[:3]:  # 最多分析3个
@@ -1098,6 +1165,12 @@ def run_policy_check():
                         try:
                             analysis = analyze_policy_diff(old_text, new_text, platform, url)
                             results['llm_analyses'].append(analysis)
+                            # ← 新增：把受影响规则写回 policy_versions.json
+                            if analysis.get('has_policy_change'):
+                                apply_res = apply_analysis_to_versions(analysis, versions, platform)
+                                analysis['auto_marked_rules'] = apply_res.get('marked', [])
+                                if apply_res.get('marked'):
+                                    save_versions(versions)
                         except Exception as e:
                             results['llm_analyses'].append({'url': url, 'error': str(e)})
 
@@ -1285,6 +1358,38 @@ def policy_freshness():
             return jsonify({'error': 'policy_versions.json 未找到'}), 404
         report = analyze_freshness(versions)
         return jsonify(report)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v1/policies/mark-verified', methods=['POST'])
+def mark_rule_verified():
+    """人工标记单条规则已复核（清除 change_alert / needs_review，更新 last_verified）"""
+    try:
+        data = request.get_json() or {}
+        platform = data.get('platform', '').strip()
+        rule_id  = data.get('rule_id', '').strip()
+        if not platform or not rule_id:
+            return jsonify({'error': '缺少 platform 或 rule_id'}), 400
+
+        from engines.policy_monitor import load_versions, save_versions
+        from datetime import date
+        versions = load_versions()
+
+        platform_data = versions.get(platform, {})
+        rules = platform_data.get('rules', {})
+        if rule_id not in rules:
+            return jsonify({'error': f'规则 {rule_id} 不存在于 {platform}'}), 404
+
+        rule = rules[rule_id]
+        today = date.today().isoformat()
+        rule['last_verified'] = today
+        rule['verified_by']   = 'manual_ui'
+        rule.pop('change_alert', None)
+        rule.pop('needs_review', None)
+
+        save_versions(versions)
+        return jsonify({'ok': True, 'rule_id': rule_id, 'platform': platform, 'last_verified': today})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

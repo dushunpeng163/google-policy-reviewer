@@ -1,0 +1,441 @@
+---
+# 合规规则配置系统
+# 支持动态加载、版本管理、社区贡献
+
+schema_version: "2.0"
+last_updated: "2026-03-05"
+
+# 全局配置
+global:
+  default_severity_levels:
+    critical: { weight: 100, color: "red", requires_immediate_action: true }
+    high: { weight: 75, color: "orange", requires_action_within: "7_days" }
+    medium: { weight: 50, color: "yellow", requires_action_within: "30_days" }
+    low: { weight: 25, color: "green", monitor_only: true }
+  
+  supported_output_formats: ["json", "xml", "html", "pdf", "csv", "markdown"]
+  
+  risk_calculation:
+    base_multipliers:
+      children_under_13: 2.0
+      cross_border_data: 1.5
+      biometric_data: 1.8
+      financial_transactions: 1.6
+      health_data: 1.9
+    
+    market_risk_factors:
+      China: 1.7  # 严格的数据本地化要求
+      EU: 1.4     # GDPR高额罚款
+      US: 1.2     # COPPA和州级法律复杂性
+
+# 儿童保护规则 - 全球最全面
+children_protection:
+  coppa_us:
+    age_threshold: 13
+    regions: ["US"]
+    severity: critical
+    parental_consent_methods:
+      tier_1: # FTC认可的最高级别
+        - credit_card_preauth
+        - digital_signature_with_ca
+        - video_conference_verification
+        - government_id_plus_live_photo
+      tier_2: # 次级但可接受
+        - email_plus_phone_verification
+        - postal_mail_with_signature
+        - encrypted_parental_portal
+    
+    prohibited_features:
+      - behavioral_advertising
+      - location_tracking_without_necessity
+      - social_networking_features
+      - third_party_data_sharing
+      - push_notifications_for_marketing
+    
+    required_implementations:
+      - parental_dashboard
+      - data_deletion_on_request
+      - minimal_data_collection
+      - secure_data_transmission
+      - regular_data_audit
+  
+  gdpr_children_eu:
+    age_threshold: 16  # 可配置到13-16之间
+    regions: ["EU", "UK", "EEA"]
+    severity: critical
+    
+    member_state_variations:
+      Austria: 14
+      Belgium: 13
+      Bulgaria: 14
+      Croatia: 16
+      Cyprus: 14
+      Czech_Republic: 15
+      Denmark: 13
+      Estonia: 13
+      Finland: 13
+      France: 15
+      Germany: 16
+      Greece: 15
+      Hungary: 16
+      Ireland: 16
+      Italy: 14
+      Latvia: 13
+      Lithuania: 14
+      Luxembourg: 16
+      Malta: 16
+      Netherlands: 16
+      Poland: 13
+      Portugal: 13
+      Romania: 16
+      Slovakia: 16
+      Slovenia: 15
+      Spain: 14
+      Sweden: 13
+    
+    required_rights_implementation:
+      - right_of_access
+      - right_of_rectification
+      - right_of_erasure
+      - right_to_restrict_processing
+      - right_to_data_portability
+      - right_to_object
+      - rights_related_to_automated_decision_making
+    
+    privacy_by_design_requirements:
+      - default_highest_privacy_settings
+      - data_protection_impact_assessment
+      - privacy_by_default_implementation
+      - regular_compliance_audits
+  
+  pipl_china_minors:
+    age_threshold: 14
+    regions: ["China"]
+    severity: critical
+    
+    sensitive_data_protection:
+      biometric_identifiers: "special_category"
+      health_information: "special_category"  
+      location_data: "enhanced_protection"
+      learning_behavior: "educational_context_only"
+    
+    guardian_consent_requirements:
+      - written_consent_for_sensitive_data
+      - separate_consent_for_cross_border
+      - periodic_consent_renewal
+      - consent_withdrawal_mechanism
+    
+    data_localization:
+      storage_location: "mainland_china_only"
+      processing_location: "mainland_china_preferred"
+      exceptions: ["technical_necessity", "user_consent", "government_approved"]
+
+# 游戏法规 - 全球最完整
+gaming_regulations:
+  china_anti_addiction:
+    severity: critical
+    regions: ["China"]
+    
+    time_restrictions:
+      weekdays: { allowed_time: 0, restriction: "complete_ban" }
+      weekends: { allowed_time: 3600, time_window: "20:00-21:00" }
+      holidays: { allowed_time: 3600, time_window: "20:00-21:00" }
+    
+    payment_restrictions:
+      under_8: { single_payment: 0, monthly_limit: 0 }
+      age_8_to_16: { single_payment: 50, monthly_limit: 200 }
+      age_16_to_18: { single_payment: 100, monthly_limit: 400 }
+    
+    required_systems:
+      - nrta_realname_integration
+      - face_recognition_verification
+      - parental_supervision_platform
+      - gameplay_time_monitoring
+      - payment_restriction_enforcement
+    
+    prohibited_mechanics:
+      - addiction_inducing_design
+      - excessive_reward_frequency
+      - social_pressure_tactics
+      - fear_of_missing_out_exploitation
+  
+  korea_gaming_laws:
+    severity: medium
+    regions: ["Korea", "South_Korea"]
+    
+    cinderella_law:
+      age_restriction: 16
+      prohibited_hours: ["00:00", "06:00"]
+      verification_method: "resident_registration_number"
+    
+    probability_disclosure:
+      required_for: ["random_items", "loot_boxes", "gacha_systems"]
+      disclosure_location: "prominent_in_game_display"
+      statistical_reporting: "monthly_actual_rates"
+    
+    rating_requirements:
+      authority: "GCRB"
+      mandatory: true
+      content_descriptors: true
+  
+  japan_gaming_regulations:
+    severity: medium
+    regions: ["Japan"]
+    
+    complete_gacha_ban:
+      prohibited: true
+      definition: "collecting_specific_set_for_reward"
+      alternative_allowed: "individual_item_value"
+    
+    minor_protection:
+      age_of_majority: 20
+      parental_consent_required: true
+      payment_notifications: "guardian_notification_required"
+
+# 教育合规 - 美国为主，全球扩展
+education_compliance:
+  ferpa_us:
+    severity: high
+    regions: ["US"]
+    scope: "educational_records"
+    
+    educational_record_definition:
+      included:
+        - student_grades
+        - attendance_records
+        - disciplinary_records
+        - special_education_files
+        - health_records_maintained_by_school
+      excluded:
+        - personal_observations
+        - private_notes
+        - law_enforcement_records
+        - employment_records
+        - medical_records_by_physician
+    
+    parent_student_rights:
+      - inspect_and_review_records
+      - request_amendment_of_records
+      - consent_to_disclosure
+      - file_complaints
+      - receive_annual_notification
+    
+    disclosure_restrictions:
+      directory_information_allowed: true
+      consent_required_for: "non_directory_information"
+      exceptions_no_consent_needed:
+        - school_officials_legitimate_interest
+        - other_schools_transfer
+        - audit_evaluation
+        - financial_aid
+        - organizations_studies
+        - accrediting_organizations
+        - judicial_orders
+        - health_safety_emergencies
+  
+  state_student_privacy_laws:
+    california_sb1177:
+      severity: medium
+      scope: "online_services_providers"
+      prohibited_activities:
+        - behavioral_advertising
+        - creating_profiles_non_educational
+        - selling_student_information
+        - disclosing_student_information
+    
+    new_york_education_law_2d:
+      severity: medium  
+      requirements:
+        - data_security_plan
+        - breach_notification
+        - data_retention_limits
+        - parent_access_rights
+
+# 隐私法律 - 全球最全
+privacy_laws:
+  gdpr_eu:
+    severity: critical
+    regions: ["EU", "UK", "EEA"]
+    max_fine: "4% global revenue or €20M"
+    
+    lawful_bases:
+      - consent
+      - contract
+      - legal_obligation
+      - vital_interests
+      - public_task
+      - legitimate_interests
+    
+    data_subject_rights:
+      access: { response_time: "1_month", fee_allowed: false }
+      rectification: { response_time: "1_month", fee_allowed: false }
+      erasure: { response_time: "1_month", conditions_apply: true }
+      restrict_processing: { response_time: "1_month", conditions_apply: true }
+      data_portability: { response_time: "1_month", machine_readable: true }
+      object: { response_time: "1_month", absolute_for_marketing: true }
+    
+    special_categories:
+      - racial_ethnic_origin
+      - political_opinions
+      - religious_philosophical_beliefs
+      - trade_union_membership
+      - genetic_data
+      - biometric_data
+      - health_data
+      - sex_life_sexual_orientation
+  
+  pipl_china:
+    severity: critical
+    regions: ["China"]
+    max_fine: "5% revenue or 50M RMB"
+    
+    cross_border_transfer_mechanisms:
+      - cyberspace_administration_approval
+      - personal_information_protection_certification
+      - standard_contractual_clauses
+      - other_conditions_specified_by_law
+    
+    sensitive_personal_information:
+      categories:
+        - biometric_identification
+        - religious_beliefs
+        - specific_identity
+        - medical_health
+        - financial_accounts
+        - whereabouts_tracking
+        - minors_under_14
+      
+      special_requirements:
+        - specific_purpose_sufficient_necessity
+        - separate_consent
+        - strict_protection_measures
+        - regular_compliance_assessment
+
+# 平台政策 - 持续更新
+platform_policies:
+  google_play:
+    current_requirements:
+      target_api_level: 34  # 动态更新
+      64bit_requirement: true
+      app_bundle_recommended: true
+      
+    family_policy:
+      target_audience_declaration_required: true
+      ads_restrictions:
+        no_behavioral_ads: true
+        no_retargeting: true
+        family_safe_content_only: true
+      
+      third_party_sdks:
+        analytics_restricted: true
+        crash_reporting_allowed: true
+        attribution_restricted: true
+    
+    data_safety_section:
+      required_disclosures:
+        - data_collection
+        - data_sharing
+        - security_practices
+        - data_retention_deletion
+  
+  apple_app_store:
+    current_guidelines:
+      privacy_nutrition_labels: true
+      app_tracking_transparency: true
+      
+    kids_category:
+      prohibited_features:
+        - external_links
+        - in_app_purchases_without_parental_gate
+        - behavioral_advertising
+        - location_services
+        - social_networking
+        - user_generated_content_sharing
+      
+      required_features:
+        - educational_or_entertaining_value
+        - age_appropriate_content
+        - simple_navigation
+
+# 技术实现模板 - 最全面的代码库
+technical_implementations:
+  parental_consent_systems:
+    credit_card_preauth:
+      description: "COPPA认可的可验证家长同意方法"
+      implementation_complexity: "high"
+      cost_estimate: "$500-2000/month"
+      code_template: "templates/coppa_credit_card_consent.py"
+      
+    digital_signature:
+      description: "符合ESIGN Act的数字签名验证"
+      implementation_complexity: "very_high"
+      cost_estimate: "$1000-5000/month"
+      code_template: "templates/digital_signature_consent.py"
+  
+  age_verification_systems:
+    multi_tier_verification:
+      description: "多层次年龄验证系统"
+      tiers:
+        basic: "birthday_input + behavioral_analysis"
+        enhanced: "basic + phone_verification"
+        premium: "enhanced + government_id_verification"
+        enterprise: "premium + biometric_verification"
+      code_template: "templates/multi_tier_age_verification.py"
+  
+  anti_addiction_systems:
+    china_compliant:
+      description: "符合中国防沉迷法规的完整系统"
+      components:
+        - realname_verification
+        - time_management
+        - payment_restriction
+        - parental_supervision
+        - health_gaming_advisory
+      code_template: "templates/china_anti_addiction_system.py"
+
+# 报告模板 - 多格式支持
+report_templates:
+  executive_summary:
+    sections:
+      - compliance_overview
+      - risk_assessment
+      - critical_issues
+      - implementation_roadmap
+      - cost_benefit_analysis
+    
+  technical_implementation:
+    sections:
+      - architecture_overview
+      - code_examples
+      - configuration_guides
+      - testing_procedures
+      - monitoring_setup
+    
+  legal_compliance:
+    sections:
+      - applicable_laws
+      - compliance_gaps
+      - remediation_steps
+      - legal_risk_assessment
+      - regulatory_timeline
+
+# 更新机制 - 持续演进
+update_mechanisms:
+  rule_updates:
+    frequency: "weekly"
+    sources:
+      - government_official_websites
+      - legal_databases
+      - industry_newsletters
+      - community_contributions
+    
+    validation_process:
+      - legal_expert_review
+      - community_feedback
+      - automated_testing
+      - staged_rollout
+  
+  community_contributions:
+    github_integration: true
+    contributor_recognition: true
+    review_process: "peer_review + expert_validation"

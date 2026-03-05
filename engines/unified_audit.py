@@ -99,6 +99,37 @@ MARKET_LEGAL_CHECKS = {
     },
 }
 
+# finding id -> 推荐库（简短，用于优先清单展示）
+_FINDING_PACKAGES = {
+    "ios_att":              "📦 com.unity.advertisement.ios.support（免费官方）",
+    "gdpr_consent":         "📦 com.google.ump — Google UMP SDK（免费官方）",
+    "gdpr_privacy_policy":  "📝 人工操作：在 App Store Connect / Play Console 填写 URL",
+    "ccpa_do_not_sell":     "📝 UI 自写（隐私设置页加开关）+ UMP SDK 支持",
+    "aadc_default_privacy": "📝 代码默认值：数据收集功能初始设为 false",
+    "ios_iap_storekit":     "📦 com.unity.purchasing — Unity IAP（免费官方）",
+    "android_play_billing": "📦 com.unity.purchasing — Unity IAP（免费官方）",
+    "ios_parental_gate":    "📝 自写 UI（~80行 C#，无现成开源方案）",
+    "ios_kids_sdk":         "📋 核对 Apple Families Approved 列表（无代码）",
+    "android_kids_policy":  "📋 Play Console 后台设置 + 核对 SDK 列表（无代码）",
+    "coppa_parental_consent":"📝 年龄门控 + 家长邮件确认（自写，约200行）",
+    "coppa_no_behavioral_ads":"📦 AdMob: tagForChildDirectedTreatment=true（1行）",
+    "coppa_no_pii":         "📝 儿童模式下禁用相关权限请求（代码开关）",
+    "ios_account_deletion": "📝 自写后端 DELETE API + 游戏内设置页入口",
+    "android_account_deletion":"📝 自写后端 API + 公开网页删除入口（Android 强制）",
+    "ios_sign_in_apple":    "📦 com.lupidan.apple-signin-unity（开源免费，GitHub）",
+    "gdpr_data_rights":     "📝 设置页入口 + 后端数据导出/删除 API（自写）",
+    "gdpr_consent_withdrawal":"📦 UMP SDK: ConsentForm.loadAndPresentFromViewController",
+    "android_data_safety":  "📋 Play Console → 应用内容 → 数据安全（人工填写）",
+    "android_privacy_policy":"📋 Play Console → 商店设置（人工填写）",
+    "ios_privacy_labels":   "📋 App Store Connect → 应用隐私（人工填写）",
+    "android_iarc":         "📋 Play Console → 内容分级问卷（人工填写）",
+    "android_aab":          "📦 Unity Build Settings → Export as AAB（内置，改一个选项）",
+    "android_target_api":   "📦 Unity Player Settings → Target API Level: 35（改一个选项）",
+    "android_ads_policy":   "📦 com.google.ads.mobile — AdMob SDK（免费官方）",
+    "android_privacy_policy":"📋 Play Console → 商店设置（人工填写）",
+}
+
+
 PLATFORM_CHECKS = {
     "ios": [
         {
@@ -248,6 +279,142 @@ PLATFORM_CHECKS = {
             "applies_when": lambda f, age, _: "ads" in f,
         },
     ],
+}
+
+
+# ── 每个系统的推荐实现方案（免费/开源优先）────────────────────────────────
+_SYSTEM_SOLUTIONS = {
+    "privacy_consent": {
+        "solutions": [
+            {
+                "name": "Google UMP SDK",
+                "type": "免费官方",
+                "covers": ["GDPR 同意弹窗", "CCPA", "同意状态管理"],
+                "unity_package": "com.google.ump",
+                "url": "https://developers.google.com/admob/unity/privacy",
+                "note": "Google 官方，与 AdMob 配套使用，一行代码初始化",
+            },
+            {
+                "name": "iOS ATT 原生 API",
+                "type": "平台内置",
+                "covers": ["iOS ATT 弹窗"],
+                "unity_package": "com.unity.advertisement.ios.support",
+                "url": "https://developer.apple.com/documentation/apptrackingtransparency",
+                "note": "苹果原生，零成本，Unity 插件直接调用",
+            },
+        ],
+        "custom_code_needed": "无——UMP SDK 覆盖全部同意流程",
+    },
+    "child_protection": {
+        "solutions": [
+            {
+                "name": "广告 SDK COPPA 标记",
+                "type": "平台内置",
+                "covers": ["禁止行为定向广告", "COPPA 标记"],
+                "unity_package": None,
+                "url": "https://developers.google.com/admob/unity/targeting",
+                "note": "AdMob/各广告 SDK 均内置，传入 tagForChildDirectedTreatment=true 即可",
+            },
+            {
+                "name": "Apple Families Approved SDK 列表",
+                "type": "审核要求",
+                "covers": ["儿童类别 SDK 合规"],
+                "unity_package": None,
+                "url": "https://developer.apple.com/support/third-party-SDK-requirements/",
+                "note": "需逐一核对自用 SDK 是否在列表内，无代码工作量",
+            },
+        ],
+        "custom_code_needed": "家长门控 UI（约 80-100 行 C#，逻辑简单）；COPPA 年龄判断路由",
+    },
+    "iap": {
+        "solutions": [
+            {
+                "name": "Unity IAP",
+                "type": "免费官方",
+                "covers": ["iOS StoreKit", "Google Play Billing", "统一购买/恢复流程"],
+                "unity_package": "com.unity.purchasing",
+                "url": "https://docs.unity3d.com/Packages/com.unity.purchasing@latest",
+                "note": "Unity 官方包，Package Manager 直接安装，双平台统一 API",
+            },
+            {
+                "name": "RevenueCat（免费版）",
+                "type": "免费第三方",
+                "covers": ["收据验证", "订阅管理", "跨平台用户购买状态"],
+                "unity_package": "com.revenuecat.purchases-unity",
+                "url": "https://www.revenuecat.com/",
+                "note": "免费版足够独立游戏，省去自建收据验证后端的工作量",
+            },
+        ],
+        "custom_code_needed": "商品 ID 配置；购买成功后的游戏内发货逻辑",
+    },
+    "ads": {
+        "solutions": [
+            {
+                "name": "Google AdMob",
+                "type": "免费官方",
+                "covers": ["广告展示", "儿童模式", "COPPA 标记", "iOS/Android 双平台"],
+                "unity_package": "com.google.ads.mobile",
+                "url": "https://developers.google.com/admob/unity/start",
+                "note": "与 UMP SDK 深度集成，同意回调后自动初始化广告请求",
+            },
+        ],
+        "custom_code_needed": "广告初始化时序控制（等 UMP 同意回调后再调用 MobileAds.Initialize，约 20 行）",
+    },
+    "account": {
+        "solutions": [
+            {
+                "name": "apple-signin-unity",
+                "type": "开源免费",
+                "covers": ["Sign in with Apple"],
+                "unity_package": "com.lupidan.apple-signin-unity",
+                "url": "https://github.com/lupidan/apple-signin-unity",
+                "note": "GitHub 开源，Star 数高，社区活跃，直接从 Package Manager 安装",
+            },
+            {
+                "name": "Google Play Games Plugin for Unity",
+                "type": "免费官方",
+                "covers": ["Google 登录（Android）"],
+                "unity_package": "com.google.play.games",
+                "url": "https://github.com/playgameservices/play-games-plugin-for-unity",
+                "note": "Google 官方，Android 社交登录首选",
+            },
+        ],
+        "custom_code_needed": "账户删除后端 API（DELETE /user，含30天软删除逻辑）；删除网页入口（Android 强制要求）",
+    },
+    "user_rights": {
+        "solutions": [
+            {
+                "name": "Google UMP SDK（同意撤回）",
+                "type": "免费官方",
+                "covers": ["GDPR 同意撤回", "重新展示同意弹窗"],
+                "unity_package": "com.google.ump",
+                "url": "https://developers.google.com/admob/unity/privacy",
+                "note": "调用 UMPConsentForm.loadAndPresentFromViewController 即可重新弹出",
+            },
+        ],
+        "custom_code_needed": "设置页数据权利入口 UI；调用后端「导出我的数据」和「删除我的数据」接口",
+    },
+    "platform_config": {
+        "solutions": [
+            {
+                "name": "App Store Connect（人工）",
+                "type": "平台后台",
+                "covers": ["隐私营养标签", "App 隐私声明"],
+                "unity_package": None,
+                "url": "https://appstoreconnect.apple.com/",
+                "note": "代码无法替代，须在其他系统全部实现后再填写，否则声明与实现不符",
+            },
+            {
+                "name": "Google Play Console（人工）",
+                "type": "平台后台",
+                "covers": ["数据安全表单", "IARC 内容分级", "账户删除 URL 填写"],
+                "unity_package": None,
+                "url": "https://play.google.com/console/",
+                "note": "代码无法替代，最后统一在 Play Console 逐项填写",
+            },
+        ],
+        "custom_code_needed": "无代码工作量，全为平台后台人工操作",
+    },
 }
 
 
@@ -415,6 +582,8 @@ def _build_required_systems(findings: List[Dict]) -> List[Dict]:
                 {"id": f.get("id"), "title": f.get("title"), "severity": f.get("severity")}
                 for f in matched
             ],
+            "recommended_solutions": _SYSTEM_SOLUTIONS.get(sdef["id"], {}).get("solutions", []),
+            "custom_code_needed": _SYSTEM_SOLUTIONS.get(sdef["id"], {}).get("custom_code_needed", ""),
         })
     # 按依赖顺序排序（depends_on 现在是对象列表，用 dep["id"] 比较）
     ordered, remaining = [], list(systems)
@@ -518,6 +687,7 @@ def audit_game(
             "category": f["category"],
             "fix": f.get("fix", ""),
             "detail": f.get("detail", ""),
+            "recommended_package": _FINDING_PACKAGES.get(f.get("id", ""), ""),
         })
 
     return {

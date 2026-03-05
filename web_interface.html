@@ -123,26 +123,101 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 
 /* ── Landing (mode select) ── */
 #landing {
-  max-width: 900px; margin: 0 auto; padding: 60px 20px;
+  max-width: 960px; margin: 0 auto; padding: 56px 24px 64px;
   text-align: center;
 }
-#landing h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
-#landing p { color: var(--muted); font-size: 16px; margin-bottom: 48px; }
+#landing h1 { font-size: 38px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 10px; }
+#landing > p { color: var(--muted); font-size: 15px; margin-bottom: 40px; }
+
+/* ── Hero 主卡片 ── */
+.hero-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px 36px 32px;
+  cursor: pointer; transition: all .25s;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+  text-align: left; margin-bottom: 16px;
+  position: relative; overflow: hidden;
+}
+.hero-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 0%, rgba(99,102,241,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-card:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(99,102,241,0.15); }
+.hero-left { display: flex; flex-direction: column; gap: 14px; }
+.hero-left .badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; color: var(--accent2);
+  background: rgba(99,102,241,0.12); padding: 4px 10px; border-radius: 20px;
+  width: fit-content; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.hero-left h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; }
+.hero-left p { color: var(--muted); font-size: 14px; line-height: 1.7; flex: 1; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.hero-tag {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px;
+  background: rgba(99,102,241,0.1); color: var(--accent2);
+}
+.hero-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 24px; border-radius: 10px;
+  background: var(--accent); color: #fff; font-weight: 700; font-size: 15px;
+  border: none; cursor: pointer; transition: all .2s; width: fit-content;
+}
+.hero-btn:hover { background: var(--accent2); transform: translateX(2px); }
+.hero-right { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+.mode-pill {
+  border-radius: 14px; padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 6px;
+  border: 1px solid; transition: all .2s;
+}
+.mode-pill.green {
+  background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.25);
+}
+.mode-pill.purple {
+  background: rgba(99,102,241,0.07); border-color: rgba(99,102,241,0.25);
+}
+.mode-pill .pill-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.mode-pill.green .pill-title { color: #10b981; }
+.mode-pill.purple .pill-title { color: #818cf8; }
+.mode-pill .pill-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.mode-pill .pill-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.mode-pill .pill-tag {
+  font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600;
+}
+.mode-pill.green .pill-tag { background: rgba(16,185,129,0.15); color: #10b981; }
+.mode-pill.purple .pill-tag { background: rgba(129,140,248,0.15); color: #818cf8; }
+
+/* ── 辅助卡片行 ── */
+.sub-cards { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.sub-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px 24px;
+  cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 20px; text-align: left;
+}
+.sub-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.sub-card .icon { font-size: 28px; flex-shrink: 0; }
+.sub-card .sc-body { flex: 1; }
+.sub-card .sc-body h3 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.sub-card .sc-body p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.sub-card .sc-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.sub-card .sc-tag {
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px;
+  background: rgba(99,102,241,0.1); color: var(--accent2);
+}
+.sub-card .sc-arrow {
+  font-size: 18px; color: var(--muted); flex-shrink: 0; transition: transform .2s;
+}
+.sub-card:hover .sc-arrow { transform: translateX(4px); color: var(--accent2); }
+
+/* 旧 mode-card 兼容保留（不再用于首页） */
 .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
 .mode-card {
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 32px;
   cursor: pointer; transition: all .2s;
   display: flex; flex-direction: column; gap: 12px;
-}
-.mode-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-.mode-card .icon { font-size: 36px; }
-.mode-card h2 { font-size: 20px; font-weight: 700; }
-.mode-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
-.mode-card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; padding-bottom: 4px; }
-.mode-card .tag {
-  font-size: 11px; font-weight: 600; padding: 3px 8px;
-  border-radius: 6px; background: rgba(99,102,241,0.12); color: var(--accent2);
 }
 .mode-card .btn-enter {
   margin-top: auto; padding: 10px 20px; border-radius: 8px;
@@ -329,7 +404,9 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+  .hero-card { grid-template-columns: 1fr; gap: 20px; padding: 24px 20px; }
+  .hero-left h2 { font-size: 20px; }
   .mode-cards { grid-template-columns: 1fr; }
   header { padding: 16px 20px; }
   .roadmap-step { grid-template-columns: 36px 1fr; }
@@ -382,42 +459,63 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
   </div>
 </div>
 
-<!-- ── 模式选择（首页） ── -->
+<!-- ── 首页 ── -->
 <div id="landing">
   <h1>Unity 游戏合规系统</h1>
   <p>面向 App Store & Google Play 发布，覆盖欧美市场法规（GDPR · COPPA · CCPA）</p>
-  <div class="mode-cards">
 
-    <div class="mode-card" onclick="showMode('unified')" style="grid-column:1/-1;max-width:680px;margin:0 auto;">
-      <div class="icon">🎮</div>
-      <h2>合规检测 / 开发向导</h2>
-      <p>填写游戏信息，系统自动判断模式：<br>
-        <span style="color:#10b981;font-weight:600;">📁 填写项目路径</span> → 代码扫描审计（发现真实缺项）<br>
-        <span style="color:#818cf8;font-weight:600;">📋 不填路径</span> → 合规开发向导（路线图 + 代码模板）
-      </p>
-      <div class="tags">
-        <span class="tag">代码扫描</span>
-        <span class="tag">合规问题清单</span>
-        <span class="tag">推荐 SDK</span>
-        <span class="tag">开发路线图</span>
-        <span class="tag">代码模板</span>
+  <!-- 主 Hero 卡片 -->
+  <div class="hero-card" onclick="showMode('unified')">
+    <div class="hero-left">
+      <div class="badge">🚀 一站式合规方案</div>
+      <h2>合规检测<br>& 开发向导</h2>
+      <p>填写游戏信息，系统根据是否提供项目路径自动切换模式，输出专属合规方案、推荐 SDK 和代码模板。</p>
+      <div class="hero-tags">
+        <span class="hero-tag">推荐 SDK</span>
+        <span class="hero-tag">优先修复清单</span>
+        <span class="hero-tag">代码模板</span>
+        <span class="hero-tag">GDPR · COPPA · CCPA</span>
       </div>
-      <button class="btn-enter">开始 →</button>
+      <button class="hero-btn" onclick="event.stopPropagation();showMode('unified')">开始检测 →</button>
     </div>
+    <div class="hero-right">
+      <div class="mode-pill green">
+        <div class="pill-title">📁 填写项目路径</div>
+        <div class="pill-desc">代码扫描审计 — 精确定位源码中的合规缺项，输出带行号的修复建议</div>
+        <div class="pill-tags">
+          <span class="pill-tag">代码扫描</span>
+          <span class="pill-tag">合规问题清单</span>
+          <span class="pill-tag">系统依赖图</span>
+        </div>
+      </div>
+      <div class="mode-pill purple">
+        <div class="pill-title">📋 不填路径</div>
+        <div class="pill-desc">合规开发向导 — 根据功能和市场推断合规要求，生成路线图和代码模板</div>
+        <div class="pill-tags">
+          <span class="pill-tag">开发路线图</span>
+          <span class="pill-tag">时间估算</span>
+          <span class="pill-tag">平台配置清单</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="mode-card" onclick="showMode('templates')" style="grid-column:1/-1;max-width:480px;margin:0 auto;">
+  <!-- 辅助入口 -->
+  <div class="sub-cards">
+    <div class="sub-card" onclick="showMode('templates')">
       <div class="icon">📦</div>
-      <h2>合规代码模板库</h2>
-      <p>直接下载可用的合规实现代码：COPPA 家长同意、GDPR 数据主体权利、中国防沉迷系统。</p>
-      <div class="tags">
-        <span class="tag">COPPA</span>
-        <span class="tag">GDPR</span>
-        <span class="tag">中国防沉迷</span>
-        <span class="tag">Python 实现</span>
+      <div class="sc-body">
+        <h3>合规代码模板库</h3>
+        <p>直接下载可用的合规实现代码：COPPA 家长同意、GDPR 数据主体权利、中国防沉迷系统</p>
+        <div class="sc-tags">
+          <span class="sc-tag">COPPA</span>
+          <span class="sc-tag">GDPR</span>
+          <span class="sc-tag">中国防沉迷</span>
+          <span class="sc-tag">Unity C#</span>
+        </div>
       </div>
-      <button class="btn-enter">浏览模板 →</button>
+      <div class="sc-arrow">→</div>
     </div>
-
   </div>
 </div>
 

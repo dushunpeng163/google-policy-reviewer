@@ -704,6 +704,17 @@ def guide_new_game():
             })
         except Exception:
             pass
+        # 同步计算 required_systems 供前端展示推荐 SDK
+        try:
+            from engines.unified_audit import audit_game as _audit_for_systems
+            _synth = _audit_for_systems(
+                game_info={'name': data.get('game_name', ''), 'features': data.get('features', []), 'min_user_age': data.get('min_user_age', 13)},
+                target_markets=data.get('target_markets', ['US', 'EU']),
+                target_platforms=data.get('target_platforms', ['ios', 'android']),
+            )
+            result['required_systems'] = _synth.get('required_systems', [])
+        except Exception:
+            result['required_systems'] = []
         return jsonify({'status': 'success', 'data': result})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500

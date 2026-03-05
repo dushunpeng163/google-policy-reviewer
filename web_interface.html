@@ -388,30 +388,21 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
   <p>面向 App Store & Google Play 发布，覆盖欧美市场法规（GDPR · COPPA · CCPA）</p>
   <div class="mode-cards">
 
-    <div class="mode-card" onclick="showMode('guide')">
-      <div class="icon">🗺️</div>
-      <h2>开发新游戏</h2>
-      <p>告诉我你要做什么游戏，系统生成完整的合规开发路线图、Unity 代码模板和平台配置清单。</p>
-      <div class="tags">
-        <span class="tag">开发向导</span>
-        <span class="tag">代码模板</span>
-        <span class="tag">平台配置清单</span>
-        <span class="tag">法规要点</span>
-      </div>
-      <button class="btn-enter">开始规划 →</button>
-    </div>
-
-    <div class="mode-card" onclick="showMode('audit')">
-      <div class="icon">🔍</div>
-      <h2>检测已有游戏</h2>
-      <p>输入游戏信息（可选填项目路径做代码扫描），系统输出统一审计报告：平台政策 + 法规合规 + 代码缺项。</p>
+    <div class="mode-card" onclick="showMode('unified')" style="grid-column:1/-1;max-width:680px;margin:0 auto;">
+      <div class="icon">🎮</div>
+      <h2>合规检测 / 开发向导</h2>
+      <p>填写游戏信息，系统自动判断模式：<br>
+        <span style="color:#10b981;font-weight:600;">📁 填写项目路径</span> → 代码扫描审计（发现真实缺项）<br>
+        <span style="color:#818cf8;font-weight:600;">📋 不填路径</span> → 合规开发向导（路线图 + 代码模板）
+      </p>
       <div class="tags">
         <span class="tag">代码扫描</span>
-        <span class="tag">平台政策检测</span>
-        <span class="tag">法规合规检测</span>
-        <span class="tag">优先修复清单</span>
+        <span class="tag">合规问题清单</span>
+        <span class="tag">推荐 SDK</span>
+        <span class="tag">开发路线图</span>
+        <span class="tag">代码模板</span>
       </div>
-      <button class="btn-enter">开始检测 →</button>
+      <button class="btn-enter">开始 →</button>
     </div>
 
     <div class="mode-card" onclick="showMode('templates')" style="grid-column:1/-1;max-width:480px;margin:0 auto;">
@@ -430,23 +421,23 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
   </div>
 </div>
 
-<!-- ── Mode A：开发向导表单 ── -->
-<div id="view-guide" class="view">
+<!-- ── 统一表单（合并向导 + 审计） ── -->
+<div id="view-unified" class="view">
   <button class="back-btn" onclick="showLanding()">← 返回</button>
   <div class="view-header">
-    <h2>🗺️ 合规开发向导</h2>
-    <p>填写游戏基本信息，生成专属的合规开发路线图和 Unity 代码模板</p>
+    <h2>🎮 游戏合规检测</h2>
+    <p id="unified-mode-hint" style="color:var(--muted);">填写项目路径 → 代码扫描审计 &nbsp;|&nbsp; 不填路径 → 合规开发向导</p>
   </div>
 
   <div class="section">
     <div class="section-title">游戏基本信息</div>
     <div class="field">
       <label>游戏名称</label>
-      <input type="text" id="g-name" placeholder="My Unity Game" value="My Unity Game">
+      <input type="text" id="u-name" placeholder="My Unity Game" value="My Unity Game">
     </div>
     <div class="field">
       <label>游戏类型</label>
-      <select id="g-type">
+      <select id="u-type">
         <option value="casual">休闲游戏</option>
         <option value="puzzle">益智游戏</option>
         <option value="action">动作游戏</option>
@@ -458,17 +449,36 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
     </div>
     <div class="field">
       <label>最小用户年龄</label>
-      <input type="number" id="g-age" value="13" min="3" max="18">
+      <input type="number" id="u-age" value="13" min="3" max="18">
       <small>影响 COPPA（&lt;13岁）和儿童相关合规要求</small>
     </div>
   </div>
 
   <div class="section">
+    <div class="section-title" style="display:flex;align-items:center;gap:10px;">
+      Unity 项目路径
+      <span id="u-path-badge" style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(129,140,248,0.15);color:#818cf8;font-weight:600;">
+        📋 不填 → 开发向导模式
+      </span>
+    </div>
+    <div class="field">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="u-path" placeholder="/Users/you/MyUnityGame（留空则进入向导模式）" style="flex:1;" oninput="onPathInput(this.value)">
+        <button onclick="browseFolder('u-path')" style="padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;">
+          📁 浏览
+        </button>
+      </div>
+      <small>填写后将扫描真实源码，精确定位合规缺项</small>
+    </div>
+  </div>
+
+  <div class="section">
     <div class="section-title">游戏功能（多选）</div>
-    <div class="cb-grid" id="g-features">
+    <div class="cb-grid" id="u-features">
       <label class="cb-item"><input type="checkbox" value="iap"> 应用内购买（IAP）</label>
       <label class="cb-item"><input type="checkbox" value="ads"> 广告变现</label>
       <label class="cb-item"><input type="checkbox" value="social_login"> 第三方登录</label>
+      <label class="cb-item"><input type="checkbox" value="user_accounts"> 用户账户系统</label>
       <label class="cb-item"><input type="checkbox" value="multiplayer"> 多人联机</label>
       <label class="cb-item"><input type="checkbox" value="leaderboard"> 排行榜</label>
       <label class="cb-item"><input type="checkbox" value="ugc"> 用户生成内容</label>
@@ -479,7 +489,7 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 
   <div class="section">
     <div class="section-title">目标市场（多选）</div>
-    <div class="cb-grid" id="g-markets">
+    <div class="cb-grid" id="u-markets">
       <label class="cb-item"><input type="checkbox" value="US" checked> 🇺🇸 美国（COPPA）</label>
       <label class="cb-item"><input type="checkbox" value="EU" checked> 🇪🇺 欧盟（GDPR）</label>
       <label class="cb-item"><input type="checkbox" value="UK"> 🇬🇧 英国（UK GDPR）</label>
@@ -491,84 +501,18 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 
   <div class="section">
     <div class="section-title">目标平台</div>
-    <div class="cb-grid" id="g-platforms">
+    <div class="cb-grid" id="u-platforms">
       <label class="cb-item"><input type="checkbox" value="ios" checked> 🍎 iOS App Store</label>
       <label class="cb-item"><input type="checkbox" value="android" checked> 🤖 Google Play</label>
     </div>
   </div>
 
-  <button class="btn-submit" id="btn-guide" onclick="submitGuide()">生成合规开发向导</button>
+  <button class="btn-submit" id="btn-unified" onclick="submitUnified()">开始检测 →</button>
 </div>
 
-<!-- ── Mode B：审计检测表单 ── -->
-<div id="view-audit" class="view">
-  <button class="back-btn" onclick="showLanding()">← 返回</button>
-  <div class="view-header">
-    <h2>🔍 游戏合规审计</h2>
-    <p>检测已有游戏是否满足平台政策和目标市场法规要求</p>
-  </div>
-
-  <div class="section">
-    <div class="section-title">游戏信息</div>
-    <div class="field">
-      <label>游戏名称</label>
-      <input type="text" id="a-name" placeholder="My Unity Game" value="My Unity Game">
-    </div>
-    <div class="field">
-      <label>最小用户年龄</label>
-      <input type="number" id="a-age" value="13" min="3" max="18">
-    </div>
-    <div class="field">
-      <label>Unity 项目路径（可选，填写后将进行代码扫描）</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="a-path" placeholder="/Users/you/MyUnityGame" style="flex:1;">
-        <button id="browse-btn" onclick="browseFolder()" style="
-          padding:10px 16px;border-radius:8px;border:1px solid var(--border);
-          background:var(--card2);color:var(--text);font-size:13px;font-weight:600;
-          cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;">
-          📁 浏览
-        </button>
-      </div>
-      <small id="browse-hint">留空则进行问卷式检测（仅根据你填写的信息分析）</small>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">游戏已有功能（多选）</div>
-    <div class="cb-grid" id="a-features">
-      <label class="cb-item"><input type="checkbox" value="iap"> 应用内购买（IAP）</label>
-      <label class="cb-item"><input type="checkbox" value="ads"> 广告</label>
-      <label class="cb-item"><input type="checkbox" value="social_login"> 第三方登录</label>
-      <label class="cb-item"><input type="checkbox" value="multiplayer"> 多人联机</label>
-      <label class="cb-item"><input type="checkbox" value="leaderboard"> 排行榜</label>
-      <label class="cb-item"><input type="checkbox" value="ugc"> 用户生成内容</label>
-      <label class="cb-item"><input type="checkbox" value="analytics"> 数据分析</label>
-      <label class="cb-item"><input type="checkbox" value="push"> 推送通知</label>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">目标市场（多选）</div>
-    <div class="cb-grid" id="a-markets">
-      <label class="cb-item"><input type="checkbox" value="US" checked> 🇺🇸 美国</label>
-      <label class="cb-item"><input type="checkbox" value="EU" checked> 🇪🇺 欧盟</label>
-      <label class="cb-item"><input type="checkbox" value="UK"> 🇬🇧 英国</label>
-      <label class="cb-item"><input type="checkbox" value="AU"> 🇦🇺 澳大利亚</label>
-      <label class="cb-item"><input type="checkbox" value="CA"> 🇨🇦 加拿大</label>
-      <label class="cb-item"><input type="checkbox" value="JP"> 🇯🇵 日本</label>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">目标平台</div>
-    <div class="cb-grid" id="a-platforms">
-      <label class="cb-item"><input type="checkbox" value="ios" checked> 🍎 iOS App Store</label>
-      <label class="cb-item"><input type="checkbox" value="android" checked> 🤖 Google Play</label>
-    </div>
-  </div>
-
-  <button class="btn-submit" id="btn-audit" onclick="submitAudit()">开始合规审计</button>
-</div>
+<!-- ── 旧表单保留为隐藏（保持 backToForm 兼容） ── -->
+<div id="view-guide" class="view" style="display:none!important;"></div>
+<div id="view-audit" class="view" style="display:none!important;"></div>
 
 <!-- ── Mode C：代码模板库 ── -->
 <div id="view-templates" class="view">
@@ -604,8 +548,7 @@ document.querySelectorAll('.cb-item input').forEach(cb => {
 
 function showLanding() {
   document.getElementById('landing').style.display = '';
-  document.getElementById('view-guide').classList.remove('active');
-  document.getElementById('view-audit').classList.remove('active');
+  document.getElementById('view-unified').classList.remove('active');
   document.getElementById('view-templates').classList.remove('active');
   document.getElementById('results').classList.remove('active');
 }
@@ -613,8 +556,7 @@ function showLanding() {
 function showMode(mode) {
   currentMode = mode;
   document.getElementById('landing').style.display = 'none';
-  document.getElementById('view-guide').classList.toggle('active', mode === 'guide');
-  document.getElementById('view-audit').classList.toggle('active', mode === 'audit');
+  document.getElementById('view-unified').classList.toggle('active', mode === 'unified');
   document.getElementById('view-templates').classList.toggle('active', mode === 'templates');
   document.getElementById('results').classList.remove('active');
   if (mode === 'templates') loadTemplates();
@@ -622,19 +564,98 @@ function showMode(mode) {
 
 function backToForm() {
   document.getElementById('results').classList.remove('active');
-  document.getElementById(`view-${currentMode}`).classList.add('active');
+  const target = document.getElementById(`view-${currentMode}`);
+  if (target) target.classList.add('active');
 }
 
 function showResults(html) {
-  document.getElementById('view-guide').classList.remove('active');
-  document.getElementById('view-audit').classList.remove('active');
+  document.getElementById('view-unified').classList.remove('active');
   document.getElementById('results-content').innerHTML = html;
   document.getElementById('results').classList.add('active');
   window.scrollTo(0, 0);
 }
 
+function onPathInput(val) {
+  const badge = document.getElementById('u-path-badge');
+  const btn   = document.getElementById('btn-unified');
+  if (val.trim()) {
+    badge.style.background = 'rgba(16,185,129,0.15)';
+    badge.style.color = '#10b981';
+    badge.textContent = '✅ 有路径 → 代码扫描审计';
+    btn.textContent = '开始代码扫描审计 →';
+  } else {
+    badge.style.background = 'rgba(129,140,248,0.15)';
+    badge.style.color = '#818cf8';
+    badge.textContent = '📋 不填 → 开发向导模式';
+    btn.textContent = '生成合规开发向导 →';
+  }
+}
+
 function showLoading(msg) {
   showResults(`<div class="loading"><div class="spinner"></div><p>${msg}</p></div>`);
+}
+
+// ── 统一入口 Submit ───────────────────────────────────────────────
+
+async function submitUnified() {
+  const features  = getChecked('u-features');
+  const markets   = getChecked('u-markets');
+  const platforms = getChecked('u-platforms');
+  const age       = parseInt(document.getElementById('u-age').value) || 13;
+  const name      = document.getElementById('u-name').value || 'My Unity Game';
+  const type      = document.getElementById('u-type').value;
+  const path      = document.getElementById('u-path').value.trim();
+
+  if (!markets.length || !platforms.length) {
+    alert('请至少选择一个目标市场和目标平台');
+    return;
+  }
+
+  if (path) {
+    // ── 有路径 → 代码扫描审计 ──
+    currentMode = 'unified';
+    showLoading('正在扫描代码并生成合规审计报告...');
+    try {
+      const res = await fetch('/api/v1/audit/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          game_info: { name, features, min_user_age: age },
+          project_path: path,
+          target_markets: markets,
+          target_platforms: platforms
+        })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        window._lastAuditAppName = name;
+        showResults(renderAudit(data.data));
+      } else {
+        showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message}</p></div>`);
+      }
+    } catch (e) {
+      showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+    }
+  } else {
+    // ── 无路径 → 合规开发向导 ──
+    currentMode = 'unified';
+    showLoading('正在生成合规开发向导...');
+    try {
+      const res = await fetch('/api/v1/guide/new-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_name: name, game_type: type, features, min_user_age: age, target_markets: markets, target_platforms: platforms })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        showResults(renderGuide(data.data));
+      } else {
+        showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message}</p></div>`);
+      }
+    } catch (e) {
+      showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+    }
+  }
 }
 
 // ── Mode A Submit ────────────────────────────────────────────────
@@ -842,6 +863,53 @@ function renderGuide(d) {
     });
   });
   html += `</div>`;
+
+  // ── 推荐 SDK 系统卡片（复用审计逻辑）─────────────────────────────
+  const guideSystems = d.required_systems || [];
+  if (guideSystems.length) {
+    const sevColor = { critical: 'var(--red)', high: 'var(--orange)', medium: 'var(--yellow)', low: 'var(--green)' };
+    const sevLabel = { critical: '严重', high: '高', medium: '中', low: '低' };
+    html += `<div style="margin:28px 0 8px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">🔧 你需要集成的合规 SDK</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+        基于你的游戏功能，以下是推荐的免费/开源实现方案（按实现顺序排列）
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">`;
+    guideSystems.forEach((sys, idx) => {
+      const color = sevColor[sys.severity] || 'var(--muted)';
+      const deps  = sys.depends_on || [];
+      const depsHtml = deps.length
+        ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">→ 依赖：${deps.map(dep => typeof dep === 'object' ? `${dep.icon||''} ${dep.name}`.trim() : dep).join('、')}</div>`
+        : `<div style="font-size:11px;color:var(--green);margin-top:6px;">✅ 无前置依赖，可立即开始</div>`;
+      const sols = sys.recommended_solutions || [];
+      html += `<div style="background:var(--card2);border:1px solid var(--border);border-left:3px solid ${color};border-radius:10px;padding:14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:20px;">${sys.icon}</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;">${sys.name}</div>
+            <div style="font-size:11px;font-weight:700;color:${color};">${sevLabel[sys.severity]||sys.severity} · ${sys.issue_count} 项要求</div>
+          </div>
+          <div style="font-size:18px;font-weight:700;color:var(--muted);opacity:0.3;">${idx+1}</div>
+        </div>
+        ${depsHtml}
+        ${sols.length ? `<details style="margin-top:8px;"><summary style="cursor:pointer;font-size:11px;color:#10b981;font-weight:600;">🔧 推荐方案 (${sols.length})</summary>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px;">
+            ${sols.map(sol => `<div style="padding:7px 9px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:7px;">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+                <span style="font-size:12px;font-weight:700;">${sol.name}</span>
+                <span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(16,185,129,0.2);color:#10b981;">${sol.type}</span>
+              </div>
+              ${sol.unity_package ? `<code style="font-size:10px;padding:2px 5px;background:var(--card);border-radius:4px;color:var(--accent2);">${sol.unity_package}</code> ` : ''}
+              <span style="font-size:11px;color:var(--muted);">${sol.note||''}</span>
+              ${sol.url ? `<div style="margin-top:3px;"><a href="${sol.url}" target="_blank" style="font-size:10px;color:var(--accent2);">📖 文档</a></div>` : ''}
+            </div>`).join('')}
+            ${sys.custom_code_needed ? `<div style="font-size:11px;padding:5px 9px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:6px;color:#f59e0b;">✏️ 需自写：${sys.custom_code_needed}</div>` : ''}
+          </div>
+        </details>` : ''}
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
 
   return html;
 }
@@ -1985,34 +2053,17 @@ openPolicyModal = async function() {
   });
 };
 
-async function browseFolder() {
-  const btn = document.getElementById('browse-btn');
-  const hint = document.getElementById('browse-hint');
-  btn.disabled = true;
-  btn.textContent = '⏳ 等待选择...';
-  hint.textContent = '请在弹出的系统对话框中选择 Unity 项目根目录';
-  hint.style.color = 'var(--accent2)';
-
+async function browseFolder(inputId) {
+  const targetId = inputId || 'u-path';
   try {
     const res = await fetch('/api/v1/browse-folder');
     const data = await res.json();
     if (data.status === 'success' && data.path) {
-      document.getElementById('a-path').value = data.path;
-      hint.textContent = '✅ 路径已选择，提交后将进行代码扫描';
-      hint.style.color = 'var(--green)';
-    } else if (data.status === 'cancelled') {
-      hint.textContent = '已取消选择，留空则进行问卷式检测';
-      hint.style.color = 'var(--muted)';
-    } else {
-      hint.textContent = '❌ ' + (data.message || '选择失败');
-      hint.style.color = 'var(--red)';
+      const el = document.getElementById(targetId);
+      if (el) { el.value = data.path; onPathInput(data.path); }
     }
   } catch (e) {
-    hint.textContent = '❌ 请求失败，请确认服务器正在运行';
-    hint.style.color = 'var(--red)';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '📁 浏览';
+    alert('❌ 请求失败，请确认服务器正在运行');
   }
 }
 

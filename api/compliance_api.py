@@ -100,7 +100,7 @@ CORS(app)
 
 # 配置速率限制
 limiter = Limiter(
-    app,
+    app=app,
     key_func=get_remote_address,
     default_limits=["100 per hour"]
 )
@@ -672,7 +672,12 @@ def run_api_server(host='0.0.0.0', port=5000, debug=False):
     app.run(host=host, port=port, debug=debug)
 
 if __name__ == "__main__":
-    # 设置环境变量中的API密钥
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', default='0.0.0.0')
+    parser.add_argument('--port', type=int, default=8080)
+    parser.add_argument('--debug', action='store_true')
+    args = parser.parse_args()
+
     os.environ['COMPLIANCE_API_KEYS'] = 'demo-key-for-testing,production-key-123'
-    
-    run_api_server(debug=True)
+    run_api_server(host=args.host, port=args.port, debug=args.debug)

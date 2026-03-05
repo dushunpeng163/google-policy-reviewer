@@ -76,7 +76,7 @@ class ComplianceSystemLauncher:
         
         print("✅ 数据库初始化完成")
     
-    def start_web_interface(self, port: int = 5000, debug: bool = False):
+    def start_web_interface(self, port: int = 8080, debug: bool = False):
         """启动Web可视化界面"""
         print(f"🌐 启动Web可视化界面 (端口: {port})")
         print("=" * 50)
@@ -114,7 +114,7 @@ class ComplianceSystemLauncher:
             except Exception as fallback_error:
                 print(f"备选方案也失败了: {fallback_error}")
     
-    def start_api_server(self, port: int = 5000, debug: bool = False):
+    def start_api_server(self, port: int = 8080, debug: bool = False):
         """启动API服务器"""
         print(f"🚀 启动API服务器 (端口: {port})")
         
@@ -360,8 +360,8 @@ def main():
     parser.add_argument(
         '--port', 
         type=int, 
-        default=5000,
-        help='API服务器端口 (默认: 5000)'
+        default=8080,
+        help='API服务器端口 (默认: 8080)'
     )
     
     parser.add_argument(

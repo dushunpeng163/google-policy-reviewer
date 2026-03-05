@@ -20,9 +20,9 @@ try:
     print("🌐 启动合规系统Web界面...")
     print("=" * 50)
     print("📍 访问地址:")
-    print("   • 主界面: http://localhost:5000")
-    print("   • API文档: http://localhost:5000/docs") 
-    print("   • 演示仪表板: http://localhost:5000/demo")
+    print("   • 主界面: http://localhost:8080")
+    print("   • API文档: http://localhost:8080/docs") 
+    print("   • 演示仪表板: http://localhost:8080/demo")
     print("=" * 50)
     print("💡 使用说明:")
     print("   1. 在主界面填写应用信息")
@@ -32,7 +32,7 @@ try:
     print("=" * 50)
     
     # 启动服务器
-    run_api_server(host='0.0.0.0', port=5000, debug=True)
+    run_api_server(host='0.0.0.0', port=8080, debug=True)
     
 except ImportError as e:
     print(f"❌ 导入错误: {e}")

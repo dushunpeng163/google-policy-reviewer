@@ -1,0 +1,89 @@
+# 🎮📚 教育游戏应用全球合规专家系统 - Python依赖包
+# Educational Game Compliance Expert System Requirements
+
+# ===== 核心Web框架 =====
+flask>=2.0.0                    # Web框架
+flask-cors>=3.0.0               # 跨域资源分享支持  
+flask-limiter>=2.0.0            # API速率限制
+werkzeug>=2.0.0                 # WSGI工具库
+
+# ===== 异步和HTTP =====
+aiohttp>=3.8.0                  # 异步HTTP客户端
+asyncio-throttle>=1.0.0         # 异步限流
+requests>=2.28.0                # HTTP请求库
+urllib3>=1.26.0                 # HTTP客户端
+
+# ===== 数据处理 =====
+pyyaml>=6.0.0                   # YAML配置文件解析
+python-dateutil>=2.8.0          # 日期时间处理
+pytz>=2022.1                    # 时区处理
+
+# ===== 数据存储 =====
+# sqlite3                       # SQLite数据库 (Python内置)
+
+# ===== 加密和安全 =====
+cryptography>=3.4.0            # 加密库
+hashlib                         # 哈希函数 (Python内置)
+secrets                         # 安全随机数 (Python内置)
+
+# ===== 可选：数据库升级支持 =====
+# postgresql支持 (可选)
+# psycopg2-binary>=2.9.0        # PostgreSQL适配器
+# mysql支持 (可选)  
+# PyMySQL>=1.0.0                # MySQL适配器
+
+# ===== 可选：缓存支持 =====
+# Redis缓存 (可选)
+# redis>=4.3.0                  # Redis客户端
+# hiredis>=2.0.0                # Redis高性能解析器
+
+# ===== 可选：PDF生成 =====
+# 如果需要PDF报告导出
+# reportlab>=3.6.0              # PDF生成库
+# weasyprint>=56.0               # HTML转PDF
+
+# ===== 可选：邮件发送 =====
+# 如果需要邮件通知功能
+# smtplib                        # SMTP邮件 (Python内置)
+# email                          # 邮件处理 (Python内置)
+
+# ===== 开发和测试工具 (可选) =====
+# pytest>=7.0.0                 # 测试框架
+# pytest-asyncio>=0.20.0        # 异步测试支持
+# black>=22.0.0                 # 代码格式化
+# flake8>=5.0.0                 # 代码质量检查
+
+# ===== 性能监控 (可选) =====
+# psutil>=5.9.0                 # 系统性能监控
+# memory-profiler>=0.60.0       # 内存分析
+
+# ===== 日志处理 =====
+# logging                        # 日志记录 (Python内置)
+
+# ===== 其他标准库依赖 (Python内置，无需安装) =====
+# json                           # JSON处理
+# pathlib                        # 路径处理  
+# datetime                       # 日期时间
+# uuid                           # UUID生成
+# os                            # 操作系统接口
+# sys                           # 系统特定参数
+# threading                     # 多线程
+# subprocess                    # 子进程管理
+# typing                        # 类型提示
+# dataclasses                   # 数据类
+# enum                          # 枚举类型
+# functools                     # 函数工具
+# collections                   # 容器数据类型
+# itertools                     # 迭代器工具
+# re                            # 正则表达式
+# base64                        # Base64编解码
+# hashlib                       # 哈希算法
+# hmac                          # HMAC算法
+# time                          # 时间处理
+# random                        # 随机数生成
+# string                        # 字符串操作
+# io                            # IO操作
+# csv                           # CSV文件处理
+
+# ===== 最小版本要求 =====
+# Python >= 3.8.0               # 最低Python版本要求

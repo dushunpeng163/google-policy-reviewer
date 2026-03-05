@@ -24,9 +24,76 @@ from typing import Dict, Any
 import os
 import threading
 from functools import wraps
+from pathlib import Path
 
-from .advanced_rule_engine import AdvancedRuleEngine
-from .compliance_visualizer import ComplianceVisualizationEngine
+try:
+    from engines.advanced_rule_engine import AdvancedRuleEngine
+    from engines.compliance_visualizer import ComplianceVisualizationEngine
+except ImportError:
+    # 如果在engines目录中运行，使用相对导入
+    try:
+        from advanced_rule_engine import AdvancedRuleEngine
+        from compliance_visualizer import ComplianceVisualizationEngine
+    except ImportError:
+        # 如果都失败，提供简化版本
+        class AdvancedRuleEngine:
+            def __init__(self):
+                self.rules_version = "2.0.0"
+            
+            async def analyze_compliance_async(self, app_profile):
+                return self._generate_mock_analysis(app_profile)
+            
+            def _generate_mock_analysis(self, app_profile):
+                return {
+                    'app_profile': app_profile,
+                    'risk_assessment': {
+                        'risk_level': 'high',
+                        'overall_score': 250.0,
+                        'critical_issues': 2,
+                        'high_issues': 1,
+                        'medium_issues': 1,
+                        'low_issues': 0
+                    },
+                    'compliance_results': [
+                        {
+                            'rule_id': 'demo_rule',
+                            'severity': 'critical',
+                            'status': 'failed',
+                            'message': '这是一个演示分析结果',
+                            'requirement': '请部署完整系统获取真实分析',
+                            'solution': '参考技术实现模板',
+                            'region': 'Global',
+                            'remediation_cost': 'TBD',
+                            'implementation_time': 'TBD'
+                        }
+                    ],
+                    'recommendations': [
+                        {
+                            'category': '系统部署',
+                            'priority': 'high',
+                            'title': '部署完整合规系统',
+                            'description': '当前为演示模式，请部署完整的专家引擎'
+                        }
+                    ],
+                    'timestamp': datetime.now().isoformat()
+                }
+        
+        class ComplianceVisualizationEngine:
+            def generate_dashboard(self, results):
+                return """
+                <html>
+                <head><title>演示模式</title></head>
+                <body style="font-family: Arial; padding: 20px;">
+                    <h1>🎮📚 合规分析演示结果</h1>
+                    <div style="background: #f0f8ff; padding: 20px; border-radius: 10px;">
+                        <h2>当前为演示模式</h2>
+                        <p>要获取完整的可视化仪表板，请部署完整的系统组件。</p>
+                        <p>演示分析结果:</p>
+                        <pre>{}</pre>
+                    </div>
+                </body>
+                </html>
+                """.format(json.dumps(results, indent=2, ensure_ascii=False))
 
 app = Flask(__name__)
 CORS(app)
@@ -494,6 +561,28 @@ def api_documentation():
     """
     
     return docs_html
+
+@app.route('/')
+def web_interface():
+    """Web可视化界面 - 首页"""
+    try:
+        # 读取Web界面HTML文件
+        web_interface_path = Path(__file__).parent.parent / "web_interface.html"
+        with open(web_interface_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+        
+    except FileNotFoundError:
+        return """
+        <html>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>🎮📚 教育游戏应用全球合规专家系统</h1>
+            <p>Web界面文件未找到。请确保 web_interface.html 文件存在。</p>
+            <p><a href="/docs">查看API文档</a> | <a href="/demo">演示仪表板</a></p>
+        </body>
+        </html>
+        """, 200, {'Content-Type': 'text/html; charset=utf-8'}
 
 @app.route('/demo')
 def demo_dashboard():

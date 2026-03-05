@@ -4,6 +4,31 @@
 
 ---
 
+## ⚡ **5秒快速开始 - Web可视化界面**
+
+**最简单的使用方式 - 无需任何技术背景！**
+
+```bash
+# 1. 下载系统
+cd google-policy-reviewer
+
+# 2. 一键启动Web界面  
+python3 launcher.py --mode web
+
+# 3. 打开浏览器访问
+open http://localhost:5000
+```
+
+**然后只需要：**
+1. 📋 填写应用基本信息（名称、年龄、市场）
+2. ☑️ 勾选应用功能特性（内购、社交等）  
+3. 🚀 点击"开始智能合规分析"
+4. 📊 获得专业级合规报告 + 完整解决方案
+
+**🎯 从应用想法到全球合规清单，只需1分钟！**
+
+---
+
 ## 🚀 **系统概览**
 
 这是一个专门为教育游戏应用设计的全球合规专家系统，采用混合架构：外部统一专家入口，内部专业模块化。提供从法律合规检查到完整技术实现的一站式解决方案。
@@ -58,38 +83,61 @@
 
 ## ⚡ **快速开始**
 
-### **1. 安装依赖**
-```bash
-# 克隆项目
-git clone <your-repo-url>
-cd google-policy-reviewer
+### **📦 第0步：安装依赖 (必需)**
 
-# 安装Python依赖
-pip install flask flask-cors flask-limiter aiohttp pyyaml
+```bash
+# 方式1: 一键安装脚本 (推荐)
+chmod +x install.sh
+./install.sh
+
+# 方式2: Python安装脚本 (跨平台)
+python3 setup.py
+
+# 方式3: Windows批处理脚本
+install.bat
+
+# 方式4: 手动安装核心依赖
+pip install flask flask-cors flask-limiter aiohttp pyyaml requests python-dateutil cryptography
 ```
 
-### **2. 一键启动**
+### **🌐 方式1：Web可视化界面（推荐新手）**
 ```bash
-# 查看系统信息
-python3 launcher.py --mode info
+# 启动Web界面
+python3 launcher.py --mode web
 
-# 完整演示（推荐首次使用）
+# 访问 http://localhost:5000
+# 填写表单 → 获取报告
+```
+
+### **🚀 方式2：一键完整演示**
+```bash
+# 体验所有功能
 python3 launcher.py --mode full
+```
 
+### **⚡ 方式3：API服务器**
+```bash
 # 启动API服务器
 python3 launcher.py --mode api --port 5000
-
-# 生成可视化仪表板
-python3 launcher.py --mode dashboard
-
-# 执行合规分析
-python3 launcher.py --mode check
 ```
 
-### **3. 访问服务**
-- **API文档**: http://localhost:5000/docs
-- **演示仪表板**: http://localhost:5000/demo
-- **健康检查**: http://localhost:5000/api/v1/health
+### **📊 方式4：可视化仪表板**
+```bash
+# 生成专业报告
+python3 launcher.py --mode dashboard
+```
+
+### **🔍 方式5：命令行分析**
+```bash
+# 快速CLI分析
+python3 quick_analyzer.py
+```
+
+### **📡 访问服务**
+- **🌐 Web界面**: http://localhost:5000 (主界面)
+- **📚 API文档**: http://localhost:5000/docs
+- **🎛️ 演示仪表板**: http://localhost:5000/demo
+- **💓 健康检查**: http://localhost:5000/api/v1/health
 
 ---
 

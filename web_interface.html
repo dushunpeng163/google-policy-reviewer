@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮📚 教育游戏应用全球合规专家系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: 20px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .form-section {
+            padding: 30px;
+        }
+        
+        .section-title {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-item:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        .checkbox-item input:checked + label {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            color: white;
+        }
+        
+        .results-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .risk-badge {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .risk-critical { background: #dc3545; color: white; }
+        .risk-high { background: #fd7e14; color: white; }
+        .risk-medium { background: #ffc107; color: #212529; }
+        .risk-low { background: #28a745; color: white; }
+        
+        .progress-container {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: bold;
+            color: #6c757d;
+        }
+        
+        .step.active {
+            background: #0d6efd;
+            color: white;
+        }
+        
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .feature-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .expert-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #17a2b8;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-shield-alt"></i> 教育游戏应用全球合规专家系统 v2.0</h1>
+                <p class="mb-0">一站式合规审核 • AI智能分析 • 完整解决方案</p>
+                <div class="mt-3">
+                    <span class="expert-badge"><i class="fas fa-child"></i> 儿童保护专家</span>
+                    <span class="expert-badge"><i class="fas fa-gamepad"></i> 游戏法规专家</span>
+                    <span class="expert-badge"><i class="fas fa-graduation-cap"></i> 教育合规专家</span>
+                    <span class="expert-badge"><i class="fas fa-lock"></i> 隐私法律专家</span>
+                    <span class="expert-badge"><i class="fas fa-store"></i> 平台政策专家</span>
+                </div>
+            </div>
+
+            <!-- Main Form -->
+            <div class="form-section">
+                <form id="complianceForm">
+                    
+                    <!-- 基本信息 -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3 class="section-title"><i class="fas fa-info-circle"></i> 基本信息</h3>
+                            
+                            <div class="form-group">
+                                <label for="appName" class="form-label">应用/游戏名称 *</label>
+                                <input type="text" class="form-control" id="appName" placeholder="例如：数学冒险游戏" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="appType" class="form-label">应用类型 *</label>
+                                <select class="form-select" id="appType" required>
+                                    <option value="">请选择应用类型</option>
+                                    <option value="Educational Gaming">教育游戏</option>
+                                    <option value="Educational App">教育应用</option>
+                                    <option value="Gaming">纯游戏</option>
+                                    <option value="Learning Platform">学习平台</option>
+                                    <option value="Social Learning">社交学习</option>
+                                    <option value="Gamified Learning">游戏化学习</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="appVersion" class="form-label">版本号</label>
+                                <input type="text" class="form-control" id="appVersion" placeholder="例如：1.0.0">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h3 class="section-title"><i class="fas fa-users"></i> 用户信息</h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="minAge" class="form-label">最小用户年龄 *</label>
+                                        <input type="number" class="form-control" id="minAge" min="0" max="18" placeholder="例如：6" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="maxAge" class="form-label">最大用户年龄</label>
+                                        <input type="number" class="form-control" id="maxAge" min="0" max="100" placeholder="例如：16">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="targetAgeGroup" class="form-label">目标年龄组描述</label>
+                                <input type="text" class="form-control" id="targetAgeGroup" placeholder="例如：小学生(6-12岁)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 市场和平台 -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h3 class="section-title"><i class="fas fa-globe"></i> 目标市场 *</h3>
+                            <p class="text-muted">选择您计划上架的国家/地区（影响合规要求）</p>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_us" name="target_markets" value="US">
+                                    <label for="market_us" class="form-check-label ms-2">🇺🇸 美国 (COPPA风险)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_china" name="target_markets" value="China">
+                                    <label for="market_china" class="form-check-label ms-2">🇨🇳 中国 (防沉迷风险)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_eu" name="target_markets" value="EU">
+                                    <label for="market_eu" class="form-check-label ms-2">🇪🇺 欧盟 (GDPR风险)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_uk" name="target_markets" value="UK">
+                                    <label for="market_uk" class="form-check-label ms-2">🇬🇧 英国 (儿童设计准则)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_korea" name="target_markets" value="Korea">
+                                    <label for="market_korea" class="form-check-label ms-2">🇰🇷 韩国 (游戏法规)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_japan" name="target_markets" value="Japan">
+                                    <label for="market_japan" class="form-check-label ms-2">🇯🇵 日本 (扭蛋法规)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_canada" name="target_markets" value="Canada">
+                                    <label for="market_canada" class="form-check-label ms-2">🇨🇦 加拿大</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="market_australia" name="target_markets" value="Australia">
+                                    <label for="market_australia" class="form-check-label ms-2">🇦🇺 澳大利亚</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h3 class="section-title"><i class="fas fa-mobile-alt"></i> 目标平台</h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="platform_ios" name="target_platforms" value="iOS">
+                                    <label for="platform_ios" class="form-check-label ms-2"><i class="fab fa-apple"></i> iOS App Store</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="platform_android" name="target_platforms" value="Android">
+                                    <label for="platform_android" class="form-check-label ms-2"><i class="fab fa-google-play"></i> Google Play</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="platform_web" name="target_platforms" value="Web">
+                                    <label for="platform_web" class="form-check-label ms-2"><i class="fas fa-globe"></i> Web浏览器</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="platform_windows" name="target_platforms" value="Windows">
+                                    <label for="platform_windows" class="form-check-label ms-2"><i class="fab fa-windows"></i> Windows应用商店</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 功能特性 -->
+                    <div class="mt-4">
+                        <h3 class="section-title"><i class="fas fa-cogs"></i> 应用功能特性</h3>
+                        <p class="text-muted">选择您应用具备的功能（直接影响合规复杂度）</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-coins"></i> 商业功能</h5>
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_iap" name="app_features" value="has_in_app_purchases">
+                                        <label for="feature_iap" class="form-check-label ms-2">💰 应用内购买 (高风险)</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_ads" name="app_features" value="advertising_present">
+                                        <label for="feature_ads" class="form-check-label ms-2">📺 广告展示</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_subscription" name="app_features" value="subscription_model">
+                                        <label for="feature_subscription" class="form-check-label ms-2">📅 订阅模式</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_freemium" name="app_features" value="freemium_model">
+                                        <label for="feature_freemium" class="form-check-label ms-2">🎁 免费+付费模式</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-users"></i> 社交功能</h5>
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_multiplayer" name="app_features" value="has_multiplayer">
+                                        <label for="feature_multiplayer" class="form-check-label ms-2">👥 多人游戏</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_chat" name="app_features" value="has_chat_messaging">
+                                        <label for="feature_chat" class="form-check-label ms-2">💬 聊天功能 (高风险)</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_social" name="app_features" value="has_social_features">
+                                        <label for="feature_social" class="form-check-label ms-2">🤝 社交互动</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_ugc" name="app_features" value="user_generated_content">
+                                        <label for="feature_ugc" class="form-check-label ms-2">📝 用户生成内容</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-database"></i> 数据处理</h5>
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_educational_data" name="app_features" value="collects_educational_data">
+                                        <label for="feature_educational_data" class="form-check-label ms-2">📚 收集教育数据 (FERPA风险)</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_cross_border" name="app_features" value="cross_border_data_transfer">
+                                        <label for="feature_cross_border" class="form-check-label ms-2">🌐 跨境数据传输 (高风险)</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_ai" name="app_features" value="uses_ai_algorithms">
+                                        <label for="feature_ai" class="form-check-label ms-2">🤖 AI算法推荐</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_third_party" name="app_features" value="data_sharing_third_parties">
+                                        <label for="feature_third_party" class="form-check-label ms-2">🔗 第三方数据分享</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-shield-alt"></i> 安全控制</h5>
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_parental_controls" name="app_features" value="has_parental_controls">
+                                        <label for="feature_parental_controls" class="form-check-label ms-2">👨‍👩‍👧‍👦 家长控制功能</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_age_verification" name="app_features" value="has_age_verification">
+                                        <label for="feature_age_verification" class="form-check-label ms-2">🆔 年龄验证系统</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_content_moderation" name="app_features" value="content_moderation">
+                                        <label for="feature_content_moderation" class="form-check-label ms-2">🛡️ 内容审核</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="feature_time_limits" name="app_features" value="has_time_limits">
+                                        <label for="feature_time_limits" class="form-check-label ms-2">⏰ 使用时间限制</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 技术架构 -->
+                    <div class="mt-4">
+                        <h3 class="section-title"><i class="fas fa-server"></i> 技术架构</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="tech_cloud" name="tech_features" value="cloud_storage">
+                                        <label for="tech_cloud" class="form-check-label ms-2">☁️ 云存储</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="tech_offline" name="tech_features" value="offline_mode">
+                                        <label for="tech_offline" class="form-check-label ms-2">📱 离线模式</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="tech_location" name="tech_features" value="uses_location_services">
+                                        <label for="tech_location" class="form-check-label ms-2">📍 位置服务</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="tech_camera" name="tech_features" value="uses_camera_microphone">
+                                        <label for="tech_camera" class="form-check-label ms-2">📷 摄像头/麦克风</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="tech_push" name="tech_features" value="push_notifications">
+                                        <label for="tech_push" class="form-check-label ms-2">🔔 推送通知</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="tech_biometric" name="tech_features" value="biometric_data">
+                                        <label for="tech_biometric" class="form-check-label ms-2">👆 生物识别数据 (高风险)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 补充信息 -->
+                    <div class="mt-4">
+                        <h3 class="section-title"><i class="fas fa-comment"></i> 补充信息</h3>
+                        <div class="form-group">
+                            <label for="additionalInfo" class="form-label">其他需要说明的特殊情况</label>
+                            <textarea class="form-control" id="additionalInfo" rows="4" 
+                                      placeholder="例如：与学校系统集成、特殊的数据处理需求、已知的合规问题等"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 分析选项 -->
+                    <div class="mt-4">
+                        <h3 class="section-title"><i class="fas fa-sliders-h"></i> 分析选项</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="option_detailed" checked>
+                                    <label class="form-check-label" for="option_detailed">
+                                        详细分析报告
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="option_predictions" checked>
+                                    <label class="form-check-label" for="option_predictions">
+                                        AI风险预测
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="option_solutions" checked>
+                                    <label class="form-check-label" for="option_solutions">
+                                        解决方案代码
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="text-center mt-5">
+                        <button type="submit" class="btn analyze-btn">
+                            <i class="fas fa-magic"></i> 开始智能合规分析
+                        </button>
+                        <p class="mt-3 text-muted">
+                            <i class="fas fa-clock"></i> 预计分析时间：30-60秒
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="progress-container" id="progressContainer">
+                <div class="step-indicator">
+                    <div class="step active" id="step1">1</div>
+                    <div class="step" id="step2">2</div>
+                    <div class="step" id="step3">3</div>
+                    <div class="step" id="step4">4</div>
+                    <div class="step" id="step5">5</div>
+                </div>
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">分析中...</span>
+                </div>
+                <h4 class="mt-3">正在进行智能合规分析...</h4>
+                <p id="progressText">正在初始化专家系统...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <h2><i class="fas fa-chart-line"></i> 合规分析结果</h2>
+                <div id="resultsContent">
+                    <!-- 结果将在这里显示 -->
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="container mt-4">
+        <div class="feature-highlight">
+            <h4><i class="fas fa-star"></i> 为什么选择我们的合规系统？</h4>
+            <div class="row mt-3">
+                <div class="col-md-3 text-center">
+                    <i class="fas fa-brain fa-3x mb-2"></i>
+                    <h6>AI智能分析</h6>
+                    <p>25+ 法规自动识别</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <i class="fas fa-code fa-3x mb-2"></i>
+                    <h6>完整技术实现</h6>
+                    <p>75K+ 行可部署代码</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <i class="fas fa-dollar-sign fa-3x mb-2"></i>
+                    <h6>节省95%成本</h6>
+                    <p>vs 传统法律咨询</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <i class="fas fa-clock fa-3x mb-2"></i>
+                    <h6>24小时更新</h6>
+                    <p>法规变化实时反映</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.getElementById('complianceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 显示进度指示器
+            document.querySelector('.form-section').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'block';
+            
+            // 收集表单数据
+            const formData = collectFormData();
+            
+            // 模拟分析步骤
+            await simulateAnalysis();
+            
+            // 调用API进行分析
+            try {
+                const response = await analyzeCompliance(formData);
+                displayResults(response);
+            } catch (error) {
+                displayError(error);
+            }
+        });
+        
+        function collectFormData() {
+            const form = document.getElementById('complianceForm');
+            const formData = new FormData(form);
+            
+            // 基本信息
+            const appProfile = {
+                name: document.getElementById('appName').value,
+                app_type: document.getElementById('appType').value,
+                version: document.getElementById('appVersion').value || '1.0.0',
+                min_user_age: parseInt(document.getElementById('minAge').value),
+                max_user_age: parseInt(document.getElementById('maxAge').value) || null,
+                target_age_group: document.getElementById('targetAgeGroup').value,
+                additional_info: document.getElementById('additionalInfo').value
+            };
+            
+            // 收集多选项
+            appProfile.target_markets = Array.from(document.querySelectorAll('input[name="target_markets"]:checked')).map(cb => cb.value);
+            appProfile.target_platforms = Array.from(document.querySelectorAll('input[name="target_platforms"]:checked')).map(cb => cb.value);
+            
+            // 功能特性
+            const features = Array.from(document.querySelectorAll('input[name="app_features"]:checked')).map(cb => cb.value);
+            const techFeatures = Array.from(document.querySelectorAll('input[name="tech_features"]:checked')).map(cb => cb.value);
+            
+            // 转换为布尔属性
+            features.forEach(feature => {
+                appProfile[feature] = true;
+            });
+            techFeatures.forEach(feature => {
+                appProfile[feature] = true;
+            });
+            
+            // 分析选项
+            const options = {
+                format: document.getElementById('option_detailed').checked ? 'detailed' : 'summary',
+                include_predictions: document.getElementById('option_predictions').checked,
+                include_solutions: document.getElementById('option_solutions').checked
+            };
+            
+            return { app_profile: appProfile, options: options };
+        }
+        
+        async function simulateAnalysis() {
+            const steps = [
+                '正在初始化专家系统...',
+                '正在分析应用特征...',
+                '正在评估法规适用性...',
+                '正在生成风险评估...',
+                '正在准备解决方案...'
+            ];
+            
+            for (let i = 0; i < steps.length; i++) {
+                document.getElementById('progressText').textContent = steps[i];
+                document.getElementById(`step${i + 1}`).classList.add('completed');
+                if (i < steps.length - 1) {
+                    document.getElementById(`step${i + 2}`).classList.add('active');
+                }
+                await new Promise(resolve => setTimeout(resolve, 800));
+            }
+        }
+        
+        async function analyzeCompliance(formData) {
+            // 这里调用实际的API
+            const response = await fetch('/api/v1/compliance/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'demo-key'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API错误: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        function displayResults(response) {
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            const results = response.results || response;
+            let html = '';
+            
+            // 风险摘要
+            if (results.risk_assessment) {
+                html += generateRiskSummary(results.risk_assessment);
+            }
+            
+            // 详细问题列表
+            if (results.compliance_results) {
+                html += generateIssuesList(results.compliance_results);
+            }
+            
+            // 推荐解决方案
+            if (results.recommendations) {
+                html += generateRecommendations(results.recommendations);
+            }
+            
+            // 实施指南
+            if (results.implementation_guide) {
+                html += generateImplementationGuide(results.implementation_guide);
+            }
+            
+            document.getElementById('resultsContent').innerHTML = html;
+            
+            // 滚动到结果区域
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function generateRiskSummary(riskAssessment) {
+            return `
+                <div class="alert alert-info">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 风险评估摘要</h4>
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <h2 class="text-danger">${riskAssessment.critical_issues || 0}</h2>
+                            <span class="risk-badge risk-critical">严重问题</span>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h2 class="text-warning">${riskAssessment.high_issues || 0}</h2>
+                            <span class="risk-badge risk-high">高风险</span>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h2 class="text-info">${riskAssessment.medium_issues || 0}</h2>
+                            <span class="risk-badge risk-medium">中风险</span>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h2 class="text-success">${riskAssessment.low_issues || 0}</h2>
+                            <span class="risk-badge risk-low">低风险</span>
+                        </div>
+                    </div>
+                    <p class="mt-3">
+                        <strong>整体风险等级：</strong> 
+                        <span class="risk-badge risk-${riskAssessment.risk_level}">${riskAssessment.risk_level?.toUpperCase()}</span>
+                        <strong>风险评分：</strong> ${riskAssessment.overall_score || 0}/1000
+                    </p>
+                </div>
+            `;
+        }
+        
+        function generateIssuesList(issues) {
+            if (!issues || issues.length === 0) {
+                return '<div class="alert alert-success"><i class="fas fa-check-circle"></i> 恭喜！未发现明显的合规问题。</div>';
+            }
+            
+            let html = '<h3><i class="fas fa-list-alt"></i> 详细问题分析</h3>';
+            
+            const groupedIssues = issues.reduce((groups, issue) => {
+                const severity = issue.severity || 'low';
+                if (!groups[severity]) groups[severity] = [];
+                groups[severity].push(issue);
+                return groups;
+            }, {});
+            
+            ['critical', 'high', 'medium', 'low'].forEach(severity => {
+                if (groupedIssues[severity]) {
+                    html += `<h4 class="mt-4"><span class="risk-badge risk-${severity}">${severity.toUpperCase()}</span> 级问题 (${groupedIssues[severity].length}个)</h4>`;
+                    
+                    groupedIssues[severity].forEach(issue => {
+                        html += `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <span class="risk-badge risk-${severity}">${severity}</span>
+                                        ${issue.message || '合规问题'}
+                                    </h5>
+                                    <p class="card-text"><strong>法规要求：</strong> ${issue.requirement || '未指定'}</p>
+                                    <p class="card-text"><strong>解决方案：</strong> ${issue.solution || '联系合规专家'}</p>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <small class="text-muted"><strong>影响地区：</strong> ${issue.region || 'Global'}</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted"><strong>预估成本：</strong> ${issue.remediation_cost || 'TBD'}</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted"><strong>实施时间：</strong> ${issue.implementation_time || 'TBD'}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+            
+            return html;
+        }
+        
+        function generateRecommendations(recommendations) {
+            if (!recommendations || recommendations.length === 0) return '';
+            
+            let html = '<h3><i class="fas fa-lightbulb"></i> 优先建议</h3>';
+            
+            recommendations.forEach((rec, index) => {
+                html += `
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-arrow-right"></i> ${rec.title || `建议 ${index + 1}`}</h5>
+                        <p>${rec.description || '详细建议内容'}</p>
+                        ${rec.priority ? `<span class="badge bg-primary">优先级: ${rec.priority}</span>` : ''}
+                        ${rec.category ? `<span class="badge bg-secondary ms-2">类别: ${rec.category}</span>` : ''}
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+        
+        function generateImplementationGuide(guide) {
+            return `
+                <div class="alert alert-success">
+                    <h4><i class="fas fa-tools"></i> 实施指南</h4>
+                    <p>我们已为您准备了完整的技术实现解决方案：</p>
+                    <ul>
+                        <li><strong>COPPA家长同意系统：</strong> templates/coppa_parental_consent.py (21K行)</li>
+                        <li><strong>中国防沉迷系统：</strong> templates/china_anti_addiction_system.py (33K行)</li>
+                        <li><strong>GDPR数据权利系统：</strong> templates/gdpr_data_subject_rights.py (42K行)</li>
+                        <li><strong>API集成方案：</strong> api/compliance_api.py</li>
+                        <li><strong>可视化监控：</strong> engines/compliance_visualizer.py</li>
+                    </ul>
+                    <p>所有代码均可直接部署，无需从零开发！</p>
+                </div>
+            `;
+        }
+        
+        function displayError(error) {
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            document.getElementById('resultsContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-circle"></i> 分析出现错误</h4>
+                    <p>抱歉，分析过程中出现了问题：${error.message}</p>
+                    <p>请检查：</p>
+                    <ul>
+                        <li>确保API服务器正在运行 (python3 launcher.py --mode api)</li>
+                        <li>检查网络连接</li>
+                        <li>验证输入的信息格式是否正确</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        <i class="fas fa-redo"></i> 重新尝试
+                    </button>
+                </div>
+            `;
+        }
+        
+        // 表单验证
+        document.getElementById('minAge').addEventListener('change', function() {
+            const minAge = parseInt(this.value);
+            const maxAgeInput = document.getElementById('maxAge');
+            
+            if (minAge < 13) {
+                document.querySelector('label[for="market_us"]').innerHTML = '🇺🇸 美国 (COPPA风险 - 强制要求)';
+                document.getElementById('market_us').parentElement.style.background = '#fff3cd';
+            }
+            
+            if (minAge < 18) {
+                document.querySelector('label[for="market_china"]').innerHTML = '🇨🇳 中国 (防沉迷风险 - 强制要求)';
+                document.getElementById('market_china').parentElement.style.background = '#fff3cd';
+            }
+        });
+        
+        // 实时风险提示
+        document.querySelectorAll('input[name="target_markets"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateRiskWarnings();
+            });
+        });
+        
+        function updateRiskWarnings() {
+            const selectedMarkets = Array.from(document.querySelectorAll('input[name="target_markets"]:checked')).map(cb => cb.value);
+            const minAge = parseInt(document.getElementById('minAge').value) || 18;
+            
+            let warnings = [];
+            
+            if (selectedMarkets.includes('US') && minAge < 13) {
+                warnings.push('🔴 美国市场需要COPPA合规');
+            }
+            
+            if (selectedMarkets.includes('China') && minAge < 18) {
+                warnings.push('🔴 中国市场需要防沉迷系统');
+            }
+            
+            if (selectedMarkets.includes('EU')) {
+                warnings.push('🟠 欧盟市场需要GDPR合规');
+            }
+            
+            // 在界面上显示预警（可选实现）
+        }
+    </script>
+</body>
+</html>

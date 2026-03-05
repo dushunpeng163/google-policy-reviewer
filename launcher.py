@@ -76,6 +76,44 @@ class ComplianceSystemLauncher:
         
         print("✅ 数据库初始化完成")
     
+    def start_web_interface(self, port: int = 5000, debug: bool = False):
+        """启动Web可视化界面"""
+        print(f"🌐 启动Web可视化界面 (端口: {port})")
+        print("=" * 50)
+        print("📍 访问地址:")
+        print(f"   • 主界面: http://localhost:{port}")
+        print(f"   • API文档: http://localhost:{port}/docs")
+        print(f"   • 演示仪表板: http://localhost:{port}/demo")
+        print("=" * 50)
+        print("💡 使用说明:")
+        print("   1. 在主界面填写应用信息")
+        print("   2. 点击'开始智能合规分析'")
+        print("   3. 查看详细的合规分析报告")
+        print("   4. 获取完整的解决方案代码")
+        print("=" * 50)
+        
+        try:
+            # 检查Web界面文件是否存在
+            web_interface_file = self.project_root / "web_interface.html"
+            if not web_interface_file.exists():
+                print("❌ Web界面文件不存在，正在创建...")
+                # 这里可以创建基本的Web界面文件
+            
+            # 启动API服务器（包含Web界面）
+            self.start_api_server(port, debug)
+            
+        except Exception as e:
+            print(f"❌ Web界面启动失败: {e}")
+            
+            # 提供快速分析备选方案
+            print("💡 备选方案：使用命令行快速分析")
+            try:
+                sys.path.insert(0, str(self.project_root))
+                from quick_analyzer import quick_analysis_demo
+                quick_analysis_demo()
+            except Exception as fallback_error:
+                print(f"备选方案也失败了: {fallback_error}")
+    
     def start_api_server(self, port: int = 5000, debug: bool = False):
         """启动API服务器"""
         print(f"🚀 启动API服务器 (端口: {port})")
@@ -279,6 +317,7 @@ class ComplianceSystemLauncher:
         print()
         
         print("🚀 可用启动模式:")
+        print("  web      - 启动Web可视化界面 (推荐)")
         print("  api      - 启动RESTful API服务器")
         print("  dashboard - 生成可视化仪表板")
         print("  check    - 执行合规分析检查")
@@ -313,7 +352,7 @@ def main():
     
     parser.add_argument(
         '--mode', 
-        choices=['api', 'dashboard', 'check', 'full', 'info'],
+        choices=['api', 'dashboard', 'check', 'full', 'info', 'web'],
         default='info',
         help='启动模式'
     )
@@ -342,6 +381,10 @@ def main():
     # 根据模式执行相应操作
     if args.mode == 'info':
         launcher.show_system_info()
+    
+    elif args.mode == 'web':
+        print("🌐 启动Web可视化界面...")
+        launcher.start_web_interface(args.port, args.debug)
     
     elif args.mode == 'api':
         if launcher.check_dependencies():

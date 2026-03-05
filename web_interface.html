@@ -950,15 +950,27 @@ function renderAudit(d) {
   if (!(d.fix_priority_list && d.fix_priority_list.length)) {
     html += `<div class="finding-card low"><div class="finding-detail">🎉 未发现明显合规问题！请确保平台配置表单也已填写完整。</div></div>`;
   }
+  const sevLabel2 = { critical: '严重', high: '高风险', medium: '中等', low: '低' };
+  const catLabel2 = { platform_policy: '平台政策', legal: '法规', code_scan: '代码缺项' };
+  let lastSystem = null;
   (d.fix_priority_list || []).forEach(item => {
-    const catLabel = { platform_policy: '平台政策', legal: '法规', code_scan: '代码缺项' }[item.category] || item.category;
-    html += `<div class="finding-card ${item.severity}">
+    // 系统分组标题
+    if (item.system && item.system !== lastSystem) {
+      lastSystem = item.system;
+      html += `<div style="margin:16px 0 8px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+        ${item.system}
+      </div>`;
+    }
+    const platText = item.platform === 'all' ? '双平台' : item.platform?.toUpperCase();
+    const catText  = catLabel2[item.category] || item.category;
+    html += `<div class="finding-card ${item.severity}" style="margin-bottom:8px;">
       <div class="finding-header">
-        <span class="sev ${item.severity}">${item.severity}</span>
-        <span class="platform-tag">${item.platform === 'all' ? '双平台' : item.platform.toUpperCase()}</span>
-        <span class="platform-tag">${catLabel}</span>
-        <h4>#${item.priority} ${item.title}</h4>
+        <span class="sev ${item.severity}">${sevLabel2[item.severity] || item.severity}</span>
+        <span class="platform-tag">${platText}</span>
+        <span class="platform-tag">${catText}</span>
+        <h4 style="font-size:13px;">#${item.priority} ${item.title}</h4>
       </div>
+      ${item.detail ? `<div style="font-size:12px;color:var(--muted);margin:4px 0 6px;line-height:1.6;">${item.detail}</div>` : ''}
       ${item.fix ? `<div class="finding-fix">✏️ ${item.fix}</div>` : ''}
     </div>`;
   });

@@ -399,20 +399,24 @@ def _build_required_systems(findings: List[Dict]) -> List[Dict]:
             "issue_count": len(matched),
             "critical_count": critical_count,
             "high_count": high_count,
-            # 依赖：仅列出实际也出现在本报告中的系统
             "depends_on": [
-                s for s in sdef["depends_on"]
-                if any(sd["id"] == s and
-                       any(f.get("id") in sd["finding_ids"] for f in findings)
-                       for sd in _SYSTEM_DEFS)
+                {
+                    "id": dep_id,
+                    "name": next((sd["name"] for sd in _SYSTEM_DEFS if sd["id"] == dep_id), dep_id),
+                    "icon": next((sd["icon"] for sd in _SYSTEM_DEFS if sd["id"] == dep_id), ""),
+                }
+                for dep_id in sdef["depends_on"]
+                if dep_id in {
+                    sd["id"] for sd in _SYSTEM_DEFS
+                    if any(f.get("id") in sd["finding_ids"] for f in findings)
+                }
             ],
-            "required_before": sdef["required_before"],
             "findings": [
                 {"id": f.get("id"), "title": f.get("title"), "severity": f.get("severity")}
                 for f in matched
             ],
         })
-    # 按依赖顺序排序（没有依赖的排前面）
+    # 按依赖顺序排序（depends_on 现在是对象列表，用 dep["id"] 比较）
     ordered, remaining = [], list(systems)
     visited = set()
     max_iter = len(systems) * 2
@@ -420,11 +424,12 @@ def _build_required_systems(findings: List[Dict]) -> List[Dict]:
     while remaining and i < max_iter:
         i += 1
         for s in list(remaining):
-            if all(dep in visited for dep in s["depends_on"]):
+            dep_ids = [d["id"] for d in s["depends_on"]]
+            if all(dep_id in visited for dep_id in dep_ids):
                 ordered.append(s)
                 visited.add(s["id"])
                 remaining.remove(s)
-    ordered.extend(remaining)  # 兜底：有循环依赖时直接追加
+    ordered.extend(remaining)
     return ordered
 
 
@@ -484,6 +489,37 @@ def audit_game(
 
     required_systems = _build_required_systems(all_findings)
 
+    # fix_priority_list：按系统实现顺序排列（依赖顺序），同系统内按 severity 排
+    # 目的：开发者按照优先清单顺序推进，不会出现"先做最后才能做的步骤"
+    sev_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    finding_to_system: Dict[str, int] = {}   # finding_id -> 系统在 required_systems 中的位置
+    for sys_idx, sys in enumerate(required_systems):
+        for fitem in sys.get("findings", []):
+            finding_to_system.setdefault(fitem["id"], sys_idx)
+
+    def _priority_key(f: Dict):
+        sys_idx = finding_to_system.get(f.get("id", ""), 999)
+        sev_idx = sev_order.get(f.get("severity", "low"), 9)
+        return (sys_idx, sev_idx)
+
+    priority_findings = sorted(all_findings, key=_priority_key)
+
+    fix_priority_list = []
+    for i, f in enumerate(priority_findings[:15]):   # 最多 15 条，覆盖更多
+        sys_idx = finding_to_system.get(f.get("id", ""), None)
+        sys_name = required_systems[sys_idx]["name"] if sys_idx is not None and sys_idx < len(required_systems) else ""
+        sys_icon = required_systems[sys_idx]["icon"] if sys_idx is not None and sys_idx < len(required_systems) else ""
+        fix_priority_list.append({
+            "priority": i + 1,
+            "system": f"{sys_icon} {sys_name}".strip(),
+            "title": f["title"],
+            "severity": f["severity"],
+            "platform": f["platform"],
+            "category": f["category"],
+            "fix": f.get("fix", ""),
+            "detail": f.get("detail", ""),
+        })
+
     return {
         "audit_summary": {
             "risk_level": risk_level,
@@ -498,16 +534,6 @@ def audit_game(
         },
         "required_systems": required_systems,
         "findings": all_findings,
-        "fix_priority_list": [
-            {
-                "priority": i + 1,
-                "title": f["title"],
-                "severity": f["severity"],
-                "platform": f["platform"],
-                "category": f["category"],
-                "fix": f.get("fix", ""),
-            }
-            for i, f in enumerate(all_findings[:10])
-        ],
+        "fix_priority_list": fix_priority_list,
         "note": "平台配置类问题（App Store Connect / Play Console 表单）无法通过代码扫描检测，须手动核查",
     }

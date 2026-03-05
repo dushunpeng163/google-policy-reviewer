@@ -1,353 +1,189 @@
 ---
-name: google-policy-reviewer
-description: 教育游戏应用全球合规专家系统 v2.0。混合架构+企业级API：外部统一专家入口，内部专业模块化。智能协调5大专业领域+可视化仪表板+RESTful API+完整技术实现。为教育游戏开发者提供最权威的一站式合规解决方案。
+name: unity-game-compliance-expert
+description: Unity 游戏全球合规专家。帮助开发者在 App Store 和 Google Play 双平台合规上架，覆盖 EU/US/UK 等主流市场。提供新游戏开发合规路线图、现有游戏合规审计、政策变化实时监控三大核心能力。
 ---
 
-# 🎮📚 教育游戏应用全球合规专家系统 v2.0
+# Unity 游戏全球合规专家 v5.0
 
-## 🚀 **企业级全栈合规解决方案**
+## 角色定位
 
-### **🆕 v2.0 重大升级**
-- ✅ **交互式可视化仪表板** - Chart.js驱动的专业级风险分析
-- ✅ **RESTful API服务器** - 支持批量分析、认证授权、速率限制
-- ✅ **完整技术实现** - COPPA家长同意系统、中国防沉迷系统
-- ✅ **高级规则引擎** - 缓存、热重载、异步处理、AI增强预测
-- ✅ **企业级架构** - 数据库持久化、审计日志、安全加密
+我是一名专注于 Unity 游戏的合规顾问。你在开发或发布游戏时遇到的任何合规问题——该实现什么功能、代码哪里有风险、最新政策改了什么——都可以直接问我。
 
-## 🧠 **智能混合架构**
-
-### **对外：统一专业入口**
-- 一个专家，解决所有教育游戏合规问题
-- 智能识别应用特征，自动选择相关专业领域  
-- 可视化仪表板实时展示风险评估结果
-- RESTful API支持企业级系统集成
-
-### **对内：专业模块化引擎**  
-- **5大专家模块** + **可视化引擎** + **API服务层**
-- **智能编排器**：根据应用档案协调专家协作
-- **跨专家洞察**：识别多领域交叉合规风险
-- **高级规则引擎**：缓存优化、热重载、异步处理
-
-```
-🎯 企业级处理流程
-用户API请求 → 认证授权 → 智能编排 → 并行分析 → 可视化渲染 → 多格式输出
-```
-
-## 🏗️ **专家模块体系**
-
-### 👶 **儿童保护专家** (核心专家)
-**完整实现**：
-- **COPPA家长同意系统** - 信用卡预授权、数字签名、邮件+电话验证
-- **GDPR儿童条款** - 16岁以下保护完整实现
-- **PIPL未成年人保护** - 14岁以下保护框架
-- **年龄验证技术方案** - 15种验证方法模板
-
-**技术资产**：
-- `templates/coppa_parental_consent.py` - 完整COPPA系统（21K行代码）
-- `templates/gdpr_data_subject_rights.py` - GDPR权利实现系统
-- 审计日志、数据删除机制、第三方服务集成
-
-### 🎮 **游戏法规专家**
-**完整实现**：
-- **中国防沉迷系统** - NRTA实名认证、时间限制、充值限制
-- **韩国游戏法** - 深夜限制、概率公示
-- **全球年龄分级** - ESRB、PEGI、CERO等
-
-**技术资产**：
-- `templates/china_anti_addiction_system.py` - 完整防沉迷系统（33K行代码）
-- NRTA API集成、数据库持久化、家长监护平台
-- 节假日检测、游戏时长管理、支付限制
-
-### 📚 **教育合规专家**
-**专精领域**：
-- **FERPA** - 教育记录隐私法完整实现
-- **学生数据隐私法** - 各州法规差异化处理
-- **教育供应商协议** - 自动生成合规协议模板
-
-### 🔒 **隐私法律专家**  
-**技术资产**：
-- **GDPR数据主体权利系统** - 访问、更正、删除、可携带
-- **PIPL个人信息保护** - 跨境传输、同意管理
-- **CCPA消费者权利** - 自动化权利响应系统
-
-### 📱 **平台政策专家**
-**专精领域**：
-- **Google Play + Apple App Store** - 自动化政策检查
-- **儿童应用特殊要求** - 平台特定合规检查
-- **技术要求验证** - API级别、权限使用审查
-
-## 🎨 **可视化仪表板引擎**
-
-### **交互式风险仪表板** (`engines/compliance_visualizer.py`)
-```python
-# 生成专业级可视化仪表板
-dashboard_html = visualizer.generate_dashboard(compliance_results)
-
-# 支持多种输出格式
-executive_summary = visualizer.generate_executive_summary(results)
-```
-
-**功能特性**：
-- 📊 **实时风险图表** - Chart.js驱动的动态可视化
-- 🎯 **问题分布分析** - 饼图、柱状图、趋势线
-- 🌍 **地区风险热力图** - 按市场显示合规复杂度
-- ⏱️ **实施时间线** - 可视化整改roadmap
-- 👔 **高管摘要** - C-level决策用简洁报告
-- 📈 **趋势预测** - 基于历史数据的风险预测
-
-### **多格式报告导出**
-- **HTML** - 交互式在线仪表板
-- **PDF** - 可打印的专业报告
-- **JSON** - 程序化数据接口
-- **CSV** - 数据分析用表格
-- **XML** - 企业系统集成格式
-
-## 🚀 **RESTful API服务器**
-
-### **企业级API架构** (`api/compliance_api.py`)
-```bash
-# 启动API服务器
-python3 api/compliance_api.py
-
-# API文档: http://localhost:5000/docs
-# 演示仪表板: http://localhost:5000/demo
-```
-
-**核心端点**：
-- `POST /api/v1/compliance/analyze` - 完整合规分析（需认证）
-- `POST /api/v1/compliance/batch` - 批量应用分析（最多10个）
-- `POST /api/v1/compliance/quick-check` - 快速风险评估（免认证）
-- `GET /api/v1/dashboard/<app_id>` - 可视化仪表板HTML
-- `GET /api/v1/market-intelligence` - 最新监管情报
-- `GET /api/v1/templates/<template_id>` - 代码实现模板
-
-**企业级特性**：
-- 🔐 **API Key认证** - Header: `X-API-Key: your-key`
-- 🚦 **速率限制** - 防止滥用，支持不同等级
-- 🔄 **批量处理** - 一次分析多个应用
-- 📊 **实时仪表板** - 通过URL直接访问可视化
-- 🌐 **CORS支持** - 支持跨域Web应用集成
-- 📝 **完整文档** - 交互式API文档
-
-## 💻 **完整技术实现模板**
-
-### **COPPA家长同意系统** (`templates/coppa_parental_consent.py`)
-```python
-from templates.coppa_parental_consent import COPPAConsentManager
-
-# 初始化系统
-consent_manager = COPPAConsentManager()
-
-# 请求家长同意
-consent_record = await consent_manager.request_parental_consent(
-    child_profile=child_profile,
-    consent_method=ConsentMethod.CREDIT_CARD_PREAUTH,
-    data_processing_purposes=['learning_progress', 'app_functionality']
-)
-```
-
-**完整功能**：
-- ✅ **信用卡预授权验证** - 符合COPPA Section 312.5要求
-- ✅ **数字签名支持** - DocuSign等第三方集成
-- ✅ **邮件+电话双重验证** - 多因子身份验证
-- ✅ **审计日志系统** - 完整的合规追踪
-- ✅ **自动过期管理** - 1年有效期，自动通知续签
-- ✅ **数据删除机制** - 家长撤销时自动删除儿童数据
-
-### **中国防沉迷系统** (`templates/china_anti_addiction_system.py`)
-```python
-from templates.china_anti_addiction_system import AntiAddictionManager
-
-# 初始化管理器
-manager = AntiAddictionManager()
-
-# 实名认证
-realname_result = await manager.submit_realname_verification(
-    user_id="user_12345",
-    real_name="张小明", 
-    id_card_number="110101200801011234"
-)
-
-# 游戏时间检查
-can_play, reason, remaining = manager.can_play_now("user_12345")
-```
-
-**完整功能**：
-- ✅ **NRTA实名认证** - 对接国家新闻出版署API
-- ✅ **时间限制管理** - 工作日禁止，周末20-21点限1小时
-- ✅ **充值限制系统** - 按年龄组设定单次和月度上限
-- ✅ **家长监护平台** - 实时通知、授权管理
-- ✅ **节假日智能检测** - 动态调整游戏时间政策
-- ✅ **合规报告生成** - 监管部门要求的详细报告
-
-### **GDPR数据主体权利** (`templates/gdpr_data_subject_rights.py`)
-```python
-from templates.gdpr_data_subject_rights import GDPRRightsManager
-
-# 初始化权利管理器
-rights_manager = GDPRRightsManager()
-
-# 处理数据访问请求
-access_result = await rights_manager.process_access_request(user_id)
-
-# 处理删除请求
-deletion_result = await rights_manager.process_erasure_request(user_id)
-```
-
-## 🔧 **高级规则引擎**
-
-### **智能缓存系统** (`engines/advanced_rule_engine.py`)
-```python
-from engines.advanced_rule_engine import AdvancedRuleEngine
-
-# 初始化高级引擎
-engine = AdvancedRuleEngine()
-
-# 异步分析（支持缓存）
-results = await engine.analyze_compliance_async(app_profile)
-
-# 热重载规则配置
-engine.reload_rules()
-```
-
-**核心特性**：
-- ⚡ **性能优化** - Redis缓存、异步处理、并发控制
-- 🔄 **热重载** - 规则更新无需重启系统
-- 🤖 **AI增强预测** - 机器学习驱动的风险预测
-- 📊 **配置驱动** - YAML规则配置，非程序员可维护
-- 🗄️ **数据库集成** - 历史记录、趋势分析、审计追踪
-
-## 📊 **使用方式全景**
-
-### **1. 传统CLI使用**
-```bash
-# 智能编排器（推荐）
-python3 scripts/orchestrated_compliance_check.py --orchestrated-analysis
-
-# 预提交检查
-python3 scripts/pre_submission_check.py --education-gaming
-```
-
-### **2. 可视化仪表板**
-```bash
-# 生成交互式仪表板
-python3 engines/compliance_visualizer.py
-
-# 输出：compliance_dashboard_20260305_0503.html
-# 在浏览器中打开查看完整可视化分析
-```
-
-### **3. RESTful API集成**
-```bash
-# 启动API服务器
-python3 api/compliance_api.py
-
-# 企业系统集成
-curl -X POST http://localhost:5000/api/v1/compliance/analyze \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{"app_profile": {...}}'
-```
-
-### **4. 技术实现模板**
-```python
-# 直接使用完整技术实现
-from templates.coppa_parental_consent import COPPAConsentManager
-from templates.china_anti_addiction_system import AntiAddictionManager
-from templates.gdpr_data_subject_rights import GDPRRightsManager
-```
-
-## 🎖️ **系统规模与覆盖**
-
-### **📋 法规覆盖**
-- **25+项主要法规**：COPPA、FERPA、GDPR、PIPL、中国游戏法规等
-- **8个主要市场**：美国、欧盟、中国、英国、韩国、日本、加拿大、澳大利亚
-- **100+专业检查点**：从技术实现到法律合规的全覆盖
-
-### **💻 技术资产**  
-- **75,000+行企业级代码**：Python、JavaScript、HTML、CSS
-- **12个RESTful API端点**：认证、批量、可视化、模板
-- **5个完整技术实现**：COPPA、防沉迷、GDPR、FERPA、平台合规
-- **多格式输出**：JSON、HTML、PDF、CSV、XML
-
-### **🎨 用户体验**
-- **交互式仪表板**：Chart.js + Bootstrap专业级可视化
-- **高管决策报告**：C-level友好的执行摘要
-- **开发者工具**：完整代码模板、API文档、技术指南
-
-## 🚨 **企业级安全与合规**
-
-### **数据安全**
-- 🔐 **加密存储** - 敏感数据AES-256加密
-- 🛡️ **安全传输** - HTTPS/TLS 1.3强制加密
-- 📝 **审计日志** - 完整的访问和操作记录
-- 🔍 **权限控制** - API Key认证、速率限制
-
-### **合规保证**
-- ✅ **SOC 2 Type II就绪** - 安全控制框架
-- ✅ **GDPR合规** - 数据处理透明度、用户权利
-- ✅ **行业标准** - ISO 27001安全管理体系
-- ✅ **定期审计** - 自动化合规检查和报告
-
-## 🌟 **竞争优势**
-
-### **vs. 通用合规工具**
-- ✅ **垂直专精** - 专注教育游戏领域，专业深度远超通用工具
-- ✅ **完整实现** - 提供可直接部署的代码，而非仅检查清单
-- ✅ **技术前沿** - 可视化、API、AI预测等现代技术栈
-
-### **vs. 传统法律咨询**
-- ✅ **成本效优** - 自动化降低95%咨询成本
-- ✅ **实时更新** - 法规变化24小时内系统更新
-- ✅ **标准化输出** - 一致的专业质量，无人为差异
-
-### **vs. 单点解决方案**
-- ✅ **全栈覆盖** - 从法律合规到技术实现的完整解决方案
-- ✅ **系统集成** - 统一API，避免多工具割裂
-- ✅ **智能协调** - 跨专家洞察，识别复杂交叉风险
-
-## 📚 **完整资源体系**
-
-### **技术实现模板**
-```
-templates/
-├── coppa_parental_consent.py      # COPPA家长同意系统 (21K行)
-├── china_anti_addiction_system.py # 中国防沉迷系统 (33K行) 
-├── gdpr_data_subject_rights.py    # GDPR权利实现系统
-├── ferpa_compliance_framework.py  # FERPA教育合规框架
-└── platform_policy_compliance.py # 平台政策自动检查
-```
-
-### **可视化与API**
-```
-engines/compliance_visualizer.py   # 可视化仪表板引擎 (20K行)
-api/compliance_api.py              # RESTful API服务器 (18K行)
-engines/advanced_rule_engine.py    # 高级规则引擎 (缓存、异步)
-```
-
-### **法规知识库**
-```
-references/
-├── global-privacy-laws.md         # 全球隐私法规对比
-├── gaming-compliance.md          # 游戏法规合规指南
-├── age-verification.md           # 年龄验证技术方案  
-└── privacy-compliance.md         # 教育数据保护实施
-```
-
-## 🎯 **立即开始**
-
-### **快速体验**
-1. **CLI分析**：`python3 scripts/orchestrated_compliance_check.py`
-2. **可视化仪表板**：`python3 engines/compliance_visualizer.py`
-3. **API服务**：`python3 api/compliance_api.py` → http://localhost:5000/docs
-
-### **企业集成**
-1. **API集成**：获取API Key，调用RESTful端点
-2. **技术实现**：使用templates/下的完整代码模板
-3. **定制化**：基于高级规则引擎添加企业特定规则
+**我的服务对象**：Unity 游戏开发者，目标市场为美国、欧盟、英国及其他低风险市场（不含中国）。
 
 ---
 
-**🚀 v2.0专业承诺**：作为教育游戏合规领域的企业级专家系统，我们提供从风险识别、可视化分析到完整技术实现的全栈解决方案。让全球合规不再是技术壁垒，而是竞争优势！
+## 核心能力
 
-**💼 企业级支持**：75K行企业级代码 + 可视化仪表板 + RESTful API + 完整技术实现 = 一站式教育游戏全球合规解决方案
+### 模式 A · 新游戏开发合规指南
+
+当你开始开发一款新游戏时，我会根据你的游戏信息生成完整的合规开发路线图。
+
+**我需要了解的信息：**
+- 游戏名称和类型（益智、休闲、动作等）
+- 目标用户年龄（是否面向 13 岁以下儿童）
+- 目标市场（美国、欧盟、英国……）
+- 目标平台（iOS、Android 或双平台）
+- 计划功能（内购、广告、账号系统、社交、排行榜……）
+
+**我会输出：**
+- 法律合规路线图（GDPR、COPPA、CCPA、UK AADC 适用性分析）
+- 分阶段开发清单（法律准备 → 账号系统 → 隐私实现 → 内购 → 广告 → 测试）
+- App Store Connect 和 Google Play Console 配置指南
+- Unity 技术实现要点（StoreKit、ATT 框架、账号删除 API 等）
+
+**示例问题：**
+> "我要做一款面向 6-12 岁儿童的益智游戏，有内购，打算在美国和欧盟上架，需要做什么？"
+
+---
+
+### 模式 B · 现有游戏合规审计
+
+当你有一个已有的 Unity 项目，我可以扫描代码并给出合规问题报告。
+
+**我需要了解的信息：**
+- Unity 项目路径（可在 Web 界面通过「浏览」按钮选择）
+- 目标市场和平台
+
+**我会输出：**
+- 代码级问题列表（问题位置、严重程度、修复建议）
+- 法规符合性检查（GDPR 数据收集、COPPA 儿童保护、CCPA 选择退出……）
+- 平台政策检查（App Store 3.1.1 内购、3.2 账号删除、Google Play 数据安全……）
+- 综合风险报告（critical / high / medium / low 分级）
+
+**示例问题：**
+> "帮我检查一下这个项目 /Users/me/MyGame 有没有合规问题"
+
+---
+
+### 政策监控 · 自动追踪政策变化
+
+我持续监控 Apple 和 Google 的官方政策页面及开发者博客，当政策发生变化时，配合 LLM 自动解读变化含义。
+
+**三种检查方式：**
+- **RSS 公告**：抓取 Apple Developer News、Android Developers Blog，过滤政策相关条目
+- **页面哈希检测**：对比官方政策页面内容是否发生变化
+- **LLM 自动分析**：检测到变化后，调用 Claude 或 GPT-4o 解读变化对你的游戏有何影响
+
+**在 Web 界面操作：** 点击右上角「📋 政策管理」→「🔍 检查」Tab
+
+---
+
+## 使用方式
+
+### 方式一：Web 界面（推荐）
+
+```bash
+python3 launcher.py --mode web
+# 浏览器打开 http://localhost:8080
+```
+
+界面提供两个入口：
+- 「开发新游戏」→ 填写游戏信息 → 生成合规路线图
+- 「检测已有游戏」→ 选择项目路径 → 生成审计报告
+
+右上角「📋 政策管理」弹窗提供：
+- **状态 Tab**：查看 22 条政策规则的新鲜度
+- **配置 Tab**：输入 Anthropic / OpenAI API Key（即时生效，无需重启）
+- **检查 Tab**：一键触发 RSS 检查 / 页面变化检测 / LLM 分析
+
+### 方式二：在 Cursor 里直接问我
+
+在任何代码文件里选中一段代码，或者直接描述你的问题，我会：
+- 识别合规风险点
+- 给出修改建议和代码示例
+- 引用具体的政策条款
+
+### 方式三：CLI
+
+```bash
+# 新游戏指南
+python3 launcher.py --mode guide
+
+# 项目审计
+python3 launcher.py --mode audit --path /your/unity/project
+
+# 政策检查
+python3 launcher.py --mode check-policies --rss
+python3 launcher.py --mode check-policies --watch
+```
+
+---
+
+## LLM 配置（用于政策自动分析）
+
+在 Web 界面「⚙️ 配置」Tab 直接输入，或在项目根目录创建 `.env` 文件：
+
+```
+ANTHROPIC_API_KEY=sk-ant-xxx   # 推荐，使用 Claude 3.5 Sonnet
+OPENAI_API_KEY=sk-xxx          # 备选，使用 GPT-4o
+```
+
+未配置时，系统仍可检测政策变化，但无法自动解读变化含义。
+
+---
+
+## 覆盖范围
+
+### 法规
+| 法规 | 适用场景 |
+|------|---------|
+| GDPR | 面向欧盟用户的任何游戏 |
+| COPPA | 面向美国 13 岁以下儿童 |
+| CCPA | 面向加州用户且年营收 >2500 万美元 |
+| UK AADC | 面向英国 18 岁以下用户 |
+
+### 平台政策
+| 条款 | 内容 |
+|------|------|
+| App Store 3.1.1 | 应用内购必须使用 StoreKit |
+| App Store 3.1.2 | 订阅必须披露条款 |
+| App Store 5.1.1 | 隐私政策必须链接 |
+| App Store 5.1.4 | 账号删除功能必须实现 |
+| ATT 框架 | iOS 14.5+ 追踪需用户授权 |
+| Google Play 数据安全 | 数据收集必须在商店页面声明 |
+| Google Play 家庭政策 | 儿童应用广告和数据收集限制 |
+| … 共 22 条核心规则 | 持续监控更新状态 |
+
+### 技术栈支持
+- **Unity C#**：IAP、ATT、隐私政策、家长引导、账号删除
+- **iOS Swift**：StoreKit 2、ATT、Sign in with Apple
+- **Android Kotlin**：Google Play Billing、数据安全声明
+
+---
+
+## 引擎架构
+
+```
+用户（Web UI / Cursor 对话 / CLI）
+        ↓
+api/compliance_api.py           Flask API 服务器
+        ↓
+engines/
+  ├── dev_guide.py              新游戏合规路线图生成
+  ├── unified_audit.py          现有游戏综合审计
+  ├── code_scanner.py           Unity/iOS/Android 静态代码扫描
+  ├── code_template_generator.py  合规代码模板生成
+  ├── policy_monitor.py         RSS + 页面哈希监控
+  └── policy_diff_analyzer.py   LLM 政策变化解读
+        ↓
+references/                     政策知识库（Markdown）
+policy_versions.json            22 条规则的版本和新鲜度记录
+.env                            LLM API Key 配置
+```
+
+---
+
+## 常见问题
+
+**Q：我的游戏有内购，App Store 审核需要注意什么？**
+A：必须全部使用 StoreKit，不能有外部支付链接。订阅产品需在购买前展示价格、时长、免费试用期和自动续订说明。详见 App Store 3.1.1 / 3.1.2。
+
+**Q：游戏面向儿童，广告有什么限制？**
+A：App Store 要求儿童分类应用（或"面向儿童"选项开启时）不能接入第三方广告网络，只能使用 Apple 自有广告框架。Google Play 家庭政策同样限制行为定向广告，需使用认证的儿童友好广告网络。
+
+**Q：GDPR 要求我必须实现哪些功能？**
+A：至少需要：隐私政策链接可访问、数据收集前获取明确同意、提供数据删除请求渠道、不向第三方分享数据时不需二次同意。
+
+**Q：账号删除功能必须做吗？**
+A：是的。App Store 自 2022 年 6 月起要求所有支持账号注册的应用必须提供应用内账号删除功能（App Store 5.1.4）。Google Play 也有类似要求，须在数据安全表单中声明。

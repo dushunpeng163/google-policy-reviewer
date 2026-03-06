@@ -412,7 +412,76 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
   .roadmap-step { grid-template-columns: 36px 1fr; }
   .step-meta { grid-column: 2; text-align: left; }
 }
+
+/* ── AI 流式输出面板 ─────────────────────────── */
+#view-ai-output { display:none; }
+#view-ai-output.active { display:block; }
+.ai-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.ai-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+.ai-role-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(139,92,246,0.2);
+  color: #a78bfa;
+}
+.ai-model-badge {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+.ai-copy-btn {
+  margin-left: auto;
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.ai-copy-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.ai-output-body {
+  padding: 24px 28px;
+  min-height: 200px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text);
+}
+/* marked.js 渲染的 Markdown 样式 */
+.ai-output-body h1,.ai-output-body h2 { color:#a78bfa; border-bottom:1px solid var(--border); padding-bottom:6px; margin:20px 0 10px; }
+.ai-output-body h3 { color:#93c5fd; margin:16px 0 8px; }
+.ai-output-body h4 { color:var(--muted); margin:12px 0 6px; }
+.ai-output-body p { margin:8px 0; }
+.ai-output-body ul,.ai-output-body ol { padding-left:20px; margin:8px 0; }
+.ai-output-body li { margin:4px 0; }
+.ai-output-body code { background:rgba(0,0,0,0.3); padding:1px 6px; border-radius:4px; font-size:12px; color:#7dd3fc; }
+.ai-output-body pre { background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px 16px; overflow-x:auto; margin:12px 0; }
+.ai-output-body pre code { background:none; padding:0; color:#e2e8f0; font-size:12px; }
+.ai-output-body table { width:100%; border-collapse:collapse; margin:12px 0; font-size:13px; }
+.ai-output-body th { background:rgba(139,92,246,0.15); color:#a78bfa; padding:8px 12px; text-align:left; border:1px solid rgba(255,255,255,0.08); }
+.ai-output-body td { padding:7px 12px; border:1px solid rgba(255,255,255,0.06); color:var(--text); }
+.ai-output-body tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+.ai-output-body blockquote { border-left:3px solid #8b5cf6; padding:8px 16px; margin:10px 0; background:rgba(139,92,246,0.06); color:var(--muted); border-radius:0 8px 8px 0; }
+.ai-output-body strong { color:#f1f5f9; }
+.ai-cursor { display:inline-block; width:2px; height:1em; background:#a78bfa; margin-left:2px; vertical-align:middle; animation: blink 0.8s step-end infinite; }
+@keyframes blink { 50% { opacity:0; } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -502,6 +571,105 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 
   <!-- 辅助入口 -->
   <div class="sub-cards">
+    <div class="sub-card" onclick="showMode('architect')" style="border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.04);">
+      <div class="icon">🏗️</div>
+      <div class="sc-body">
+        <h3 style="color:#10b981;">Unity 架构师</h3>
+        <p>描述你的游戏，架构师为你选型并设计完整技术方案：渲染管线、框架、网络、AI、音频、资源包推荐</p>
+        <div class="sc-tags">
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">框架选型</span>
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">系统设计</span>
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">资源推荐</span>
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">风险评估</span>
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">实施路线图</span>
+        </div>
+      </div>
+      <div class="sc-arrow" style="color:#10b981;">→</div>
+    </div>
+    <div class="sub-card" onclick="showMode('system-designer')" style="border-color:rgba(139,92,246,0.3);background:rgba(139,92,246,0.04);">
+      <div class="icon">🗺️</div>
+      <div class="sc-body">
+        <h3 style="color:#8b5cf6;">系统策划师</h3>
+        <p>描述你的游戏，系统策划师为你生成核心循环、系统清单、MDA分析和设计支柱</p>
+        <div class="sc-tags">
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">核心循环</span>
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">系统清单</span>
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">MDA分析</span>
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">设计支柱</span>
+        </div>
+      </div>
+      <div class="sc-arrow" style="color:#8b5cf6;">→</div>
+    </div>
+    <div class="sub-card" onclick="showMode('numerical-designer')" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.04);">
+      <div class="icon">📊</div>
+      <div class="sc-body">
+        <h3 style="color:#f59e0b;">数值策划师</h3>
+        <p>输出完整可实现的战斗公式（含示例计算）、属性成长表、经济模型、掉落率和难度曲线</p>
+        <div class="sc-tags">
+          <span class="sc-tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;">战斗公式</span>
+          <span class="sc-tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;">成长曲线</span>
+          <span class="sc-tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;">经济模型</span>
+          <span class="sc-tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;">掉落系统</span>
+        </div>
+      </div>
+      <div class="sc-arrow" style="color:#f59e0b;">→</div>
+    </div>
+    <div class="sub-card" onclick="showMode('level-narrative')" style="border-color:rgba(236,72,153,0.3);background:rgba(236,72,153,0.04);">
+      <div class="icon">📖</div>
+      <div class="sc-body">
+        <h3 style="color:#ec4899;">关卡&叙事策划师</h3>
+        <p>生成世界观简报、三幕式故事结构、完整关卡序列表、难度曲线和教学设计方案</p>
+        <div class="sc-tags">
+          <span class="sc-tag" style="background:rgba(236,72,153,0.15);color:#ec4899;">世界观</span>
+          <span class="sc-tag" style="background:rgba(236,72,153,0.15);color:#ec4899;">故事结构</span>
+          <span class="sc-tag" style="background:rgba(236,72,153,0.15);color:#ec4899;">关卡序列</span>
+          <span class="sc-tag" style="background:rgba(236,72,153,0.15);color:#ec4899;">难度曲线</span>
+        </div>
+      </div>
+      <div class="sc-arrow" style="color:#ec4899;">→</div>
+    </div>
+    <div class="sub-card" onclick="showMode('impl-wizard')" style="border-color:rgba(6,182,212,0.3);background:rgba(6,182,212,0.04);">
+      <div class="icon">⚙️</div>
+      <div class="sc-body">
+        <h3 style="color:#06b6d4;">技术实现向导</h3>
+        <p>根据架构选型生成 Unity 项目骨架、C# 接口定义、框架引导代码和 ScriptableObject 模板</p>
+        <div class="sc-tags">
+          <span class="sc-tag" style="background:rgba(6,182,212,0.15);color:#06b6d4;">目录结构</span>
+          <span class="sc-tag" style="background:rgba(6,182,212,0.15);color:#06b6d4;">接口定义</span>
+          <span class="sc-tag" style="background:rgba(6,182,212,0.15);color:#06b6d4;">代码模板</span>
+          <span class="sc-tag" style="background:rgba(6,182,212,0.15);color:#06b6d4;">项目设置</span>
+        </div>
+      </div>
+      <div class="sc-arrow" style="color:#06b6d4;">→</div>
+    </div>
+    <div class="sub-card" onclick="showMode('qa-engineer')" style="border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.04);">
+      <div class="icon">🧪</div>
+      <div class="sc-body">
+        <h3 style="color:#10b981;">QA 工程师</h3>
+        <p>生成完整测试计划、平台专项测试用例、Bug 严重等级矩阵、Unity 回归清单和发布前检查表</p>
+        <div class="sc-tags">
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">测试计划</span>
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">用例库</span>
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">Bug矩阵</span>
+          <span class="sc-tag" style="background:rgba(16,185,129,0.15);color:#10b981;">发布清单</span>
+        </div>
+      </div>
+      <div class="sc-arrow" style="color:#10b981;">→</div>
+    </div>
+    <div class="sub-card" onclick="showMode('data-analyst')" style="border-color:rgba(139,92,246,0.3);background:rgba(139,92,246,0.04);">
+      <div class="icon">📊</div>
+      <div class="sc-body">
+        <h3 style="color:#8b5cf6;">数据分析师</h3>
+        <p>生成完整 KPI 体系、埋点方案、留存/付费分析框架、A/B 测试优先级和数据驱动迭代决策框架</p>
+        <div class="sc-tags">
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">KPI 体系</span>
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">埋点方案</span>
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">留存分析</span>
+          <span class="sc-tag" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">迭代框架</span>
+        </div>
+      </div>
+      <div class="sc-arrow" style="color:#8b5cf6;">→</div>
+    </div>
     <div class="sub-card" onclick="showMode('templates')">
       <div class="icon">📦</div>
       <div class="sc-body">
@@ -612,6 +780,664 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 <div id="view-guide" class="view" style="display:none!important;"></div>
 <div id="view-audit" class="view" style="display:none!important;"></div>
 
+<!-- ── Unity 架构师 ── -->
+<div id="view-architect" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>🏗️ Unity 架构师</h2>
+    <p>描述你的游戏，架构师将为你生成完整的技术选型与系统设计方案</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏基本信息</div>
+    <div class="field">
+      <label>游戏名称</label>
+      <input type="text" id="arch-name" placeholder="My Game" value="My Game">
+    </div>
+    <div class="field">
+      <label>游戏描述 <span style="color:var(--muted);font-weight:400;">（自由描述：玩法、世界观、核心机制等，越详细越准确）</span></label>
+      <textarea id="arch-desc" rows="4" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;transition:border-color .2s;" placeholder="例如：一款开放世界动作 RPG，玩家扮演猎人在中世纪大陆探索，有完整的装备系统、主支线任务和对话系统，计划上线 PC 和 iOS…"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏类型</label>
+        <select id="arch-type">
+          <option value="rpg">RPG 角色扮演</option>
+          <option value="action_rpg">动作 RPG</option>
+          <option value="action_adventure">动作冒险</option>
+          <option value="open_world">开放世界</option>
+          <option value="fps">第一人称射击（FPS）</option>
+          <option value="tps">第三人称射击（TPS）</option>
+          <option value="2d_platformer">2D 平台跳跃</option>
+          <option value="metroidvania">银河恶魔城</option>
+          <option value="top_down">俯视角游戏</option>
+          <option value="top_down_rpg">俯视角 RPG</option>
+          <option value="roguelike">Roguelike</option>
+          <option value="strategy">策略游戏</option>
+          <option value="simulation">模拟经营</option>
+          <option value="survival">生存游戏</option>
+          <option value="casual">休闲游戏</option>
+          <option value="puzzle">益智游戏</option>
+          <option value="fighting">格斗游戏</option>
+          <option value="racing">赛车游戏</option>
+          <option value="narrative">叙事 / 视觉小说</option>
+          <option value="card">卡牌游戏</option>
+          <option value="battle_royale">大逃杀</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>美术风格</label>
+        <select id="arch-art">
+          <option value="stylized">风格化（Stylized）</option>
+          <option value="low_poly">低多边形（Low Poly）</option>
+          <option value="cartoon">卡通风格</option>
+          <option value="realistic">写实（Realistic）</option>
+          <option value="photorealistic">超写实（Photorealistic）</option>
+          <option value="pixel">像素风格</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">平台与团队</div>
+    <div class="field">
+      <label>目标平台（多选）</label>
+      <div class="cb-grid" id="arch-platforms">
+        <label class="cb-item"><input type="checkbox" value="mobile" checked> 📱 手机（iOS + Android）</label>
+        <label class="cb-item"><input type="checkbox" value="pc"> 🖥️ PC（Steam / 独立）</label>
+        <label class="cb-item"><input type="checkbox" value="console"> 🎮 主机（PS5/Xbox/Switch）</label>
+        <label class="cb-item"><input type="checkbox" value="webgl"> 🌐 WebGL / 浏览器</label>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>团队规模</label>
+        <select id="arch-team">
+          <option value="solo">独立开发者（1人）</option>
+          <option value="small" selected>小团队（2–5人）</option>
+          <option value="medium">中型团队（5–20人）</option>
+          <option value="large">大团队（20人+）</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>开发周期（月）</label>
+        <input type="number" id="arch-timeline" value="12" min="1" max="60">
+        <small>预计从立项到上线的周期</small>
+      </div>
+    </div>
+    <div class="field">
+      <label>预算水平</label>
+      <select id="arch-budget">
+        <option value="budget">精打细算（尽量用免费方案）</option>
+        <option value="normal" selected>正常预算（合理付费工具）</option>
+        <option value="premium">充足预算（最优方案优先）</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏功能（多选）</div>
+    <div class="cb-grid" id="arch-features">
+      <label class="cb-item"><input type="checkbox" value="multiplayer"> 🌐 多人联机</label>
+      <label class="cb-item"><input type="checkbox" value="narrative"> 📖 叙事 / 对话系统</label>
+      <label class="cb-item"><input type="checkbox" value="inventory"> 🎒 背包 / 装备系统</label>
+      <label class="cb-item"><input type="checkbox" value="quest"> 📋 任务系统</label>
+      <label class="cb-item"><input type="checkbox" value="combat"> ⚔️ 战斗 / 技能系统</label>
+      <label class="cb-item"><input type="checkbox" value="iap"> 💰 内购（IAP）</label>
+      <label class="cb-item"><input type="checkbox" value="hot_update"> 🔥 热更新</label>
+      <label class="cb-item"><input type="checkbox" value="complex_ai"> 🤖 复杂 AI / NPC</label>
+      <label class="cb-item"><input type="checkbox" value="open_world_terrain"> 🌍 开放世界地形</label>
+      <label class="cb-item"><input type="checkbox" value="live_ops"> 📊 运营 / 排行榜</label>
+      <label class="cb-item"><input type="checkbox" value="shooting"> 🔫 射击 / 弹道系统</label>
+      <label class="cb-item"><input type="checkbox" value="mount"> 🐴 骑乘系统</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitAI('/api/v1/ai/architect', collectArchitectProfile(), 'Unity 架构师')" style="background:linear-gradient(135deg,#10b981,#059669);">
+    🏗️ 生成架构方案 →
+  </button>
+</div>
+
+<!-- ── 系统策划师 ── -->
+<div id="view-system-designer" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>🗺️ 系统策划师</h2>
+    <p>描述你的游戏，系统策划师将生成核心循环、系统清单、MDA 分析和设计支柱</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏信息</div>
+    <div class="field">
+      <label>游戏名称</label>
+      <input type="text" id="sd-name" placeholder="My Game" value="My Game">
+    </div>
+    <div class="field">
+      <label>游戏描述 <span style="color:var(--muted);font-weight:400;">（玩法、世界观、核心体验，越详细越准确）</span></label>
+      <textarea id="sd-desc" rows="4" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;" placeholder="例如：一款开放世界动作RPG，玩家扮演猎人探索中世纪大陆，有装备、任务和对话系统…"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏类型</label>
+        <select id="sd-type">
+          <option value="rpg">RPG 角色扮演</option>
+          <option value="action_rpg">动作 RPG</option>
+          <option value="open_world">开放世界</option>
+          <option value="fps">FPS 射击</option>
+          <option value="2d_platformer">2D 平台跳跃</option>
+          <option value="roguelike">Roguelike</option>
+          <option value="strategy">策略游戏</option>
+          <option value="simulation">模拟经营</option>
+          <option value="casual">休闲游戏</option>
+          <option value="survival">生存游戏</option>
+          <option value="fighting">格斗游戏</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>目标受众</label>
+        <select id="sd-audience">
+          <option value="casual">休闲玩家</option>
+          <option value="core" selected>核心玩家</option>
+          <option value="hardcore">硬核玩家</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏基调</label>
+        <select id="sd-tone">
+          <option value="dark">黑暗</option>
+          <option value="neutral" selected>中性</option>
+          <option value="light">轻松</option>
+          <option value="comedic">喜剧</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>团队规模</label>
+        <select id="sd-team">
+          <option value="solo">独立开发者</option>
+          <option value="small" selected>小团队(2-5人)</option>
+          <option value="medium">中型团队(5-20人)</option>
+          <option value="large">大团队(20人+)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">功能标签（多选）</div>
+    <div class="cb-grid" id="sd-features">
+      <label class="cb-item"><input type="checkbox" value="multiplayer"> 🌐 多人联机</label>
+      <label class="cb-item"><input type="checkbox" value="narrative"> 📖 叙事/对话系统</label>
+      <label class="cb-item"><input type="checkbox" value="inventory"> 🎒 背包/装备系统</label>
+      <label class="cb-item"><input type="checkbox" value="quest"> 📋 任务系统</label>
+      <label class="cb-item"><input type="checkbox" value="iap"> 💰 内购(IAP)</label>
+      <label class="cb-item"><input type="checkbox" value="leaderboard"> 🏆 排行榜</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitAI('/api/v1/ai/system-designer', collectSystemDesignerProfile(), '系统策划师')" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">
+    🗺️ 生成系统设计方案 →
+  </button>
+</div>
+
+<!-- ── 数值策划师 ── -->
+<div id="view-numerical-designer" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>📊 数值策划师</h2>
+    <p>输出完整可实现的战斗公式（含示例计算）、属性成长表、经济模型和掉落系统</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏基本设定</div>
+    <div class="field">
+      <label>游戏名称</label>
+      <input type="text" id="nd-name" placeholder="My Game" value="My Game">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏类型</label>
+        <select id="nd-type">
+          <option value="rpg">RPG 角色扮演</option>
+          <option value="action_rpg">动作 RPG</option>
+          <option value="fps">FPS 射击</option>
+          <option value="roguelike">Roguelike</option>
+          <option value="strategy">策略游戏</option>
+          <option value="casual">休闲游戏</option>
+          <option value="fighting">格斗游戏</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>战斗风格</label>
+        <select id="nd-combat">
+          <option value="realtime">实时战斗</option>
+          <option value="turnbased">回合制</option>
+          <option value="action">纯动作</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div class="field" style="margin:0;">
+        <label>角色最高等级</label>
+        <input type="number" id="nd-maxlevel" value="30" min="5" max="200">
+      </div>
+      <div class="field" style="margin:0;">
+        <label>变现模式</label>
+        <select id="nd-monetization">
+          <option value="f2p">免费(F2P)</option>
+          <option value="premium">买断制</option>
+          <option value="hybrid">混合模式</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div class="field" style="margin:0;">
+        <label>目标局均时长</label>
+        <select id="nd-session">
+          <option value="short">短（5-15分钟）</option>
+          <option value="medium" selected>中（20-40分钟）</option>
+          <option value="long">长（60分钟+）</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>主货币名称</label>
+        <input type="text" id="nd-currency" placeholder="金币" value="金币">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">系统开关</div>
+    <div class="cb-grid" id="nd-features">
+      <label class="cb-item"><input type="checkbox" value="gacha"> 🎰 抽卡/转蛋系统</label>
+      <label class="cb-item"><input type="checkbox" value="pvp"> ⚔️ PvP 对战</label>
+      <label class="cb-item"><input type="checkbox" value="equipment"> 🛡️ 装备系统</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitAI('/api/v1/ai/numerical-designer', collectNumericalProfile(), '数值策划师')" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+    📊 生成数值设计方案 →
+  </button>
+</div>
+
+<!-- ── 关卡&叙事策划师 ── -->
+<div id="view-level-narrative" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>📖 关卡&叙事策划师</h2>
+    <p>生成世界观简报、三幕式故事结构、完整关卡序列表、难度曲线和教学设计方案</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏与世界信息</div>
+    <div class="field">
+      <label>游戏名称</label>
+      <input type="text" id="ln-name" placeholder="My Game" value="My Game">
+    </div>
+    <div class="field">
+      <label>游戏描述</label>
+      <textarea id="ln-desc" rows="3" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;" placeholder="简述游戏的故事背景、主角和核心冲突…"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏类型</label>
+        <select id="ln-type">
+          <option value="rpg">RPG 角色扮演</option>
+          <option value="action_rpg">动作 RPG</option>
+          <option value="open_world">开放世界</option>
+          <option value="fps">FPS 射击</option>
+          <option value="roguelike">Roguelike</option>
+          <option value="casual">休闲游戏</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>世界观设定</label>
+        <select id="ln-setting">
+          <option value="fantasy">奇幻</option>
+          <option value="scifi">科幻</option>
+          <option value="modern">现代</option>
+          <option value="historical">历史</option>
+          <option value="post_apocalyptic">末世废土</option>
+          <option value="fairy_tale">童话</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏基调</label>
+        <select id="ln-tone">
+          <option value="dark">黑暗</option>
+          <option value="neutral" selected>中性</option>
+          <option value="light">轻松</option>
+          <option value="comedic">喜剧</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>教学风格</label>
+        <select id="ln-tutorial">
+          <option value="implicit" selected>隐式（关卡引导）</option>
+          <option value="explicit">显式（提示框）</option>
+          <option value="none">无引导</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div class="field" style="margin:0;">
+        <label>预计总游玩时长（小时）</label>
+        <input type="number" id="ln-hours" value="20" min="2" max="200">
+      </div>
+      <div class="field" style="margin:0;">
+        <label>关卡/区域总数</label>
+        <input type="number" id="ln-levels" value="20" min="5" max="200">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">内容开关</div>
+    <div class="cb-grid" id="ln-features">
+      <label class="cb-item"><input type="checkbox" value="side_quests" checked> 📋 支线任务</label>
+      <label class="cb-item"><input type="checkbox" value="player_choice"> 🔀 玩家选择影响剧情</label>
+      <label class="cb-item"><input type="checkbox" value="main_story" checked> 📖 主线叙事</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitAI('/api/v1/ai/level-narrative', collectLevelNarrativeProfile(), '关卡叙事策划师')" style="background:linear-gradient(135deg,#ec4899,#db2777);">
+    📖 生成关卡&叙事方案 →
+  </button>
+</div>
+
+<!-- ── 技术实现向导 ── -->
+<div id="view-impl-wizard" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>⚙️ 技术实现向导</h2>
+    <p>根据架构师选型，生成 Unity 项目骨架、C# 接口模板、框架引导代码和项目设置清单</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">项目基础</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏名称（用作命名空间）</label>
+        <input type="text" id="iw-name" placeholder="MyGame" value="MyGame">
+        <small>只含字母数字，如 DragonQuest</small>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>游戏类型</label>
+        <select id="iw-type">
+          <option value="rpg">RPG 角色扮演</option>
+          <option value="action_rpg">动作 RPG</option>
+          <option value="fps">FPS 射击</option>
+          <option value="roguelike">Roguelike</option>
+          <option value="open_world">开放世界</option>
+          <option value="casual">休闲游戏</option>
+          <option value="top_down_rpg">俯视角 RPG</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">技术选型（来自架构师输出）</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>渲染管线</label>
+        <select id="iw-rp">
+          <option value="urp" selected>URP（通用渲染管线）</option>
+          <option value="hdrp">HDRP（高清渲染管线）</option>
+          <option value="builtin">Built-in（内置管线）</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>主框架</label>
+        <select id="iw-fw">
+          <option value="gc2">Game Creator 2</option>
+          <option value="ucc">Opsive UCC</option>
+          <option value="corgi">Corgi Engine</option>
+          <option value="top_down">Top Down Engine</option>
+          <option value="scratch">自研（从零开始）</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>DI 框架</label>
+        <select id="iw-di">
+          <option value="vcontainer" selected>VContainer（推荐）</option>
+          <option value="zenject">Zenject</option>
+          <option value="none">无（ServiceLocator）</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>存档系统</label>
+        <select id="iw-save">
+          <option value="easy_save3" selected>Easy Save 3</option>
+          <option value="custom_json">自定义 JSON</option>
+          <option value="playerprefs">PlayerPrefs</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>网络框架</label>
+        <select id="iw-net">
+          <option value="none" selected>无（单机）</option>
+          <option value="fishnet">FishNet</option>
+          <option value="photon_fusion">Photon Fusion</option>
+          <option value="ngo">Netcode for GameObjects</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>架构模式</label>
+        <select id="iw-arch">
+          <option value="scriptableobject" selected>ScriptableObject 驱动</option>
+          <option value="mvc">MVC</option>
+          <option value="ecs">DOTS/ECS</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">目标平台与功能</div>
+    <div class="field">
+      <label>目标平台（多选）</label>
+      <div class="cb-grid" id="iw-platforms">
+        <label class="cb-item"><input type="checkbox" value="mobile" checked> 📱 移动端</label>
+        <label class="cb-item"><input type="checkbox" value="pc"> 🖥️ PC</label>
+        <label class="cb-item"><input type="checkbox" value="console"> 🎮 主机</label>
+        <label class="cb-item"><input type="checkbox" value="webgl"> 🌐 WebGL</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>游戏功能（多选）</label>
+      <div class="cb-grid" id="iw-features">
+        <label class="cb-item"><input type="checkbox" value="multiplayer"> 🌐 多人联机</label>
+        <label class="cb-item"><input type="checkbox" value="iap"> 💰 内购</label>
+        <label class="cb-item"><input type="checkbox" value="hot_update"> 🔥 热更新</label>
+        <label class="cb-item"><input type="checkbox" value="narrative"> 📖 叙事对话</label>
+        <label class="cb-item"><input type="checkbox" value="inventory"> 🎒 背包装备</label>
+        <label class="cb-item"><input type="checkbox" value="quest"> 📋 任务系统</label>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitAI('/api/v1/ai/impl-wizard', collectImplWizardProfile(), '技术实现向导')" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">
+    ⚙️ 生成实现方案 →
+  </button>
+</div>
+
+<!-- ── QA 工程师 ── -->
+<div id="view-qa-engineer" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>🧪 QA 工程师</h2>
+    <p>生成完整测试计划、平台专项用例、Bug 严重等级矩阵和发布前检查清单</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏基本信息</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏名称</label>
+        <input type="text" id="qa-name" placeholder="My Game" value="My Game">
+      </div>
+      <div class="field" style="margin:0;">
+        <label>游戏类型</label>
+        <select id="qa-type">
+          <option value="rpg">RPG 角色扮演</option>
+          <option value="action_rpg">动作 RPG</option>
+          <option value="fps">FPS 射击</option>
+          <option value="roguelike">Roguelike</option>
+          <option value="casual">休闲游戏</option>
+          <option value="open_world">开放世界</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>团队规模</label>
+        <select id="qa-team">
+          <option value="solo">独立开发者</option>
+          <option value="small" selected>小团队(2-5人)</option>
+          <option value="medium">中型团队(5-20人)</option>
+          <option value="large">大团队(20人+)</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>变现模式</label>
+        <select id="qa-monetization">
+          <option value="f2p">免费(F2P)</option>
+          <option value="premium">买断制</option>
+          <option value="hybrid">混合</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">目标平台（多选）</div>
+    <div class="cb-grid" id="qa-platforms">
+      <label class="cb-item"><input type="checkbox" value="mobile" checked> 📱 移动端 (iOS/Android)</label>
+      <label class="cb-item"><input type="checkbox" value="pc"> 🖥️ PC (Steam/独立)</label>
+      <label class="cb-item"><input type="checkbox" value="console"> 🎮 主机 (PS5/Xbox/Switch)</label>
+      <label class="cb-item"><input type="checkbox" value="webgl"> 🌐 WebGL</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏功能（多选）</div>
+    <div class="cb-grid" id="qa-features">
+      <label class="cb-item"><input type="checkbox" value="multiplayer"> 🌐 多人联机</label>
+      <label class="cb-item"><input type="checkbox" value="iap"> 💰 内购(IAP)</label>
+      <label class="cb-item"><input type="checkbox" value="gacha"> 🎰 抽卡系统</label>
+      <label class="cb-item"><input type="checkbox" value="hot_update"> 🔥 热更新</label>
+      <label class="cb-item"><input type="checkbox" value="combat"> ⚔️ 战斗系统</label>
+      <label class="cb-item"><input type="checkbox" value="inventory"> 🎒 背包装备</label>
+      <label class="cb-item"><input type="checkbox" value="quest"> 📋 任务系统</label>
+      <label class="cb-item"><input type="checkbox" value="narrative"> 📖 叙事对话</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitAI('/api/v1/ai/qa-engineer', collectQAProfile(), 'QA 工程师')" style="background:linear-gradient(135deg,#10b981,#059669);">
+    🧪 生成测试计划 →
+  </button>
+</div>
+
+<!-- ── 数据分析师 ── -->
+<div id="view-data-analyst" class="view">
+  <button class="back-btn" onclick="showLanding()">← 返回</button>
+  <div class="view-header">
+    <h2>📊 数据分析师</h2>
+    <p>生成完整 KPI 体系、埋点方案、留存/付费分析框架、A/B 测试优先级和数据驱动迭代决策框架</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏基本信息</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="field" style="margin:0;">
+        <label>游戏名称</label>
+        <input type="text" id="da-name" placeholder="My Game" value="My Game">
+      </div>
+      <div class="field" style="margin:0;">
+        <label>游戏类型</label>
+        <select id="da-type">
+          <option value="rpg">RPG 角色扮演</option>
+          <option value="action_rpg">动作 RPG</option>
+          <option value="fps">FPS 射击</option>
+          <option value="roguelike">Roguelike</option>
+          <option value="casual">休闲游戏</option>
+          <option value="open_world">开放世界</option>
+          <option value="strategy">策略游戏</option>
+          <option value="simulation">模拟经营</option>
+          <option value="2d_platformer">2D 平台跳跃</option>
+          <option value="survival">生存游戏</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>变现模式</label>
+        <select id="da-monetization">
+          <option value="f2p">免费 + 内购 (F2P)</option>
+          <option value="premium">买断制 (Premium)</option>
+          <option value="hybrid">混合 (广告+内购)</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>上线阶段</label>
+        <select id="da-stage">
+          <option value="pre_launch">上线前（埋点规划）</option>
+          <option value="soft_launch">软发布（数据验证）</option>
+          <option value="full_launch">正式发布（增长阶段）</option>
+          <option value="live_ops">长期运营（精细化阶段）</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>预期 DAU 规模</label>
+        <select id="da-dau">
+          <option value="<1k">小于 1,000</option>
+          <option value="1k-10k" selected>1,000 ~ 10,000</option>
+          <option value="10k-100k">10,000 ~ 100,000</option>
+          <option value="100k+">100,000 以上</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>团队规模</label>
+        <select id="da-team">
+          <option value="solo">独立开发者</option>
+          <option value="small" selected>小团队（2-10人）</option>
+          <option value="medium">中等团队（11-50人）</option>
+          <option value="large">大团队（50人以上）</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">目标平台</div>
+    <div class="cb-grid" id="da-platforms">
+      <label class="cb-item"><input type="checkbox" value="mobile" checked> 📱 手机端 (iOS/Android)</label>
+      <label class="cb-item"><input type="checkbox" value="pc"> 💻 PC (Steam/Epic)</label>
+      <label class="cb-item"><input type="checkbox" value="console"> 🎮 主机 (PS/Xbox/Switch)</label>
+      <label class="cb-item"><input type="checkbox" value="webgl"> 🌐 WebGL / 网页端</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">游戏功能（多选，影响分析维度）</div>
+    <div class="cb-grid" id="da-features">
+      <label class="cb-item"><input type="checkbox" value="multiplayer"> 🌐 多人联机</label>
+      <label class="cb-item"><input type="checkbox" value="iap"> 💰 内购 (IAP)</label>
+      <label class="cb-item"><input type="checkbox" value="gacha"> 🎰 抽卡系统</label>
+      <label class="cb-item"><input type="checkbox" value="ads"> 📺 激励广告</label>
+      <label class="cb-item"><input type="checkbox" value="pvp"> ⚔️ PvP 对战</label>
+      <label class="cb-item"><input type="checkbox" value="guild"> 🏰 公会/社交</label>
+      <label class="cb-item"><input type="checkbox" value="levels"> 🗺️ 关卡/章节系统</label>
+      <label class="cb-item"><input type="checkbox" value="live_events"> 🎉 限时活动</label>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="submitAI('/api/v1/ai/data-analyst', collectDataAnalystProfile(), '数据分析师')" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">
+    📊 生成数据分析方案 →
+  </button>
+</div>
+
 <!-- ── Mode C：代码模板库 ── -->
 <div id="view-templates" class="view">
   <button class="back-btn" onclick="showLanding()">← 返回</button>
@@ -624,6 +1450,21 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
   </div>
 </div>
 
+<!-- ── AI 流式输出面板 ── -->
+<div id="view-ai-output" class="view">
+  <button class="back-btn" onclick="backFromAI()">← 返回修改</button>
+  <div class="ai-panel">
+    <div class="ai-panel-header">
+      <span id="ai-role-badge" class="ai-role-badge">AI 分析中</span>
+      <span id="ai-model-badge" class="ai-model-badge"></span>
+      <button class="ai-copy-btn" onclick="copyAIOutput()">复制全文</button>
+    </div>
+    <div class="ai-output-body" id="ai-output">
+      <div style="color:var(--muted);text-align:center;padding:40px;">等待 AI 响应…</div>
+    </div>
+  </div>
+</div>
+
 <!-- ── 结果展示 ── -->
 <div id="results">
   <button class="back-btn" onclick="backToForm()">← 返回修改</button>
@@ -631,33 +1472,229 @@ header .policy-btn:hover { border-color: var(--accent2); color: var(--accent2); 
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// ── AI 流式分析核心引擎
+// ═══════════════════════════════════════════════════════════════
+
+let _aiCurrentView = null;  // 记录发起 AI 分析的来源视图，用于返回
+
+async function submitAI(endpoint, profile, roleLabel) {
+  // 记录来源视图
+  _aiCurrentView = ALL_VIEWS.find(v => {
+    const el = document.getElementById('view-' + v);
+    return el && el.classList.contains('active');
+  }) || null;
+
+  // 切换到 AI 输出视图
+  ALL_VIEWS.forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.classList.remove('active');
+  });
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('results').classList.remove('active');
+  const aiView = document.getElementById('view-ai-output');
+  aiView.classList.add('active');
+
+  // 初始化面板
+  document.getElementById('ai-role-badge').textContent = roleLabel;
+  document.getElementById('ai-model-badge').textContent = '';
+  const outputEl = document.getElementById('ai-output');
+  outputEl.innerHTML = '<span style="color:var(--muted)">正在连接 AI，请稍候</span><span class="ai-cursor"></span>';
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_profile: profile }),
+    });
+
+    if (!res.ok) {
+      outputEl.innerHTML = `<p style="color:var(--red)">服务器错误 ${res.status}，请确认服务器已启动。</p>`;
+      return;
+    }
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let mdBuffer  = '';
+    let buf       = '';
+
+    outputEl.innerHTML = '';  // 清空等待提示
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();  // 最后一行可能不完整，保留到下次
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') break;
+        try {
+          const { text } = JSON.parse(payload);
+          mdBuffer += text;
+          outputEl.innerHTML = marked.parse(mdBuffer) + '<span class="ai-cursor"></span>';
+          // 自动滚动到底部
+          outputEl.scrollTop = outputEl.scrollHeight;
+        } catch (_) {}
+      }
+    }
+
+    // 流结束，移除光标
+    outputEl.innerHTML = marked.parse(mdBuffer || '*(无响应)*');
+
+  } catch (e) {
+    outputEl.innerHTML = `<p style="color:var(--red)">请求失败：${e.message}<br>请确认服务器已启动（python launcher.py）。</p>`;
+  }
+}
+
+function backFromAI() {
+  document.getElementById('view-ai-output').classList.remove('active');
+  if (_aiCurrentView) {
+    const el = document.getElementById('view-' + _aiCurrentView);
+    if (el) { el.classList.add('active'); return; }
+  }
+  showLanding();
+}
+
+function copyAIOutput() {
+  const outputEl = document.getElementById('ai-output');
+  const text = outputEl.innerText || outputEl.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.ai-copy-btn');
+    btn.textContent = '✓ 已复制';
+    setTimeout(() => { btn.textContent = '复制全文'; }, 2000);
+  });
+}
+
+// ── Profile 收集辅助函数（每个角色从表单读取数据）────────────
+
+function collectArchitectProfile() {
+  return {
+    game_name:        document.getElementById('arch-name')?.value || 'My Game',
+    description:      document.getElementById('arch-desc')?.value || '',
+    game_type:        document.getElementById('arch-type')?.value || 'rpg',
+    team_size:        document.getElementById('arch-team')?.value || 'small',
+    target_platforms: getChecked('arch-platforms'),
+    features:         getChecked('arch-features'),
+  };
+}
+
+function collectSystemDesignerProfile() {
+  return {
+    game_name:       document.getElementById('sd-name')?.value || 'My Game',
+    description:     document.getElementById('sd-desc')?.value || '',
+    game_type:       document.getElementById('sd-type')?.value || 'rpg',
+    tone:            document.getElementById('sd-tone')?.value || '',
+    target_audience: document.getElementById('sd-audience')?.value || '',
+    team_size:       document.getElementById('sd-team')?.value || 'small',
+    features:        getChecked('sd-features'),
+  };
+}
+
+function collectNumericalProfile() {
+  return {
+    game_name:         document.getElementById('nd-name')?.value || 'My Game',
+    game_type:         document.getElementById('nd-type')?.value || 'rpg',
+    monetization_type: document.getElementById('nd-monetization')?.value || 'f2p',
+    features:          getChecked('nd-features'),
+  };
+}
+
+function collectLevelNarrativeProfile() {
+  return {
+    game_name:    document.getElementById('ln-name')?.value || 'My Game',
+    game_type:    document.getElementById('ln-type')?.value || 'rpg',
+    world_style:  document.getElementById('ln-world')?.value || 'fantasy',
+    tone:         document.getElementById('ln-tone')?.value || 'epic',
+    features:     getChecked('ln-features'),
+  };
+}
+
+function collectImplWizardProfile() {
+  return {
+    game_name:        document.getElementById('iw-name')?.value || 'My Game',
+    game_type:        document.getElementById('iw-type')?.value || 'rpg',
+    team_size:        document.getElementById('iw-team')?.value || 'small',
+    target_platforms: getChecked('iw-platforms'),
+    features:         getChecked('iw-features'),
+  };
+}
+
+function collectQAProfile() {
+  return {
+    game_name:        document.getElementById('qa-name')?.value || 'My Game',
+    game_type:        document.getElementById('qa-type')?.value || 'rpg',
+    team_size:        document.getElementById('qa-team')?.value || 'small',
+    monetization_type:document.getElementById('qa-monetization')?.value || 'f2p',
+    target_platforms: getChecked('qa-platforms'),
+    features:         getChecked('qa-features'),
+  };
+}
+
+function collectDataAnalystProfile() {
+  return {
+    game_name:         document.getElementById('da-name')?.value || 'My Game',
+    game_type:         document.getElementById('da-type')?.value || 'rpg',
+    monetization_type: document.getElementById('da-monetization')?.value || 'f2p',
+    launch_stage:      document.getElementById('da-stage')?.value || 'full_launch',
+    expected_dau:      document.getElementById('da-dau')?.value || '1k-10k',
+    team_size:         document.getElementById('da-team')?.value || 'small',
+    target_platforms:  getChecked('da-platforms'),
+    features:          getChecked('da-features'),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 配置 marked.js（防 XSS，启用代码高亮友好模式）
+// ─────────────────────────────────────────────────────────────
+if (typeof marked !== 'undefined') {
+  marked.setOptions({
+    breaks:   true,   // 单换行也换行
+    gfm:      true,   // GitHub Flavored Markdown
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 原有全局变量与函数
+// ═══════════════════════════════════════════════════════════════
+
 let currentMode = null;
 
 function getChecked(containerId) {
   return [...document.querySelectorAll(`#${containerId} input:checked`)].map(el => el.value);
 }
 
-// checkbox 样式联动
+// checkbox 样式联动（全局）
 document.querySelectorAll('.cb-item input').forEach(cb => {
   cb.addEventListener('change', () => {
     cb.parentElement.classList.toggle('checked', cb.checked);
   });
 });
 
+const ALL_VIEWS = ['unified', 'templates', 'architect', 'system-designer', 'numerical-designer', 'level-narrative', 'impl-wizard', 'qa-engineer', 'data-analyst', 'ai-output'];
+
 function showLanding() {
   document.getElementById('landing').style.display = '';
-  document.getElementById('view-unified').classList.remove('active');
-  document.getElementById('view-templates').classList.remove('active');
+  ALL_VIEWS.forEach(v => document.getElementById('view-' + v).classList.remove('active'));
   document.getElementById('results').classList.remove('active');
 }
 
 function showMode(mode) {
   currentMode = mode;
   document.getElementById('landing').style.display = 'none';
-  document.getElementById('view-unified').classList.toggle('active', mode === 'unified');
-  document.getElementById('view-templates').classList.toggle('active', mode === 'templates');
+  ALL_VIEWS.forEach(v => document.getElementById('view-' + v).classList.toggle('active', v === mode));
   document.getElementById('results').classList.remove('active');
   if (mode === 'templates') loadTemplates();
+  // 同步 checkbox 样式
+  const viewEl = document.getElementById('view-' + mode);
+  if (viewEl) {
+    viewEl.querySelectorAll('.cb-item input').forEach(cb => {
+      cb.parentElement.classList.toggle('checked', cb.checked);
+    });
+  }
 }
 
 function backToForm() {
@@ -2167,6 +3204,1809 @@ async function browseFolder(inputId) {
 
 function escHtml(s) {
   return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Unity 架构师 Submit ───────────────────────────────────────────
+
+async function submitArchitect() {
+  const platforms = [...document.querySelectorAll('#arch-platforms input:checked')].map(e => e.value);
+  const features  = [...document.querySelectorAll('#arch-features input:checked')].map(e => e.value);
+
+  if (!platforms.length) {
+    alert('请至少选择一个目标平台');
+    return;
+  }
+
+  const profile = {
+    game_name:        document.getElementById('arch-name').value || 'My Game',
+    description:      document.getElementById('arch-desc').value || '',
+    game_type:        document.getElementById('arch-type').value,
+    art_style:        document.getElementById('arch-art').value,
+    target_platforms: platforms,
+    team_size:        document.getElementById('arch-team').value,
+    timeline_months:  parseInt(document.getElementById('arch-timeline').value) || 12,
+    budget_level:     document.getElementById('arch-budget').value,
+    features:         features,
+    has_multiplayer:  features.includes('multiplayer'),
+    has_narrative:    features.includes('narrative'),
+    has_iap:          features.includes('iap'),
+    has_hot_update:   features.includes('hot_update'),
+  };
+
+  showLoading('Unity 架构师分析中，正在生成技术选型方案...');
+
+  try {
+    const res  = await fetch('/api/v1/architect/analyze', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ game_profile: profile }),
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      showResults(renderArchitect(data));
+    } else {
+      showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message || data.error}</p></div>`);
+    }
+  } catch (e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+  }
+}
+
+// ── Unity 架构师结果渲染 ──────────────────────────────────────────
+
+function renderArchitect(d) {
+  const gu   = d.game_understanding || {};
+  const ts   = d.tech_stack || {};
+  const sys  = d.systems || {};
+  const rp   = ts.render_pipeline || {};
+  const fw   = ts.main_framework  || {};
+  const net  = ts.network         || {};
+  const arch = ts.architecture_pattern || {};
+
+  const complexityColor = { very_high:'var(--red)', high:'var(--orange)', medium:'var(--yellow)', low:'var(--green)' };
+  const complexityLabel = { very_high:'极高', high:'高', medium:'中等', low:'较低' };
+  const cLevel = gu.complexity || 'medium';
+
+  // ── 顶部摘要 ──
+  let html = `
+    <div class="view-header">
+      <h2>🏗️ ${escHtml(gu.name || '')} — 架构设计方案</h2>
+      <p style="color:var(--muted);">${escHtml(gu.summary || '')}</p>
+    </div>
+    <div class="risk-banner" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);">
+      <div class="risk-icon">🏗️</div>
+      <div class="risk-text">
+        <h3 style="color:#10b981;">Unity 架构师分析完成</h3>
+        <p>项目复杂度：<strong style="color:${complexityColor[cLevel]}">${complexityLabel[cLevel]}</strong>
+           ・渲染管线：${escHtml(rp.display_name || '')}
+           ・主框架：${escHtml(fw.display_name || '')}</p>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat"><div class="num" style="color:#10b981;">${(d.roadmap||[]).length}</div><div class="lbl">开发阶段</div></div>
+        <div class="risk-stat"><div class="num" style="color:${complexityColor[cLevel]}">${(d.risks||[]).length}</div><div class="lbl">风险项</div></div>
+        <div class="risk-stat"><div class="num" style="color:#818cf8;">${(d.asset_recommendations||[]).length}</div><div class="lbl">推荐资源</div></div>
+      </div>
+    </div>`;
+
+  // 冲突警告
+  (d.conflicts || []).forEach(c => {
+    const sevColor = c.severity === 'critical' ? 'var(--red)' : c.severity === 'medium' ? 'var(--yellow)' : 'var(--orange)';
+    html += `<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:14px 18px;margin-bottom:12px;">
+      <div style="font-weight:700;color:${sevColor};margin-bottom:4px;">⚠️ ${escHtml(c.title||'冲突警告')}</div>
+      <div style="font-size:13px;color:var(--muted);">${escHtml(c.description||'')}</div>
+      <div style="font-size:12px;margin-top:6px;color:var(--accent2);">✅ 解决方案：${escHtml(c.solution||'')}</div>
+    </div>`;
+  });
+
+  // ── Tabs ──
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('arch-stack',this)">技术栈</button>
+    <button class="tab-btn" onclick="switchTab('arch-systems',this)">系统选型</button>
+    <button class="tab-btn" onclick="switchTab('arch-assets',this)">资源推荐</button>
+    <button class="tab-btn" onclick="switchTab('arch-risks',this)">风险评估</button>
+    <button class="tab-btn" onclick="switchTab('arch-roadmap',this)">实施路线图</button>
+    <button class="tab-btn" onclick="switchTab('arch-alts',this)">备选方案</button>
+  </div>`;
+
+  // ── Tab: 技术栈 ──
+  html += `<div id="tab-arch-stack" class="tab-panel active">`;
+
+  // 渲染管线
+  html += archCard('🎨 渲染管线', rp.display_name, rp.reason, rp.key_strengths || [], rp.warning, null, '#818cf8');
+
+  // 主框架
+  const fwModules = fw.recommended_modules || [];
+  const fwExtra = fw.companion ? `<div style="margin-top:8px;padding:8px 12px;background:rgba(16,185,129,0.08);border-radius:6px;font-size:12px;color:#10b981;">
+    💡 配套推荐：<strong>${escHtml(fw.companion.name)}</strong> — ${escHtml(fw.companion.reason)}<span style="margin-left:8px;color:var(--muted);">${escHtml(fw.companion.cost||'')}</span></div>` : '';
+  let fwModulesHtml = '';
+  if (fwModules.length) {
+    fwModulesHtml = `<div style="margin-top:10px;"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">推荐模块</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      ${fwModules.map(m => `<span style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card2);color:${m.priority==='required'?'var(--red)':m.priority==='recommended'?'#10b981':'var(--muted)'};">
+        ${m.priority==='required'?'●':m.priority==='recommended'?'◉':'○'} ${escHtml(m.name)}</span>`).join('')}
+      </div>
+      <div style="margin-top:8px;">${fwModules.map(m=>`<div style="font-size:12px;color:var(--muted);padding:3px 0;">${escHtml(m.name)}：${escHtml(m.reason||'')}</div>`).join('')}</div>
+    </div>`;
+  }
+  html += archCard('🧩 主框架', fw.display_name, fw.reason, fw.strengths||[], '', fw.cost_estimate, '#6366f1', fw.weaknesses||[], fwModulesHtml + fwExtra);
+
+  // 架构模式
+  html += archCard('🏛️ 架构模式', arch.display_name, arch.reason, [`事件系统：${arch.event_system||''}`], '', null, '#f59e0b');
+
+  // 网络框架
+  html += archCard('🌐 网络框架', net.display_name, net.reason, net.strengths||[], net.note||'', net.cost, '#06b6d4');
+
+  html += `</div>`;
+
+  // ── Tab: 系统选型 ──
+  html += `<div id="tab-arch-systems" class="tab-panel">`;
+  const sysItems = [
+    ['💾', '存档系统',   sys.save],
+    ['🖥️', 'UI 系统',    sys.ui],
+    ['🔊', '音频框架',   sys.audio],
+    ['🤖', '寻路 / AI', sys.pathfinding],
+    ['🎥', '摄像机',    sys.camera],
+    ['🎮', '输入系统',   sys.input],
+    ['🏗️', '架构 / DI', sys.architecture],
+  ];
+  sysItems.forEach(([icon, label, s]) => {
+    if (!s) return;
+    html += `<div class="finding-card medium" style="border-left-color:#10b981;">
+      <div class="finding-header">
+        <span style="font-size:18px;">${icon}</span>
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">${label}</div>
+          <h4>${escHtml(s.display_name||s.choice||'')}</h4>
+        </div>
+        ${s.cost ? `<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(99,102,241,0.15);color:var(--accent2);">${escHtml(s.cost)}</span>` : ''}
+      </div>
+      <div class="finding-detail">${escHtml(s.reason||'')}</div>
+      ${s.warning ? `<div class="finding-fix" style="border-left-color:var(--orange);color:var(--orange);">${escHtml(s.warning)}</div>` : ''}
+    </div>`;
+  });
+  if (sys.hot_update) {
+    const hu = sys.hot_update;
+    html += `<div class="finding-card high" style="border-left-color:#f59e0b;">
+      <div class="finding-header">
+        <span style="font-size:18px;">🔥</span>
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">热更新</div>
+          <h4>${escHtml(hu.display_name||hu.choice||'')}</h4>
+        </div>
+      </div>
+      <div class="finding-detail">${escHtml(hu.reason||'')}</div>
+      ${hu.warning ? `<div class="finding-fix" style="border-left-color:var(--orange);color:var(--orange);">${escHtml(hu.warning)}</div>` : ''}
+    </div>`;
+  }
+
+  // 性能预算
+  const pb = d.performance_budget || {};
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:8px;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:14px;">📊 性能预算指导 — ${escHtml(pb.target||'')}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px;">
+      ${[['DrawCall 上限',pb.draw_calls],['多边形面数',pb.triangles],['贴图上限',pb.texture_size],['内存预算',pb.memory_budget],['帧率目标',pb.fps_target]]
+        .map(([k,v])=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+          <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;">${k}</div>
+          <div style="font-size:13px;font-weight:700;margin-top:4px;color:#10b981;">${escHtml(v||'—')}</div>
+        </div>`).join('')}
+    </div>
+    <ul style="margin:0;padding-left:18px;">
+      ${(pb.key_rules||[]).map(r=>`<li style="font-size:12px;color:var(--muted);margin-bottom:4px;">${escHtml(r)}</li>`).join('')}
+    </ul>
+  </div>`;
+  html += `</div>`;
+
+  // ── Tab: 资源推荐 ──
+  html += `<div id="tab-arch-assets" class="tab-panel">`;
+  const prioColor = { recommended:'#10b981', optional:'#818cf8', required:'var(--red)' };
+  (d.asset_recommendations || []).forEach(a => {
+    const pc = prioColor[a.priority] || 'var(--muted)';
+    html += `<div class="finding-card" style="border-left-color:${pc};">
+      <div class="finding-header">
+        <span class="sev" style="background:${pc}22;color:${pc};">${a.priority==='recommended'?'推荐':a.priority==='optional'?'可选':'必需'}</span>
+        <span class="platform-tag">${escHtml(a.category||'')}</span>
+        <h4>${escHtml(a.name||'')}</h4>
+        ${a.cost ? `<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(99,102,241,0.15);color:var(--accent2);flex-shrink:0;">${escHtml(a.cost)}</span>` : ''}
+      </div>
+      <div class="finding-detail">${escHtml(a.reason||'')}</div>
+      ${a.caution ? `<div class="finding-fix" style="border-left-color:var(--orange);color:var(--orange);">${escHtml(a.caution)}</div>` : ''}
+    </div>`;
+  });
+  html += `</div>`;
+
+  // ── Tab: 风险评估 ──
+  html += `<div id="tab-arch-risks" class="tab-panel">`;
+  if (!(d.risks||[]).length) {
+    html += `<div style="text-align:center;padding:32px;color:var(--green);">✅ 未检测到明显风险</div>`;
+  }
+  (d.risks||[]).forEach(r => {
+    const lc = { high:'var(--red)', medium:'var(--yellow)', low:'var(--green)' }[r.level] || 'var(--muted)';
+    const ll = { high:'高风险', medium:'中风险', low:'低风险' }[r.level] || r.level;
+    html += `<div class="finding-card ${r.level}" style="border-left-color:${lc};">
+      <div class="finding-header">
+        <span class="sev ${r.level}">${ll}</span>
+        <span class="platform-tag">${escHtml(r.area||'')}</span>
+        <h4>${escHtml(r.risk||'')}</h4>
+      </div>
+      <div class="finding-fix">✅ 缓解措施：${escHtml(r.mitigation||'')}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // ── Tab: 实施路线图 ──
+  html += `<div id="tab-arch-roadmap" class="tab-panel">`;
+  (d.roadmap||[]).forEach(step => {
+    html += `<div class="roadmap-step">
+      <div class="step-num">${step.phase}</div>
+      <div class="step-body">
+        <h4>${escHtml(step.name||'')}</h4>
+        <p><strong>${escHtml(step.duration||'')}</strong></p>
+        <ul class="step-items">${(step.tasks||[]).map(t=>`<li>${escHtml(t)}</li>`).join('')}</ul>
+      </div>
+      <div class="step-meta">
+        <span class="prio ${step.priority}">${step.priority}</span>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // ── Tab: 备选方案 ──
+  html += `<div id="tab-arch-alts" class="tab-panel">`;
+  if (!(d.alternatives||[]).length) {
+    html += `<div style="text-align:center;padding:32px;color:var(--muted);">当前方案无需备选，推荐直接采用主方案</div>`;
+  }
+  (d.alternatives||[]).forEach((alt, i) => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">备选方案 ${i+1}</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px;color:var(--yellow);">💡 ${escHtml(alt.scenario||'')}</div>
+      <div style="font-size:13px;margin-bottom:6px;"><strong>方案：</strong>${escHtml(alt.solution||'')}</div>
+      <div style="font-size:12px;color:var(--muted);"><strong>权衡：</strong>${escHtml(alt.tradeoff||'')}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+function archCard(title, name, reason, points, warning, cost, accentColor, weaknesses, extraHtml) {
+  accentColor = accentColor || 'var(--accent)';
+  return `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${accentColor};border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">${title}</div>
+        <div style="font-size:16px;font-weight:700;margin-top:2px;color:${accentColor};">${escHtml(name||'')}</div>
+      </div>
+      ${cost ? `<span style="font-size:11px;padding:3px 10px;border-radius:6px;background:rgba(99,102,241,0.15);color:var(--accent2);flex-shrink:0;">${escHtml(cost)}</span>` : ''}
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:${points.length?'10px':'0'}">${escHtml(reason||'')}</div>
+    ${points.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:${(weaknesses&&weaknesses.length)?'8px':'0'}">
+      ${points.map(p=>`<span style="font-size:11px;padding:3px 10px;border-radius:6px;background:rgba(16,185,129,0.1);color:#10b981;">✓ ${escHtml(p)}</span>`).join('')}
+    </div>` : ''}
+    ${(weaknesses&&weaknesses.length) ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+      ${weaknesses.map(w=>`<span style="font-size:11px;padding:3px 10px;border-radius:6px;background:rgba(239,68,68,0.1);color:#f87171;">△ ${escHtml(w)}</span>`).join('')}
+    </div>` : ''}
+    ${warning ? `<div style="margin-top:8px;padding:6px 12px;background:rgba(249,115,22,0.08);border-radius:6px;font-size:12px;color:var(--orange);border-left:2px solid var(--orange);">${escHtml(warning)}</div>` : ''}
+    ${extraHtml||''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── 技术实现向导
+// ═══════════════════════════════════════════════════════════════
+
+async function submitImplWizard() {
+  const platforms = [...document.querySelectorAll('#iw-platforms input:checked')].map(e => e.value);
+  const features  = [...document.querySelectorAll('#iw-features input:checked')].map(e => e.value);
+  if (!platforms.length) { alert('请至少选择一个目标平台'); return; }
+  const profile = {
+    game_name:           document.getElementById('iw-name').value || 'MyGame',
+    game_type:           document.getElementById('iw-type').value,
+    render_pipeline:     document.getElementById('iw-rp').value,
+    main_framework:      document.getElementById('iw-fw').value,
+    di_framework:        document.getElementById('iw-di').value,
+    save_system:         document.getElementById('iw-save').value,
+    network_framework:   document.getElementById('iw-net').value,
+    architecture_pattern: document.getElementById('iw-arch').value,
+    target_platforms:    platforms,
+    features:            features,
+    has_multiplayer:     features.includes('multiplayer'),
+    has_gacha:           features.includes('gacha'),
+  };
+  showLoading('技术实现向导分析中，正在生成项目骨架与代码模板…');
+  try {
+    const res  = await fetch('/api/v1/wizard/implementation', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({game_profile:profile}) });
+    const data = await res.json();
+    if (data.status === 'success') showResults(renderImplWizard(data));
+    else showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message||data.error}</p></div>`);
+  } catch(e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+  }
+}
+
+function renderImplWizard(d) {
+  const gi    = d.game_info    || {};
+  const fs    = d.folder_structure || {};
+  const asmds = d.asmdef_plan  || [];
+  const ifaces= d.system_interfaces || [];
+  const boots = d.bootstrap_code || [];
+  const sos   = d.so_templates || [];
+  const settings = d.unity_settings || [];
+  const coding   = d.coding_standards || {};
+  const order    = d.implementation_order || [];
+
+  let html = `
+    <div class="view-header">
+      <h2>⚙️ ${escHtml(gi.name||'')} — 技术实现向导</h2>
+      <p style="color:var(--muted);">命名空间: ${escHtml(gi.name||'')} · 框架: ${escHtml(gi.main_framework||'')} · DI: ${escHtml(gi.di_framework||'')} · 架构: ${escHtml(gi.architecture||'')}</p>
+    </div>
+    <div class="risk-banner" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);">
+      <div class="risk-icon">⚙️</div>
+      <div class="risk-text">
+        <h3 style="color:#06b6d4;">技术实现向导生成完成</h3>
+        <p>项目骨架 · ${asmds.length} 个 Assembly Definition · ${ifaces.length} 个接口/工具类 · ${sos.length} 个 ScriptableObject 模板</p>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat"><div class="num" style="color:#06b6d4;">${ifaces.length}</div><div class="lbl">代码文件</div></div>
+        <div class="risk-stat"><div class="num" style="color:#8b5cf6;">${sos.length}</div><div class="lbl">SO模板</div></div>
+        <div class="risk-stat"><div class="num" style="color:#f59e0b;">${order.length}</div><div class="lbl">实现阶段</div></div>
+      </div>
+    </div>`;
+
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('iw-folder',this)">目录结构</button>
+    <button class="tab-btn" onclick="switchTab('iw-asmdef',this)">Assembly Def</button>
+    <button class="tab-btn" onclick="switchTab('iw-interfaces',this)">接口&代码</button>
+    <button class="tab-btn" onclick="switchTab('iw-so',this)">SO模板</button>
+    <button class="tab-btn" onclick="switchTab('iw-settings',this)">项目设置</button>
+    <button class="tab-btn" onclick="switchTab('iw-standards',this)">编码规范</button>
+    <button class="tab-btn" onclick="switchTab('iw-order',this)">实现顺序</button>
+  </div>`;
+
+  // Tab 目录结构
+  html += `<div id="tab-iw-folder" class="tab-panel active">`;
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;">
+    <div style="font-family:monospace;font-size:13px;line-height:1.8;">`;
+  html += renderFolderTree(fs.tree || {}, 0);
+  html += `</div></div>`;
+  (fs.notes||[]).forEach(n => {
+    html += `<div style="font-size:12px;color:var(--muted);padding:5px 0;border-left:3px solid #06b6d4;padding-left:10px;margin-bottom:4px;">${escHtml(n)}</div>`;
+  });
+  html += `</div>`;
+
+  // Tab Assembly Def
+  html += `<div id="tab-iw-asmdef" class="tab-panel">`;
+  asmds.forEach(a => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #06b6d4;border-radius:12px;padding:14px 18px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <code style="color:#06b6d4;font-size:13px;font-weight:700;">${escHtml(a.name||'')}</code>
+        ${a.editor_only ? '<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(139,92,246,0.15);color:#8b5cf6;">Editor Only</span>' : ''}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">路径：${escHtml(a.path||'')}</div>
+      <div style="font-size:13px;">${escHtml(a.purpose||'')}</div>
+      ${a.references&&a.references.length ? `<div style="margin-top:6px;font-size:11px;color:var(--muted);">引用：${a.references.map(r=>`<code style="color:#06b6d4;">${escHtml(r)}</code>`).join(' → ')}</div>` : '<div style="margin-top:4px;font-size:11px;color:var(--muted);">无外部依赖（基础层）</div>'}
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab 接口&代码
+  html += `<div id="tab-iw-interfaces" class="tab-panel">`;
+  ifaces.forEach(iface => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:#06b6d4;">${escHtml(iface.name||'')}</div>
+        <div style="font-size:11px;color:var(--muted);flex:1;">${escHtml(iface.path||'')}</div>
+        <button onclick="copyCode(this)" style="font-size:11px;padding:3px 10px;border-radius:6px;background:rgba(6,182,212,0.15);color:#06b6d4;border:1px solid rgba(6,182,212,0.3);cursor:pointer;">复制</button>
+      </div>
+      <pre style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;overflow-x:auto;font-size:11px;line-height:1.6;color:#e2e8f0;margin:0;white-space:pre-wrap;word-break:break-all;">${escHtml(iface.code||'')}</pre>
+    </div>`;
+  });
+  // 框架引导代码
+  boots.forEach(b => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #f59e0b;border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:#f59e0b;">${escHtml(b.name||'')}</div>
+        <div style="font-size:11px;color:var(--muted);flex:1;">${escHtml(b.path||'')}</div>
+        <button onclick="copyCode(this)" style="font-size:11px;padding:3px 10px;border-radius:6px;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);cursor:pointer;">复制</button>
+      </div>
+      <pre style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;overflow-x:auto;font-size:11px;line-height:1.6;color:#e2e8f0;margin:0;white-space:pre-wrap;word-break:break-all;">${escHtml(b.code||'')}</pre>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab SO模板
+  html += `<div id="tab-iw-so" class="tab-panel">`;
+  sos.forEach(so => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #8b5cf6;border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:#8b5cf6;">${escHtml(so.name||'')}</div>
+        <div style="font-size:11px;color:var(--muted);flex:1;">${escHtml(so.path||'')}</div>
+        <button onclick="copyCode(this)" style="font-size:11px;padding:3px 10px;border-radius:6px;background:rgba(139,92,246,0.15);color:#8b5cf6;border:1px solid rgba(139,92,246,0.3);cursor:pointer;">复制</button>
+      </div>
+      <pre style="background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;overflow-x:auto;font-size:11px;line-height:1.6;color:#e2e8f0;margin:0;white-space:pre-wrap;word-break:break-all;">${escHtml(so.code||'')}</pre>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab 项目设置
+  html += `<div id="tab-iw-settings" class="tab-panel">`;
+  settings.forEach(cat => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-bottom:10px;">${escHtml(cat.category||'')}</div>
+      <ul style="margin:0;padding-left:18px;">${(cat.items||[]).map(i=>`<li style="font-size:12px;color:var(--text);margin-bottom:5px;">${escHtml(i)}</li>`).join('')}</ul>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab 编码规范
+  html += `<div id="tab-iw-standards" class="tab-panel">`;
+  html += `<div style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:13px;">命名空间：<code style="color:#06b6d4;font-size:14px;font-weight:700;">${escHtml(coding.namespace||'')}</code></div>`;
+  html += `<div style="overflow-x:auto;margin-bottom:12px;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <tr><th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">类型</th><th style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">规范</th><th style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">示例</th></tr>
+    ${(coding.naming||[]).map(n=>`<tr><td style="padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.04);">${escHtml(n['类型']||'')}</td><td style="padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.04);"><code style="color:#06b6d4;">${escHtml(n['规范']||'')}</code></td><td style="padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;color:var(--muted);">${escHtml(n['示例']||'')}</td></tr>`).join('')}
+  </table></div>
+  <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 18px;margin-bottom:10px;">
+    <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">🚫 反模式（禁止在项目中使用）</div>
+    <ul style="margin:0;padding-left:18px;">${(coding.anti_patterns||[]).map(a=>`<li style="font-size:12px;color:var(--muted);margin-bottom:4px;">${escHtml(a)}</li>`).join('')}</ul>
+  </div>
+  <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px 18px;">
+    <div style="font-size:12px;font-weight:700;color:#10b981;margin-bottom:8px;">⚡ 性能规范</div>
+    <ul style="margin:0;padding-left:18px;">${(coding.performance_rules||[]).map(r=>`<li style="font-size:12px;color:var(--text);margin-bottom:4px;">${escHtml(r)}</li>`).join('')}</ul>
+  </div>`;
+  html += `</div>`;
+
+  // Tab 实现顺序
+  html += `<div id="tab-iw-order" class="tab-panel">`;
+  order.forEach(phase => {
+    html += `<div class="roadmap-step">
+      <div class="step-num">${phase.phase}</div>
+      <div class="step-body">
+        <h4>${escHtml(phase.name||'')}</h4>
+        <ul class="step-items">${(phase.tasks||[]).map(t=>`<li>${escHtml(t)}</li>`).join('')}</ul>
+        ${phase.deliverable ? `<div style="margin-top:8px;padding:6px 12px;background:rgba(16,185,129,0.08);border-radius:6px;font-size:12px;color:#10b981;">✅ 交付物：${escHtml(phase.deliverable)}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+function renderFolderTree(obj, depth) {
+  let html = '';
+  const indent = '  '.repeat(depth);
+  for (const [key, val] of Object.entries(obj)) {
+    if (typeof val === 'object' && val !== null) {
+      html += `<div style="padding:1px 0;"><span style="color:${depth===0?'#06b6d4':depth===1?'#8b5cf6':'#f59e0b'};">${escHtml(indent + key)}</span></div>`;
+      html += renderFolderTree(val, depth + 1);
+    } else {
+      html += `<div style="padding:1px 0;"><span style="color:var(--muted);font-size:11px;">${escHtml(indent + key)}</span> <span style="color:rgba(255,255,255,0.3);font-size:10px;">// ${escHtml(String(val))}</span></div>`;
+    }
+  }
+  return html;
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('div').querySelector('pre');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = '✓ 已复制';
+    setTimeout(() => btn.textContent = '复制', 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── QA 工程师
+// ═══════════════════════════════════════════════════════════════
+
+async function submitQAEngineer() {
+  const platforms = [...document.querySelectorAll('#qa-platforms input:checked')].map(e => e.value);
+  const features  = [...document.querySelectorAll('#qa-features input:checked')].map(e => e.value);
+  if (!platforms.length) { alert('请至少选择一个目标平台'); return; }
+  const profile = {
+    game_name:        document.getElementById('qa-name').value || 'My Game',
+    game_type:        document.getElementById('qa-type').value,
+    team_size:        document.getElementById('qa-team').value,
+    monetization_type:document.getElementById('qa-monetization').value,
+    target_platforms: platforms,
+    features:         features,
+    has_multiplayer:  features.includes('multiplayer'),
+    has_iap:          features.includes('iap'),
+    has_gacha:        features.includes('gacha'),
+  };
+  showLoading('QA 工程师分析中，正在生成测试计划与发布清单…');
+  try {
+    const res  = await fetch('/api/v1/qa/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({game_profile:profile}) });
+    const data = await res.json();
+    if (data.status === 'success') showResults(renderQAEngineer(data));
+    else showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message||data.error}</p></div>`);
+  } catch(e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+  }
+}
+
+function renderQAEngineer(d) {
+  const gi   = d.game_info    || {};
+  const strat= d.test_strategy || {};
+  const ftests= d.feature_tests || [];
+  const ptests= d.platform_tests || [];
+  const perf = d.performance_tests || {};
+  const reg  = d.unity_regression || [];
+  const bm   = d.bug_matrix   || {};
+  const rel  = d.release_checklist || [];
+  const auto = d.automation_plan || {};
+
+  const totalCases = ftests.reduce((s,f)=>s+(f.cases||[]).length,0) + ptests.reduce((s,p)=>s+(p.cases||[]).length,0);
+
+  let html = `
+    <div class="view-header">
+      <h2>🧪 ${escHtml(gi.name||'')} — QA 测试计划</h2>
+      <p style="color:var(--muted);">${escHtml(gi.type||'')} · 平台: ${(gi.platforms||[]).join('/')} · IAP: ${gi.has_iap?'是':'否'} · 多人: ${gi.has_multiplayer?'是':'否'}</p>
+    </div>
+    <div class="risk-banner" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);">
+      <div class="risk-icon">🧪</div>
+      <div class="risk-text">
+        <h3 style="color:#10b981;">QA 工程师分析完成</h3>
+        <p>${escHtml(strat.team_note||'')}</p>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat"><div class="num" style="color:#10b981;">${totalCases}</div><div class="lbl">测试用例</div></div>
+        <div class="risk-stat"><div class="num" style="color:var(--red);">${(bm.severity_levels||[]).length}</div><div class="lbl">严重等级</div></div>
+        <div class="risk-stat"><div class="num" style="color:#f59e0b;">${rel.reduce((s,c)=>s+(c.items||[]).length,0)}</div><div class="lbl">发布检查项</div></div>
+      </div>
+    </div>`;
+
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('qa-strategy',this)">测试策略</button>
+    <button class="tab-btn" onclick="switchTab('qa-feature',this)">功能测试</button>
+    <button class="tab-btn" onclick="switchTab('qa-platform',this)">平台测试</button>
+    <button class="tab-btn" onclick="switchTab('qa-perf',this)">性能测试</button>
+    <button class="tab-btn" onclick="switchTab('qa-regression',this)">Unity回归</button>
+    <button class="tab-btn" onclick="switchTab('qa-bugmatrix',this)">Bug矩阵</button>
+    <button class="tab-btn" onclick="switchTab('qa-release',this)">发布清单</button>
+    <button class="tab-btn" onclick="switchTab('qa-auto',this)">自动化</button>
+  </div>`;
+
+  // Tab 测试策略
+  html += `<div id="tab-qa-strategy" class="tab-panel active">`;
+  html += `<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px 18px;margin-bottom:12px;font-size:13px;"><strong>核心理念：</strong>${escHtml(strat.philosophy||'')}</div>`;
+  const pyr = strat.test_pyramid || {};
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">测试金字塔</div>
+    ${[['单元测试',pyr.unit,'#10b981'],['集成测试',pyr.integration,'#06b6d4'],['手动测试',pyr.e2e,'#8b5cf6'],['自动化测试',pyr.automated,'#f59e0b']].map(([k,v,c])=>`
+      <div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;">
+        <div style="min-width:70px;font-size:11px;font-weight:700;color:${c};padding:3px 0;">${k}</div>
+        <div style="font-size:12px;color:var(--text);">${escHtml(v||'—')}</div>
+      </div>`).join('')}
+  </div>`;
+  if ((strat.high_risk_areas||[]).length) {
+    html += `<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 18px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">🚨 高风险区域（重点测试）</div>
+      <ul style="margin:0;padding-left:18px;">${strat.high_risk_areas.map(r=>`<li style="font-size:12px;color:var(--text);margin-bottom:4px;">${escHtml(r)}</li>`).join('')}</ul>
+    </div>`;
+  }
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">QA 阶段门禁</div>
+    ${(strat.qa_phases||[]).map(ph=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div style="min-width:50px;font-size:11px;font-weight:700;color:#10b981;">${escHtml(ph.phase||'')}</div>
+      <div style="flex:1;"><div style="font-size:12px;font-weight:600;">${escHtml(ph.goal||'')}</div><div style="font-size:11px;color:var(--muted);">${escHtml(ph.exit_criteria||'')}</div></div>
+    </div>`).join('')}
+  </div>`;
+  html += `</div>`;
+
+  // Tab 功能测试
+  html += `<div id="tab-qa-feature" class="tab-panel">`;
+  const p0Color = 'var(--red)', p1Color = 'var(--orange)', p2Color = '#f59e0b', p3Color = 'var(--muted)';
+  const prioColor = {'P0':p0Color,'P1':p1Color,'P2':p2Color,'P3':p3Color};
+  ftests.forEach(sys => {
+    const pc = prioColor[sys.priority] || 'var(--muted)';
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="padding:3px 10px;border-radius:6px;background:${pc}22;color:${pc};font-size:11px;font-weight:700;">${escHtml(sys.priority||'')}</span>
+        <span style="font-size:14px;font-weight:700;">${escHtml(sys.system||'')}</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--muted);">${(sys.cases||[]).length} 个用例</span>
+      </div>
+      <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <tr><th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);width:90px;">用例ID</th><th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);">测试项</th><th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);">期望结果</th><th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);width:50px;">状态</th></tr>
+        ${(sys.cases||[]).map(c=>`<tr>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);"><code style="color:#06b6d4;font-size:11px;">${escHtml(c.id||'')}</code></td>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);">${escHtml(c.title||'')}</td>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;color:var(--muted);">${escHtml(c.expected||'')}</td>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;font-size:16px;color:var(--muted);">☐</td>
+        </tr>`).join('')}
+      </table></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab 平台测试
+  html += `<div id="tab-qa-platform" class="tab-panel">`;
+  ptests.forEach(pt => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:700;color:#06b6d4;margin-bottom:8px;">${escHtml(pt.platform||'')}</div>
+      <div style="margin-bottom:10px;"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">测试设备清单：</div>
+        ${(pt.test_devices||[]).map(d=>`<div style="font-size:12px;color:var(--text);padding:2px 0;">• ${escHtml(d)}</div>`).join('')}
+      </div>
+      <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <tr><th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);width:90px;">用例ID</th><th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);">测试项</th><th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);">期望结果</th><th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);width:50px;">状态</th></tr>
+        ${(pt.cases||[]).map(c=>`<tr>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);"><code style="color:#06b6d4;font-size:11px;">${escHtml(c.id||'')}</code></td>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);">${escHtml(c.title||'')}</td>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;color:var(--muted);">${escHtml(c.expected||'')}</td>
+          <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;font-size:16px;color:var(--muted);">☐</td>
+        </tr>`).join('')}
+      </table></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab 性能测试
+  html += `<div id="tab-qa-perf" class="tab-panel">`;
+  Object.entries(perf.platform_targets||{}).forEach(([platform, targets]) => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:10px;">📊 ${platform === 'mobile' ? '移动端' : 'PC'} 性能目标</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
+        ${Object.entries(targets).map(([k,v])=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">${escHtml(k)}</div>
+          <div style="font-size:12px;font-weight:600;margin-top:4px;color:#f59e0b;">${escHtml(String(v))}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  (perf.stress_tests||[]).filter(t=>t.applicable!==false).forEach(t => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #f59e0b;border-radius:12px;padding:14px 18px;margin-bottom:8px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px;">${escHtml(t.name||'')}</div>
+      <div style="font-size:12px;margin-bottom:4px;">方法：${escHtml(t.method||'')}</div>
+      <div style="font-size:12px;margin-bottom:4px;">工具：<code style="color:#f59e0b;">${escHtml(t.tool||'')}</code></div>
+      <div style="font-size:12px;color:#10b981;">✅ 通过标准：${escHtml(t.pass_criteria||'')}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab Unity回归
+  html += `<div id="tab-qa-regression" class="tab-panel">`;
+  const catColors = {'渲染':'#818cf8','物理':'#f59e0b','动画':'#ec4899','音频':'#06b6d4','内存':'var(--red)','移动端':'#10b981','网络':'#8b5cf6','IAP':'#f59e0b'};
+  const byCat = {};
+  reg.forEach(item => {
+    if (!byCat[item.category]) byCat[item.category] = [];
+    byCat[item.category].push(item);
+  });
+  Object.entries(byCat).forEach(([cat, items]) => {
+    const cc = catColors[cat] || 'var(--muted)';
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:${cc};margin-bottom:10px;">${cat} 类</div>
+      ${items.map(item=>`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <span style="font-size:16px;color:var(--muted);">☐</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">${escHtml(item.bug||'')}</div>
+            <div style="font-size:12px;color:var(--muted);">检查：${escHtml(item.check||'')}</div>
+            <div style="font-size:12px;color:#10b981;">修复方向：${escHtml(item.fix||'')}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab Bug矩阵
+  html += `<div id="tab-qa-bugmatrix" class="tab-panel">`;
+  const sevColors = {'P0 — 致命':'var(--red)','P1 — 严重':'var(--orange)','P2 — 中等':'#f59e0b','P3 — 轻微':'#10b981'};
+  (bm.severity_levels||[]).forEach(lv => {
+    const c = sevColors[lv.level] || 'var(--muted)';
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:4px solid ${c};border-radius:12px;padding:16px 20px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span style="font-size:14px;font-weight:700;color:${c};">${escHtml(lv.level||'')}</span>
+        <span style="font-size:11px;background:${c}22;color:${c};padding:2px 10px;border-radius:6px;">上线时最多开启: ${lv.max_open_to_release}</span>
+      </div>
+      <div style="font-size:13px;margin-bottom:6px;">${escHtml(lv.definition||'')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">示例：${(lv.examples||[]).join(' / ')}</div>
+      <div style="font-size:12px;color:${c};">响应要求：${escHtml(lv.response||'')}</div>
+    </div>`;
+  });
+  if (bm.bug_report_template) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;">📋 Bug 报告模板</div>
+      ${Object.entries(bm.bug_report_template).map(([k,v])=>`<div style="display:flex;gap:8px;padding:4px 0;font-size:12px;"><span style="color:#06b6d4;min-width:60px;font-weight:600;">${escHtml(k)}</span><span style="color:var(--muted);">${escHtml(v)}</span></div>`).join('')}
+    </div>`;
+  }
+  html += `</div>`;
+
+  // Tab 发布清单
+  html += `<div id="tab-qa-release" class="tab-panel">`;
+  rel.forEach(cat => {
+    const critCount = (cat.items||[]).filter(i=>i.critical).length;
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;">${escHtml(cat.category||'')}</div>
+        <div style="margin-left:auto;font-size:11px;color:var(--red);">⚠️ ${critCount} 项关键</div>
+      </div>
+      ${(cat.items||[]).map(item=>`<div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+        <span style="font-size:16px;color:var(--muted);">☐</span>
+        <div style="flex:1;font-size:12px;">${escHtml(item.item||'')}</div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          ${item.critical ? '<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(239,68,68,0.15);color:var(--red);">关键</span>' : ''}
+          <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--card2);color:var(--muted);">${escHtml(item.owner||'')}</span>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab 自动化
+  html += `<div id="tab-qa-auto" class="tab-panel">`;
+  html += `<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px 18px;margin-bottom:12px;font-size:13px;">${escHtml(auto.recommendation||'')}</div>`;
+  const ut = auto.unit_tests || {};
+  if (ut.framework) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:8px;">单元测试 · 框架: <code>${escHtml(ut.framework||'')}</code></div>
+      <ul style="margin:0 0 10px;padding-left:18px;">${(ut.targets||[]).map(t=>`<li style="font-size:12px;color:var(--text);margin-bottom:4px;">${escHtml(t)}</li>`).join('')}</ul>
+      ${ut.example ? `<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">示例代码：</div>
+      <pre style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;overflow-x:auto;font-size:11px;line-height:1.6;color:#e2e8f0;margin:0;white-space:pre-wrap;">${escHtml(ut.example)}</pre>` : ''}
+    </div>`;
+  }
+  const ci = auto.ci_recommendation || {};
+  if (ci.tool) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #8b5cf6;border-radius:12px;padding:16px 20px;">
+      <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:8px;">CI/CD 建议 · 工具: <code>${escHtml(ci.tool||'')}</code></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">触发：${escHtml(ci.trigger||'')}</div>
+      <ul style="margin:0;padding-left:18px;">${(ci.steps||[]).map(s=>`<li style="font-size:12px;color:var(--text);margin-bottom:4px;">${escHtml(s)}</li>`).join('')}</ul>
+    </div>`;
+  }
+  html += `</div>`;
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── 数据分析师
+// ═══════════════════════════════════════════════════════════════
+
+async function submitDataAnalyst() {
+  const platforms = [...document.querySelectorAll('#da-platforms input:checked')].map(e => e.value);
+  const features  = [...document.querySelectorAll('#da-features input:checked')].map(e => e.value);
+  if (!platforms.length) { alert('请至少选择一个目标平台'); return; }
+  const profile = {
+    game_name:         document.getElementById('da-name').value || 'My Game',
+    game_type:         document.getElementById('da-type').value,
+    monetization_type: document.getElementById('da-monetization').value,
+    launch_stage:      document.getElementById('da-stage').value,
+    expected_dau:      document.getElementById('da-dau').value,
+    team_size:         document.getElementById('da-team').value,
+    target_platforms:  platforms,
+    features:          features,
+    has_multiplayer:   features.includes('multiplayer'),
+    has_iap:           features.includes('iap') || document.getElementById('da-monetization').value === 'f2p',
+    has_gacha:         features.includes('gacha'),
+  };
+  showLoading('数据分析师分析中，正在生成 KPI 体系与数据分析框架…');
+  try {
+    const res  = await fetch('/api/v1/data/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({game_profile:profile}) });
+    const data = await res.json();
+    if (data.status === 'success') showResults(renderDataAnalyst(data));
+    else showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message||data.error}</p></div>`);
+  } catch(e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+  }
+}
+
+function renderDataAnalyst(d) {
+  const gi    = d.game_info           || {};
+  const kpi   = d.kpi_system          || {};
+  const track = d.tracking_plan       || {};
+  const ret   = d.retention_model     || {};
+  const mon   = d.monetization_model  || {};
+  const cont  = d.content_funnel      || {};
+  const ab    = d.ab_testing          || {};
+  const tools = d.tool_stack          || [];
+  const iter  = d.iteration_framework || {};
+
+  const totalEvents = (track.event_summary || {}).total_events || 0;
+  const totalTests  = (ab.priority_tests   || []).length;
+  const totalTools  = tools.length;
+
+  let html = `
+    <div class="view-header">
+      <h2>📊 ${escHtml(gi.name||'')} — 数据分析体系</h2>
+      <p style="color:var(--muted);">${escHtml(gi.type||'')} · ${escHtml(gi.monetization||'')} · ${escHtml(gi.stage||'')} · 预期 DAU: ${escHtml(gi.expected_dau||'')}</p>
+    </div>
+    <div class="risk-banner" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);">
+      <div class="risk-icon">📊</div>
+      <div class="risk-text">
+        <h3 style="color:#8b5cf6;">数据分析师方案生成完成</h3>
+        <p>从 KPI 定义到埋点规划、留存分析、付费漏斗、A/B 测试到迭代决策，完整闭环。</p>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat"><div class="num" style="color:#8b5cf6;">${totalEvents}</div><div class="lbl">埋点事件</div></div>
+        <div class="risk-stat"><div class="num" style="color:#06b6d4;">${totalTests}</div><div class="lbl">A/B 测试</div></div>
+        <div class="risk-stat"><div class="num" style="color:#10b981;">${totalTools}</div><div class="lbl">推荐工具</div></div>
+      </div>
+    </div>`;
+
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('da-kpi',this)">KPI 体系</button>
+    <button class="tab-btn" onclick="switchTab('da-track',this)">埋点方案</button>
+    <button class="tab-btn" onclick="switchTab('da-retention',this)">留存分析</button>
+    <button class="tab-btn" onclick="switchTab('da-monetization',this)">付费分析</button>
+    <button class="tab-btn" onclick="switchTab('da-content',this)">内容漏斗</button>
+    <button class="tab-btn" onclick="switchTab('da-ab',this)">A/B 测试</button>
+    <button class="tab-btn" onclick="switchTab('da-tools',this)">工具栈</button>
+    <button class="tab-btn" onclick="switchTab('da-iter',this)">迭代框架</button>
+  </div>`;
+
+  // ── Tab: KPI 体系
+  html += `<div id="tab-da-kpi" class="tab-panel active">`;
+  html += `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:14px 18px;margin-bottom:12px;font-size:13px;">
+    <strong>${escHtml(kpi.framework||'')}</strong>：${escHtml(kpi.framework_desc||'')}
+  </div>`;
+  // Tier 1
+  if ((kpi.tier1_north_star||[]).length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;margin:12px 0 8px;">⭐ 北极星指标（Tier 1）</div>`;
+    (kpi.tier1_north_star||[]).forEach(m => {
+      html += `<div style="background:var(--card);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px 18px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">${escHtml(m.metric||'')}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
+          <div><span style="color:var(--muted);">公式：</span>${escHtml(m.formula||'')}</div>
+          <div><span style="color:var(--muted);">为什么：</span>${escHtml(m.why||'')}</div>
+          <div style="grid-column:1/-1;"><span style="color:var(--muted);">行业基准：</span><pre style="margin:4px 0 0;font-size:11px;background:rgba(0,0,0,0.2);padding:8px;border-radius:6px;white-space:pre-wrap;">${escHtml(m.benchmark||'')}</pre></div>
+          <div style="grid-column:1/-1;background:rgba(239,68,68,0.06);padding:6px 10px;border-radius:6px;"><span style="color:var(--red);font-weight:600;">⚠️ 预警：</span>${escHtml(m.alert||'')}</div>
+        </div>
+      </div>`;
+    });
+  }
+  // Tier 2
+  if ((kpi.tier2_health_metrics||[]).length) {
+    html += `<div style="font-size:12px;font-weight:700;color:#06b6d4;text-transform:uppercase;margin:12px 0 8px;">💊 健康度指标（Tier 2）</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:10px;">
+    ${(kpi.tier2_health_metrics||[]).map(m=>`<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="min-width:130px;font-size:12px;font-weight:600;color:#06b6d4;">${escHtml(m.metric||'')}</div>
+      <div style="font-size:11px;color:var(--muted);">${escHtml(m.formula||'')} — ${escHtml(m.why||'')}</div>
+    </div>`).join('')}
+    </div>`;
+  }
+  // Review cadence
+  const rc = kpi.review_cadence || {};
+  if (Object.keys(rc).length) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">📅 数据复盘节奏</div>
+      ${Object.entries(rc).map(([k,v])=>`<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+        <div style="min-width:50px;font-size:11px;font-weight:700;color:#8b5cf6;">${escHtml(k)}</div>
+        <div style="font-size:12px;color:var(--text);">${escHtml(v)}</div>
+      </div>`).join('')}
+    </div>`;
+  }
+  html += `</div>`;
+
+  // ── Tab: 埋点方案
+  html += `<div id="tab-da-track" class="tab-panel">`;
+  const es = track.event_summary || {};
+  html += `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;gap:20px;align-items:center;">
+    <div style="font-size:24px;font-weight:700;color:#8b5cf6;">${es.total_events||0}</div>
+    <div><div style="font-size:12px;font-weight:600;">总埋点事件数</div><div style="font-size:11px;color:var(--muted);">优先级：${escHtml(es.priority_order||'')}</div></div>
+  </div>`;
+  if ((track.implementation_guide||[]).length) {
+    html += `<div style="background:rgba(0,0,0,0.15);border-radius:10px;padding:12px 16px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">📋 埋点实施原则</div>
+      ${track.implementation_guide.map(g=>`<div style="font-size:12px;color:var(--text);padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">✓ ${escHtml(g)}</div>`).join('')}
+    </div>`;
+  }
+  const renderEventGroup = (title, events, color) => {
+    if (!events || !events.length) return '';
+    let h = `<div style="font-size:12px;font-weight:700;color:${color};text-transform:uppercase;margin:12px 0 6px;">${title}（${events.length} 个事件）</div>`;
+    events.forEach(ev => {
+      h += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${color};border-radius:10px;padding:12px 16px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <code style="font-size:12px;color:${color};background:rgba(0,0,0,0.2);padding:2px 8px;border-radius:4px;">${escHtml(ev.event||'')}</code>
+          <div style="font-size:11px;color:var(--muted);">触发：${escHtml(ev.trigger||'')}</div>
+        </div>
+        <div style="font-size:11px;margin-bottom:6px;"><span style="color:var(--muted);">属性：</span>${(ev.properties||[]).map(p=>`<code style="margin-right:4px;background:rgba(0,0,0,0.15);padding:1px 5px;border-radius:3px;font-size:10px;">${escHtml(p)}</code>`).join('')}</div>
+        <div style="font-size:11px;color:var(--muted);">目的：${escHtml(ev.purpose||'')}</div>
+      </div>`;
+    });
+    return h;
+  };
+  html += renderEventGroup('基础事件（必须）', track.base_events, '#8b5cf6');
+  html += renderEventGroup('进度事件', track.progress_events, '#06b6d4');
+  html += renderEventGroup('社交/多人事件', track.social_events, '#10b981');
+  html += renderEventGroup('付费事件', track.iap_events, '#f59e0b');
+  html += `</div>`;
+
+  // ── Tab: 留存分析
+  html += `<div id="tab-da-retention" class="tab-panel">`;
+  const bm = ret.benchmarks || {};
+  if (Object.keys(bm).length) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">📊 留存基准（你的游戏类型）</div>
+      ${Object.entries(bm).map(([day, levels])=>`<div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;color:#8b5cf6;margin-bottom:4px;">${escHtml(day)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${Object.entries(levels||{}).map(([k,v])=>{
+            const colors={poor:'var(--red)',avg:'#f59e0b',good:'#06b6d4',excellent:'#10b981'};
+            const labels={poor:'危险',avg:'均值',good:'良好',excellent:'优秀'};
+            return `<div style="padding:4px 10px;border-radius:6px;background:rgba(0,0,0,0.15);font-size:11px;"><span style="color:${colors[k]||'var(--muted)'};">${labels[k]||k}:</span> ${escHtml(v)}</div>`;
+          }).join('')}
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }
+  if ((ret.analysis_methods||[]).length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 8px;">🔬 分析方法</div>`;
+    (ret.analysis_methods||[]).forEach(m => {
+      html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:700;color:#8b5cf6;margin-bottom:6px;">${escHtml(m.method||'')}</div>
+        <div style="font-size:11px;color:var(--text);margin-bottom:4px;">${escHtml(m.how||'')}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">💡 ${escHtml(m.insight||'')}</div>
+        <div style="font-size:11px;color:#06b6d4;">工具：${escHtml(m.tool||'')}</div>
+      </div>`;
+    });
+  }
+  if ((ret.improvement_levers||[]).length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 8px;">🚀 留存提升杠杆</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
+    ${(ret.improvement_levers||[]).map(l=>`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+        <div style="font-size:12px;font-weight:600;">${escHtml(l.lever||'')}</div>
+        <div style="margin-left:auto;font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.15);color:#10b981;">${escHtml(l.impact||'')}</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">${escHtml(l.method||'')}</div>
+    </div>`).join('')}
+    </div>`;
+  }
+  html += `</div>`;
+
+  // ── Tab: 付费分析
+  html += `<div id="tab-da-monetization" class="tab-panel">`;
+  if (mon.note) {
+    html += `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:14px 18px;margin-bottom:12px;font-size:13px;">${escHtml(mon.note)}</div>`;
+    if ((mon.premium_kpis||[]).length) {
+      html += `<ul style="padding-left:18px;">${mon.premium_kpis.map(k=>`<li style="font-size:12px;margin-bottom:6px;">${escHtml(k)}</li>`).join('')}</ul>`;
+    }
+  } else {
+    // Funnel
+    const funnelStages = (mon.payment_funnel||{}).stages || [];
+    if (funnelStages.length) {
+      html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">💳 付费转化漏斗</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;">
+      ${funnelStages.map((st,i)=>`<div style="display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+        <div style="min-width:24px;height:24px;background:rgba(139,92,246,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#8b5cf6;">${i+1}</div>
+        <div style="flex:1;font-size:12px;">${escHtml(st.stage||'')}</div>
+        <div style="font-size:12px;font-weight:700;color:#10b981;">${escHtml(st.rate||'')}</div>
+      </div>`).join('')}
+      </div>`;
+      const tips = (mon.payment_funnel||{}).optimization_tips||[];
+      if (tips.length) {
+        html += `<div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 16px;margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:8px;">💡 付费优化技巧</div>
+          ${tips.map(t=>`<div style="font-size:12px;color:var(--text);padding:3px 0;">• ${escHtml(t)}</div>`).join('')}
+        </div>`;
+      }
+    }
+    // User segments
+    const segs = mon.user_segments || [];
+    if (segs.length) {
+      html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:12px 0 8px;">🐋 用户价值分层</div>`;
+      segs.forEach(s => {
+        html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;gap:14px;align-items:flex-start;">
+          <div style="font-size:22px;">${s.segment?s.segment.split(' ')[0]:''}</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;">${escHtml(s.segment||'')} <span style="color:var(--muted);font-weight:400;">（${escHtml(s.proportion||'')}）</span></div>
+            <div style="font-size:11px;color:var(--muted);margin:4px 0;">策略：${escHtml(s.strategy||'')}</div>
+            <div style="font-size:11px;color:#10b981;">CLV：${escHtml(s.clv||'')}</div>
+          </div>
+        </div>`;
+      });
+    }
+    // LTV
+    const ltv = mon.ltv_model || {};
+    if (ltv.simple_formula) {
+      html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #8b5cf6;border-radius:12px;padding:14px 18px;margin-top:8px;">
+        <div style="font-size:12px;font-weight:700;color:#8b5cf6;margin-bottom:8px;">📈 LTV 模型</div>
+        <div style="font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">简单公式：</span>${escHtml(ltv.simple_formula||'')}</div>
+        <div style="font-size:12px;margin-bottom:4px;color:var(--muted);">${escHtml(ltv.example||'')}</div>
+        <div style="font-size:12px;margin-bottom:4px;"><span style="color:var(--muted);">高级方法：</span>${escHtml(ltv.advanced||'')}</div>
+        <div style="font-size:12px;background:rgba(239,68,68,0.06);padding:6px 10px;border-radius:6px;color:var(--red);">获客规则：${escHtml(ltv.acquisition_rule||'')}</div>
+      </div>`;
+    }
+  }
+  html += `</div>`;
+
+  // ── Tab: 内容漏斗
+  html += `<div id="tab-da-content" class="tab-panel">`;
+  const diff = cont.difficulty_analysis || {};
+  if (diff.metric) {
+    html += `<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:16px 18px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px;">⚔️ ${escHtml(diff.metric||'')}</div>
+      <div style="font-size:12px;margin-bottom:6px;"><span style="color:var(--muted);">健康范围：</span>${escHtml(diff.healthy_range||'')}</div>
+      <div style="font-size:12px;background:rgba(239,68,68,0.08);padding:6px 10px;border-radius:6px;margin-bottom:6px;">🔴 ${escHtml(diff.alert_high||'')}</div>
+      <div style="font-size:12px;background:rgba(245,158,11,0.08);padding:6px 10px;border-radius:6px;margin-bottom:10px;">🟡 ${escHtml(diff.alert_low||'')}</div>
+      ${diff.sql_example ? `<details style="cursor:pointer;"><summary style="font-size:12px;font-weight:600;color:#06b6d4;margin-bottom:6px;">查看 SQL 示例</summary>
+      <pre style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;overflow-x:auto;font-size:11px;line-height:1.6;color:#e2e8f0;white-space:pre-wrap;">${escHtml(diff.sql_example)}</pre>
+      </details>` : ''}
+    </div>`;
+  }
+  const pf = cont.progression_funnel || {};
+  if (pf.description) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:#06b6d4;margin-bottom:8px;">🎯 进度漏斗分析</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${escHtml(pf.description||'')}</div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;">典型流失节点：</div>
+      ${(pf.typical_dropoff||[]).map(d=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">📉 ${escHtml(d)}</div>`).join('')}
+    </div>`;
+  }
+  html += `</div>`;
+
+  // ── Tab: A/B 测试
+  html += `<div id="tab-da-ab" class="tab-panel">`;
+  (ab.priority_tests||[]).forEach((t, i) => {
+    const pColors = ['var(--red)','#f59e0b','#06b6d4','#10b981'];
+    const pc = pColors[i] || 'var(--muted)';
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${pc};border-radius:12px;padding:14px 18px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(0,0,0,0.2);color:${pc};">P${t.priority||i+1}</div>
+        <div style="font-size:13px;font-weight:700;">${escHtml(t.name||'')}</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">假设：${escHtml(t.hypothesis||'')}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;">
+        <div><span style="color:var(--muted);">实验组：</span>${(t.variants||[]).map(v=>`<div style="padding:2px 0;">${escHtml(v)}</div>`).join('')}</div>
+        <div>
+          <div><span style="color:var(--muted);">核心指标：</span>${escHtml(t.metric||'')}</div>
+          <div><span style="color:var(--muted);">样本量：</span>${escHtml(t.sample_size||'')}</div>
+          <div><span style="color:var(--muted);">持续时间：</span>${escHtml(t.duration||'')}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  const sg = ab.stat_significance_guide || {};
+  if (sg.common_mistakes) {
+    html += `<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:12px 16px;margin-top:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">⚠️ 常见 A/B 测试错误</div>
+      ${(sg.common_mistakes||[]).map(e=>`<div style="font-size:12px;color:var(--text);padding:3px 0;">• ${escHtml(e)}</div>`).join('')}
+    </div>`;
+  }
+  html += `</div>`;
+
+  // ── Tab: 工具栈
+  html += `<div id="tab-da-tools" class="tab-panel">`;
+  tools.forEach(t => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:700;color:#8b5cf6;">${escHtml(t.category||'')}</div>
+        <div style="margin-left:auto;font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.15);color:#10b981;">${escHtml(t.cost||'')}</div>
+      </div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">${escHtml(t.recommended||'')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${escHtml(t.why||'')}</div>
+      <div style="font-size:11px;color:#06b6d4;margin-bottom:4px;">接入难度：${escHtml(t.setup||'')}</div>
+      ${t.alternative?`<div style="font-size:11px;color:var(--muted);">备选：${escHtml(t.alternative)}</div>`:''}
+      ${t.note?`<div style="font-size:11px;background:rgba(245,158,11,0.08);padding:4px 8px;border-radius:4px;color:#f59e0b;margin-top:4px;">${escHtml(t.note)}</div>`:''}
+    </div>`;
+  });
+  html += `</div>`;
+
+  // ── Tab: 迭代框架
+  html += `<div id="tab-da-iter" class="tab-panel">`;
+  (iter.decision_tree||[]).forEach(dt => {
+    const prioColors={'P0':'var(--red)','P1':'#f59e0b','P2':'#06b6d4','P3':'var(--muted)'};
+    const pLabel = (dt.priority||'').split('—')[0].trim();
+    const pc = prioColors[pLabel] || 'var(--muted)';
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${pc};border-radius:12px;padding:14px 18px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(0,0,0,0.2);color:${pc};">${escHtml(pLabel)}</div>
+        <div style="font-size:13px;font-weight:700;">${escHtml(dt.signal||'')}</div>
+      </div>
+      <div style="font-size:11px;color:#f59e0b;margin-bottom:6px;">${escHtml(dt.priority||'')}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">排查步骤：</div>
+      ${(dt.investigation||[]).map(s=>`<div style="font-size:12px;padding:2px 0;">🔍 ${escHtml(s)}</div>`).join('')}
+      <div style="font-size:12px;background:rgba(139,92,246,0.08);padding:6px 10px;border-radius:6px;margin-top:8px;"><strong>行动：</strong>${escHtml(dt.action||'')}</div>
+    </div>`;
+  });
+  // 协作闭环
+  const loop = (iter.data_to_design_loop||{});
+  if ((loop.flow||[]).length) {
+    html += `<div style="font-size:12px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin:16px 0 8px;">🔄 数据→设计协作闭环</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${escHtml(loop.description||'')}</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
+    ${(loop.flow||[]).map(f=>`<div style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="min-width:22px;height:22px;background:rgba(139,92,246,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#8b5cf6;">${f.step}</div>
+      <div style="flex:1;font-size:12px;"><span style="color:#8b5cf6;">${escHtml(f.from||'')}</span> → <span style="color:#06b6d4;">${escHtml(f.to||'')}</span></div>
+      <div style="font-size:11px;color:var(--muted);">触发：${escHtml(f.trigger||'')}</div>
+      <div style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.1);color:#10b981;">${escHtml(f.action||'')}</div>
+    </div>`).join('')}
+    </div>`;
+  }
+  // 周报模板
+  if ((iter.weekly_review_template||[]).length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:16px 0 8px;">📋 数据周报模板</div>
+    <div style="background:rgba(0,0,0,0.15);border-radius:10px;padding:12px 16px;">
+    ${iter.weekly_review_template.map((item,i)=>`<div style="display:flex;gap:10px;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <span style="color:#8b5cf6;font-weight:700;">0${i+1}</span>
+      <span>${escHtml(item)}</span>
+    </div>`).join('')}
+    </div>`;
+  }
+  html += `</div>`;
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── 系统策划师
+// ═══════════════════════════════════════════════════════════════
+
+async function submitSystemDesigner() {
+  const features = [...document.querySelectorAll('#sd-features input:checked')].map(e => e.value);
+  const profile = {
+    game_name:       document.getElementById('sd-name').value || 'My Game',
+    description:     document.getElementById('sd-desc').value || '',
+    game_type:       document.getElementById('sd-type').value,
+    tone:            document.getElementById('sd-tone').value,
+    target_audience: document.getElementById('sd-audience').value,
+    team_size:       document.getElementById('sd-team').value,
+    has_multiplayer: features.includes('multiplayer'),
+    has_narrative:   features.includes('narrative'),
+    has_monetization: features.includes('iap'),
+    has_iap:         features.includes('iap'),
+    features:        features,
+  };
+  showLoading('系统策划师分析中，正在生成核心循环与系统设计…');
+  try {
+    const res  = await fetch('/api/v1/designer/system', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({game_profile:profile}) });
+    const data = await res.json();
+    if (data.status === 'success') showResults(renderSystemDesigner(data));
+    else showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message||data.error}</p></div>`);
+  } catch(e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+  }
+}
+
+function renderSystemDesigner(d) {
+  const gc   = d.game_concept || {};
+  const cl   = d.core_loop   || {};
+  const mda  = d.mda_analysis || {};
+  const pt   = d.player_types || {};
+  const fun  = d.fun_profile  || [];
+  const sys  = d.systems      || [];
+  const pil  = d.design_pillars || [];
+  const flags= d.technical_flags || [];
+  const lenses= d.design_lenses || [];
+
+  const complexityMap = {'must':'必须', 'should':'应有', 'could':'可选', '极高':'极高', '高':'高', '中':'中', '低':'低'};
+  const priorityColor = {'必须':'var(--red)','应有':'#10b981','可选':'#818cf8'};
+  const moscowColor   = {'Must Have':'var(--red)','Should Have':'#10b981','Could Have':'#818cf8',"Won't Have":'var(--muted)'};
+
+  let html = `
+    <div class="view-header">
+      <h2>🗺️ ${escHtml(gc.name||'')} — 系统设计方案</h2>
+      <p style="color:var(--muted);">${escHtml(gc.summary||'')}</p>
+    </div>
+    <div class="risk-banner" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);">
+      <div class="risk-icon">🗺️</div>
+      <div class="risk-text">
+        <h3 style="color:#8b5cf6;">系统策划师分析完成</h3>
+        <p>游戏类型：${escHtml(gc.type_display||gc.type||'')} · 受众：${escHtml(gc.target_audience||'')} · 基调：${escHtml(gc.tone||'')}</p>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat"><div class="num" style="color:#8b5cf6;">${(cl.primary||[]).length}</div><div class="lbl">核心步骤</div></div>
+        <div class="risk-stat"><div class="num" style="color:#10b981;">${sys.length}</div><div class="lbl">系统数量</div></div>
+        <div class="risk-stat"><div class="num" style="color:var(--orange);">${flags.length}</div><div class="lbl">技术标记</div></div>
+      </div>
+    </div>`;
+
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('sd-loop',this)">核心循环</button>
+    <button class="tab-btn" onclick="switchTab('sd-systems',this)">系统清单</button>
+    <button class="tab-btn" onclick="switchTab('sd-mda',this)">MDA分析</button>
+    <button class="tab-btn" onclick="switchTab('sd-pillars',this)">设计支柱</button>
+    <button class="tab-btn" onclick="switchTab('sd-players',this)">玩家类型</button>
+    <button class="tab-btn" onclick="switchTab('sd-flags',this)">技术标记</button>
+  </div>`;
+
+  // Tab 核心循环
+  html += `<div id="tab-sd-loop" class="tab-panel active">`;
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:14px;">🔄 主循环 · 会话时长：${escHtml(cl.session_length||'—')} · 核心驱动：${escHtml(cl.engagement_driver||'—')}</div>`;
+  (cl.primary||[]).forEach(step => {
+    html += `<div style="display:flex;gap:12px;margin-bottom:10px;align-items:flex-start;">
+      <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(139,92,246,0.2);color:#8b5cf6;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">${step.step}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;">${escHtml(step.action||'')}</div>
+        <div style="font-size:12px;color:var(--muted);">反馈：${escHtml(step.feedback||'')} · 时长：${escHtml(step.duration||'')}</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // 次级循环
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:14px;">🔁 次级循环</div>`;
+  (cl.secondary||[]).forEach(s => {
+    html += `<div style="display:flex;gap:12px;margin-bottom:10px;">
+      <div style="background:rgba(16,185,129,0.1);color:#10b981;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap;">${escHtml(s.cycle||'')}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;">${escHtml(s.name||'')}</div>
+        <div style="font-size:12px;color:var(--muted);">${escHtml(s.purpose||'')}</div>
+      </div>
+    </div>`;
+  });
+  if (cl.tertiary) {
+    html += `<div style="margin-top:8px;padding:10px 14px;background:rgba(99,102,241,0.08);border-radius:8px;border-left:3px solid #6366f1;">
+      <span style="font-size:11px;font-weight:700;color:#6366f1;text-transform:uppercase;">三级循环：${escHtml(cl.tertiary.name||'')}</span>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">${escHtml(cl.tertiary.description||'')}</div>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // 乐趣剖面
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">🎮 乐趣类型剖面（Marc LeBlanc 8种乐趣）</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    ${fun.map(f => `<div style="padding:6px 14px;border-radius:8px;${f.primary?'background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:#8b5cf6;font-weight:700;':'background:var(--card2);border:1px solid var(--border);color:var(--muted);'}">
+      ${f.primary?'★ ':''}<span style="font-size:13px;">${escHtml(f.cn||'')}</span>
+      <div style="font-size:11px;margin-top:2px;opacity:.8;">${escHtml(f.desc||'')}</div>
+    </div>`).join('')}
+    </div>
+  </div>`;
+  html += `</div>`;
+
+  // Tab 系统清单
+  html += `<div id="tab-sd-systems" class="tab-panel">`;
+  const featureList = d.feature_list || [];
+  featureList.forEach(f => {
+    const mc = moscowColor[f.moscow] || 'var(--muted)';
+    html += `<div class="finding-card" style="border-left-color:${mc};">
+      <div class="finding-header">
+        <span class="sev" style="background:${mc}22;color:${mc};">${escHtml(f.moscow||'')}</span>
+        <span class="platform-tag">复杂度：${escHtml(f.complexity||'')}</span>
+        <h4>${escHtml(f.feature||'')}</h4>
+      </div>
+      <div class="finding-detail">${escHtml(f.description||'')}</div>
+      ${(f.depends_on||[]).length ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">依赖：${f.depends_on.map(d=>escHtml(d)).join(' → ')}</div>` : ''}
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab MDA
+  html += `<div id="tab-sd-mda" class="tab-panel">`;
+  [['⚙️ Mechanics（规则）', mda.mechanics||[], '#818cf8'], ['🌊 Dynamics（玩家行为）', mda.dynamics||[], '#10b981'], ['✨ Aesthetics（情感体验）', mda.aesthetics||[], '#f59e0b']].forEach(([title, items, color]) => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${color};border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:10px;">${title}</div>
+      <ul style="margin:0;padding-left:18px;">${items.map(i=>`<li style="font-size:13px;color:var(--text);margin-bottom:4px;">${escHtml(i)}</li>`).join('')}</ul>
+    </div>`;
+  });
+  html += `<div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:14px 18px;font-size:12px;color:var(--muted);">💡 ${escHtml(mda.note||'')}</div>`;
+  html += `</div>`;
+
+  // Tab 设计支柱
+  html += `<div id="tab-sd-pillars" class="tab-panel">`;
+  pil.forEach((p,i) => {
+    const colors = ['#8b5cf6','#10b981','#f59e0b','#ec4899','#06b6d4'];
+    const c = colors[i % colors.length];
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${c};border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:${c};margin-bottom:6px;">${i+1}. ${escHtml(p.name||'')}</div>
+      <div style="font-size:13px;color:var(--text);">${escHtml(p.description||'')}</div>
+    </div>`;
+  });
+  // 关键透镜
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-top:8px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">🔍 Jesse Schell 关键设计透镜</div>
+    <ul style="margin:0;padding-left:18px;">${lenses.map(l=>`<li style="font-size:13px;color:var(--text);margin-bottom:6px;">${escHtml(l)}</li>`).join('')}</ul>
+  </div>`;
+  html += `</div>`;
+
+  // Tab 玩家类型
+  html += `<div id="tab-sd-players" class="tab-panel">`;
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:14px;">👥 Bartle 玩家类型分析</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="padding:14px;background:rgba(139,92,246,0.08);border-radius:8px;border:1px solid rgba(139,92,246,0.25);">
+        <div style="font-size:11px;font-weight:700;color:#8b5cf6;margin-bottom:4px;">主要目标玩家</div>
+        <div style="font-size:14px;font-weight:700;">${escHtml(pt.primary_type||'')}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">${escHtml(pt.primary_desc||'')}</div>
+      </div>
+      <div style="padding:14px;background:rgba(16,185,129,0.08);border-radius:8px;border:1px solid rgba(16,185,129,0.25);">
+        <div style="font-size:11px;font-weight:700;color:#10b981;margin-bottom:4px;">次要目标玩家</div>
+        <div style="font-size:14px;font-weight:700;">${escHtml(pt.secondary_type||'')}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">${escHtml(pt.secondary_desc||'')}</div>
+      </div>
+    </div>
+    ${(pt.design_tips||{}).for_primary ? `
+    <div style="margin-top:12px;"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px;">主要玩家设计建议：</div>
+      <ul style="margin:0;padding-left:18px;">${(pt.design_tips.for_primary).map(t=>`<li style="font-size:12px;color:var(--text);margin-bottom:4px;">${escHtml(t)}</li>`).join('')}</ul>
+    </div>` : ''}
+  </div>`;
+  html += `</div>`;
+
+  // Tab 技术标记
+  html += `<div id="tab-sd-flags" class="tab-panel">`;
+  if (!flags.length) {
+    html += `<div style="text-align:center;padding:32px;color:var(--green);">✅ 无高复杂度技术标记，项目风险较低</div>`;
+  }
+  flags.forEach(f => {
+    html += `<div class="finding-card high" style="border-left-color:var(--orange);">
+      <div class="finding-header">
+        <span class="sev" style="background:rgba(249,115,22,0.15);color:var(--orange);">${escHtml(f.flag||'')}</span>
+        <span class="platform-tag">${escHtml(f.system||'')}</span>
+        <h4>复杂度：${escHtml(f.complexity||'')}</h4>
+      </div>
+      <div class="finding-fix">📋 ${escHtml(f.note||'')}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── 数值策划师
+// ═══════════════════════════════════════════════════════════════
+
+async function submitNumericalDesigner() {
+  const features = [...document.querySelectorAll('#nd-features input:checked')].map(e => e.value);
+  const profile = {
+    game_name:         document.getElementById('nd-name').value || 'My Game',
+    game_type:         document.getElementById('nd-type').value,
+    combat_style:      document.getElementById('nd-combat').value,
+    max_level:         parseInt(document.getElementById('nd-maxlevel').value) || 30,
+    monetization_type: document.getElementById('nd-monetization').value,
+    session_length:    document.getElementById('nd-session').value,
+    economy_currency:  document.getElementById('nd-currency').value || '金币',
+    has_gacha:         features.includes('gacha'),
+    has_pvp:           features.includes('pvp'),
+    has_equipment:     features.includes('equipment'),
+  };
+  showLoading('数值策划师分析中，正在生成战斗公式与数值体系…');
+  try {
+    const res  = await fetch('/api/v1/designer/numerical', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({game_profile:profile}) });
+    const data = await res.json();
+    if (data.status === 'success') showResults(renderNumericalDesigner(data));
+    else showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message||data.error}</p></div>`);
+  } catch(e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+  }
+}
+
+function renderNumericalDesigner(d) {
+  const gi  = d.game_info   || {};
+  const cs  = d.combat_system || {};
+  const gc  = d.growth_curves || {};
+  const eco = d.economy_model || {};
+  const drops = d.drop_system || {};
+  const diff  = d.difficulty_curve || {};
+  const gacha = d.gacha_system;
+  const pvp   = d.pvp_balance;
+  const check = d.balance_checklist || [];
+
+  let html = `
+    <div class="view-header">
+      <h2>📊 ${escHtml(gi.name||'')} — 数值体系设计</h2>
+      <p style="color:var(--muted);">${escHtml(gi.type||'')} · 最高${gi.max_level||''}级 · ${escHtml(gi.monetization||'')}</p>
+    </div>
+    <div class="risk-banner" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);">
+      <div class="risk-icon">📊</div>
+      <div class="risk-text">
+        <h3 style="color:#f59e0b;">数值策划师分析完成</h3>
+        <p>战斗公式已生成 · 属性成长表已生成 · 经济模型收支比：${eco.balance ? escHtml(String(eco.balance.ratio)) : '—'}</p>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat"><div class="num" style="color:#f59e0b;">${(cs.formulas||[]).length}</div><div class="lbl">战斗公式</div></div>
+        <div class="risk-stat"><div class="num" style="color:#10b981;">${(drops.tiers||[]).length}</div><div class="lbl">掉落品质</div></div>
+        <div class="risk-stat"><div class="num" style="color:var(--red);">${check.length}</div><div class="lbl">自检项</div></div>
+      </div>
+    </div>`;
+
+  const tabBtns = ['战斗公式', '成长曲线', '经济模型', '掉落系统', '难度曲线'];
+  const tabKeys = ['nd-combat', 'nd-growth', 'nd-eco', 'nd-drop', 'nd-diff'];
+  if (gacha) { tabBtns.push('抽卡系统'); tabKeys.push('nd-gacha'); }
+  if (pvp)   { tabBtns.push('PvP平衡');  tabKeys.push('nd-pvp'); }
+  tabBtns.push('平衡自检'); tabKeys.push('nd-check');
+
+  html += `<div class="tabs">${tabBtns.map((t,i)=>`<button class="tab-btn${i===0?' active':''}" onclick="switchTab('${tabKeys[i]}',this)">${t}</button>`).join('')}</div>`;
+
+  // Tab 战斗公式
+  html += `<div id="tab-nd-combat" class="tab-panel active">`;
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+    <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:8px;">${escHtml(cs.system_name||'战斗系统')}</div>`;
+  (cs.formulas||[]).forEach(f => {
+    html += `<div style="margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border);">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px;">${escHtml(f.name||'')}</div>
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px 14px;font-family:monospace;font-size:12px;color:#f59e0b;margin-bottom:8px;word-break:break-all;">${escHtml(f.formula||'')}</div>
+      ${(f.sub_formulas||[]).map(sf=>`<div style="font-family:monospace;font-size:11px;color:var(--muted);padding:2px 14px;">${escHtml(sf)}</div>`).join('')}
+      ${f.variables && Object.keys(f.variables).length ? `<div style="margin-top:8px;"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">变量定义：</div>
+        ${Object.entries(f.variables).map(([k,v])=>`<div style="font-size:12px;color:var(--text);padding:2px 0;"><code style="color:#f59e0b;">${escHtml(k)}</code>：${escHtml(v)}</div>`).join('')}
+      </div>` : ''}
+      ${f.example ? `<div style="margin-top:8px;background:rgba(16,185,129,0.06);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--text);white-space:pre-wrap;">${escHtml(f.example)}</div>` : ''}
+      ${f.tuning_notes ? `<div style="margin-top:6px;font-size:12px;color:var(--muted);font-style:italic;">💡 调参建议：${escHtml(f.tuning_notes)}</div>` : ''}
+      ${f.table ? `<div style="margin-top:10px;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <tr>${Object.keys(f.table[0]).map(k=>`<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;">${escHtml(k)}</th>`).join('')}</tr>
+        ${f.table.map(row=>`<tr>${Object.values(row).map(v=>`<td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text);">${escHtml(String(v))}</td>`).join('')}</tr>`).join('')}
+      </table></div>` : ''}
+    </div>`;
+  });
+  // 属性总览
+  if ((cs.attribute_summary||[]).length) {
+    html += `<div style="overflow-x:auto;margin-top:8px;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr>${Object.keys(cs.attribute_summary[0]).map(k=>`<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">${escHtml(k)}</th>`).join('')}</tr>
+      ${cs.attribute_summary.map(row=>`<tr>${Object.values(row).map(v=>`<td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);">${escHtml(String(v))}</td>`).join('')}</tr>`).join('')}
+    </table></div>`;
+  }
+  html += `</div></div>`;
+
+  // Tab 成长曲线
+  html += `<div id="tab-nd-growth" class="tab-panel">`;
+  if (gc.note) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">${escHtml(gc.note)}</div>`;
+  } else {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">公式定义</div>
+      ${Object.entries(gc.formulas||{}).map(([k,v])=>`<div style="margin-bottom:6px;"><code style="color:#f59e0b;font-size:12px;">${escHtml(k).toUpperCase()}</code> <span style="font-size:12px;color:var(--muted);">${escHtml(v)}</span></div>`).join('')}
+    </div>
+    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr>${Object.keys((gc.player_attribute_table||[{}])[0]||{}).map(k=>`<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">${escHtml(k)}</th>`).join('')}</tr>
+      ${(gc.player_attribute_table||[]).map(row=>`<tr>${Object.values(row).map((v,i)=>`<td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);${i===0?'font-weight:700;color:#f59e0b;':''}">${escHtml(String(v))}</td>`).join('')}</tr>`).join('')}
+    </table></div>
+    ${(gc.design_notes||[]).length ? `<div style="margin-top:12px;"><ul style="margin:0;padding-left:18px;">${gc.design_notes.map(n=>`<li style="font-size:12px;color:var(--muted);margin-bottom:4px;">${escHtml(n)}</li>`).join('')}</ul></div>` : ''}`;
+  }
+  html += `</div>`;
+
+  // Tab 经济模型
+  html += `<div id="tab-nd-eco" class="tab-panel">`;
+  const incomeTotal = (eco.daily_income||{}).total || 0;
+  const sinkTotal   = (eco.daily_sinks||{}).total  || 0;
+  const bal         = eco.balance || {};
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:10px;color:#10b981;font-weight:700;text-transform:uppercase;">日收益</div>
+      <div style="font-size:22px;font-weight:700;color:#10b981;margin:4px 0;">${incomeTotal}</div>
+      <div style="font-size:11px;color:var(--muted);">${escHtml(eco.currency_name||'金币')}/天</div>
+    </div>
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase;">日消耗</div>
+      <div style="font-size:22px;font-weight:700;color:var(--red);margin:4px 0;">${sinkTotal}</div>
+      <div style="font-size:11px;color:var(--muted);">目标: 收支比0.85-1.1</div>
+    </div>
+    <div style="background:${bal.ratio>=0.75&&bal.ratio<=1.15?'rgba(16,185,129,0.08)':'rgba(249,115,22,0.08)'};border:1px solid ${bal.ratio>=0.75&&bal.ratio<=1.15?'rgba(16,185,129,0.2)':'rgba(249,115,22,0.2)'};border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;">收支比</div>
+      <div style="font-size:22px;font-weight:700;margin:4px 0;">${bal.ratio||'—'}</div>
+      <div style="font-size:11px;color:var(--muted);">${escHtml(bal.status||'')}</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+      <div style="font-size:12px;font-weight:700;color:#10b981;margin-bottom:10px;">💰 日收益来源</div>
+      ${((eco.daily_income||{}).sources||[]).map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+        <div style="font-size:12px;">${escHtml(s['来源']||'')}</div>
+        <div style="font-size:12px;font-weight:700;color:#10b981;">${s['日收益']||'—'}</div>
+      </div>`).join('')}
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:10px;">🪣 日消耗去向</div>
+      ${((eco.daily_sinks||{}).sinks||[]).map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+        <div style="font-size:12px;">${escHtml(s['消耗项']||'')}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--red);">${s['日消耗']||'—'}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+  ${(eco.economy_rules||[]).length ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">经济设计原则</div>
+    <ul style="margin:0;padding-left:18px;">${eco.economy_rules.map(r=>`<li style="font-size:12px;color:var(--text);margin-bottom:4px;">${escHtml(r)}</li>`).join('')}</ul>
+  </div>` : ''}`;
+  html += `</div>`;
+
+  // Tab 掉落系统
+  html += `<div id="tab-nd-drop" class="tab-panel">`;
+  if (drops.note) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">${escHtml(drops.note)}</div>`;
+  } else {
+    (drops.tiers||[]).forEach(t => {
+      html += `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;">
+        <div style="width:12px;height:12px;border-radius:50%;background:${escHtml(t['颜色']||'#888')};flex-shrink:0;"></div>
+        <div style="flex:1;font-size:13px;font-weight:600;">${escHtml(t['品质']||'')}</div>
+        <div style="font-size:13px;font-weight:700;color:#f59e0b;min-width:50px;text-align:right;">${escHtml(t['掉落率']||'')}</div>
+        <div style="font-size:11px;color:var(--muted);min-width:120px;">${escHtml(t['期望掉落间隔']||'')}</div>
+      </div>`;
+    });
+    if (drops.pity_system) {
+      const ps = drops.pity_system;
+      html += `<div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:16px;margin-top:12px;">
+        <div style="font-size:12px;font-weight:700;color:#818cf8;margin-bottom:8px;">🛡️ 保底机制（Pity System）</div>
+        <div style="font-size:13px;color:var(--text);">${escHtml(ps.description||'')}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">期望出货：${escHtml(ps.expected_pulls||'')} · 软保底第${ps.soft_pity_start||''}次开始 · 硬保底第${ps.hard_pity||''}次必出</div>
+      </div>`;
+    }
+    (drops.design_rules||[]).length && (html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px;"><ul style="margin:0;padding-left:18px;">${drops.design_rules.map(r=>`<li style="font-size:12px;color:var(--muted);margin-bottom:4px;">${escHtml(r)}</li>`).join('')}</ul></div>`);
+  }
+  html += `</div>`;
+
+  // Tab 难度曲线
+  html += `<div id="tab-nd-diff" class="tab-panel">`;
+  if (diff.note) {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">${escHtml(diff.note)}</div>`;
+  } else {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;">
+      <div style="font-family:monospace;font-size:14px;letter-spacing:1px;margin-bottom:4px;color:#f59e0b;">${(diff.zones||[]).map(z=>{const bars=['▁','▂','▃','▄','▅','▆','▇','█'];return bars[Math.min(7,Math.floor((z['敌人HP倍率']||1)*2))];}).join('')}</div>
+      <div style="font-size:11px;color:var(--muted);">← 游戏开始 &nbsp;|&nbsp; 游戏结束 →</div>
+    </div>
+    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr><th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">区域</th><th style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">关卡范围</th><th style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">ATK倍率</th><th style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">HP倍率</th><th style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">预期胜率</th><th style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">设计目标</th></tr>
+      ${(diff.zones||[]).map(z=>`<tr>
+        <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;">${escHtml(z['区域']||'')}</td>
+        <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted);">${escHtml(z['关卡范围']||'')}</td>
+        <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;color:#f59e0b;">${z['敌人ATK倍率']||'—'}×</td>
+        <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;color:#f59e0b;">${z['敌人HP倍率']||'—'}×</td>
+        <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;color:#10b981;">${escHtml(z['预期玩家胜率']||'')}</td>
+        <td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;color:var(--muted);">${escHtml(z['设计目标']||'')}</td>
+      </tr>`).join('')}
+    </table></div>`;
+  }
+  html += `</div>`;
+
+  // Tab 抽卡（可选）
+  if (gacha) {
+    html += `<div id="tab-nd-gacha" class="tab-panel">`;
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:#818cf8;margin-bottom:10px;">${escHtml(gacha.overview||'抽卡系统')}</div>
+      <div style="overflow-x:auto;margin-bottom:12px;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <tr>${Object.keys((gacha.ssr_rates||[{}])[0]||{}).map(k=>`<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);color:var(--muted);">${escHtml(k)}</th>`).join('')}</tr>
+        ${(gacha.ssr_rates||[]).map(row=>`<tr>${Object.values(row).map(v=>`<td style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.04);">${escHtml(String(v))}</td>`).join('')}</tr>`).join('')}
+      </table></div>
+      ${gacha.compliance_note ? `<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);">${escHtml(gacha.compliance_note)}</div>` : ''}
+      ${(gacha.design_rules||[]).length ? `<ul style="margin:12px 0 0;padding-left:18px;">${gacha.design_rules.map(r=>`<li style="font-size:12px;color:var(--muted);margin-bottom:4px;">${escHtml(r)}</li>`).join('')}</ul>` : ''}
+    </div>`;
+    html += `</div>`;
+  }
+
+  // Tab PvP（可选）
+  if (pvp) {
+    html += `<div id="tab-nd-pvp" class="tab-panel">`;
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-bottom:10px;">⚔️ ${escHtml((pvp.matchmaking||{}).system||'匹配系统')}</div>
+      <div style="background:rgba(6,182,212,0.08);border-radius:8px;padding:10px 14px;font-family:monospace;font-size:12px;white-space:pre-wrap;color:#06b6d4;margin-bottom:12px;">${escHtml((pvp.matchmaking||{}).formula||'')}</div>
+      ${(pvp.matchmaking||{}).example ? `<div style="background:rgba(16,185,129,0.06);border-radius:6px;padding:8px 12px;font-size:12px;white-space:pre-wrap;">${escHtml(pvp.matchmaking.example)}</div>` : ''}
+      <ul style="margin:12px 0 0;padding-left:18px;">${(pvp.balance_principles||[]).map(r=>`<li style="font-size:12px;color:var(--muted);margin-bottom:4px;">${escHtml(r)}</li>`).join('')}</ul>
+    </div>`;
+    html += `</div>`;
+  }
+
+  // Tab 平衡自检
+  html += `<div id="tab-nd-check" class="tab-panel">`;
+  check.forEach(item => {
+    html += `<div style="display:flex;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;">
+      <div style="min-width:50px;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,0.12);color:#f59e0b;font-size:11px;font-weight:700;text-align:center;height:fit-content;">${escHtml(item['类别']||'')}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;">${escHtml(item['检查项']||'')}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">⚠️ 风险：${escHtml(item['风险']||'')}</div>
+      </div>
+      <div style="font-size:16px;opacity:.4;">☐</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── 关卡&叙事策划师
+// ═══════════════════════════════════════════════════════════════
+
+async function submitLevelNarrative() {
+  const features = [...document.querySelectorAll('#ln-features input:checked')].map(e => e.value);
+  const profile = {
+    game_name:      document.getElementById('ln-name').value || 'My Game',
+    game_type:      document.getElementById('ln-type').value,
+    description:    document.getElementById('ln-desc').value || '',
+    world_setting:  document.getElementById('ln-setting').value,
+    tone:           document.getElementById('ln-tone').value,
+    tutorial_style: document.getElementById('ln-tutorial').value,
+    content_hours:  parseInt(document.getElementById('ln-hours').value) || 20,
+    num_levels:     parseInt(document.getElementById('ln-levels').value) || 20,
+    has_main_story: features.includes('main_story'),
+    has_side_quests:features.includes('side_quests'),
+    player_choice:  features.includes('player_choice'),
+  };
+  showLoading('关卡&叙事策划师分析中，正在生成故事结构与关卡序列…');
+  try {
+    const res  = await fetch('/api/v1/designer/level-narrative', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({game_profile:profile}) });
+    const data = await res.json();
+    if (data.status === 'success') showResults(renderLevelNarrative(data));
+    else showResults(`<div class="loading"><p style="color:var(--red)">错误：${data.message||data.error}</p></div>`);
+  } catch(e) {
+    showResults(`<div class="loading"><p style="color:var(--red)">请求失败，请确认服务器已启动</p></div>`);
+  }
+}
+
+function renderLevelNarrative(d) {
+  const gi   = d.game_info     || {};
+  const wb   = d.world_brief   || {};
+  const story= d.story_structure || {};
+  const ls   = d.level_sequence || [];
+  const dp   = d.difficulty_pacing || {};
+  const tut  = d.tutorial_design || {};
+  const nm   = d.narrative_moments || [];
+  const prn  = d.design_principles || [];
+
+  let html = `
+    <div class="view-header">
+      <h2>📖 ${escHtml(gi.name||'')} — 关卡&叙事设计方案</h2>
+      <p style="color:var(--muted);">${escHtml(gi.type||'')} · ${escHtml(gi.setting||'')} · 预计${gi.content_hours||''}小时</p>
+    </div>
+    <div class="risk-banner" style="background:rgba(236,72,153,0.08);border:1px solid rgba(236,72,153,0.25);">
+      <div class="risk-icon">📖</div>
+      <div class="risk-text">
+        <h3 style="color:#ec4899;">关卡&叙事策划师分析完成</h3>
+        <p>关卡序列已生成 · ${ls.length}个关卡/区域 · 故事结构：三幕式</p>
+      </div>
+      <div class="risk-stats">
+        <div class="risk-stat"><div class="num" style="color:#ec4899;">${ls.length}</div><div class="lbl">关卡总数</div></div>
+        <div class="risk-stat"><div class="num" style="color:#8b5cf6;">${nm.length}</div><div class="lbl">核心叙事场景</div></div>
+        <div class="risk-stat"><div class="num" style="color:#10b981;">${(tut.steps||[]).length}</div><div class="lbl">教学步骤</div></div>
+      </div>
+    </div>`;
+
+  html += `<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('ln-world',this)">世界观</button>
+    <button class="tab-btn" onclick="switchTab('ln-story',this)">故事结构</button>
+    <button class="tab-btn" onclick="switchTab('ln-levels',this)">关卡序列</button>
+    <button class="tab-btn" onclick="switchTab('ln-diff',this)">难度曲线</button>
+    <button class="tab-btn" onclick="switchTab('ln-tutorial',this)">教学设计</button>
+    <button class="tab-btn" onclick="switchTab('ln-moments',this)">关键叙事场景</button>
+    <button class="tab-btn" onclick="switchTab('ln-principles',this)">设计原则</button>
+  </div>`;
+
+  // Tab 世界观
+  html += `<div id="tab-ln-world" class="tab-panel active">`;
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #ec4899;border-radius:12px;padding:20px;margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:700;color:#ec4899;margin-bottom:8px;">🌍 世界氛围</div>
+    <div style="font-size:14px;margin-bottom:10px;">${escHtml(wb.atmosphere||'')}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:var(--card2);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">视觉基调</div>
+        <div style="font-size:12px;">${escHtml((wb.tone_style||{}).visual_tone||'')}</div>
+      </div>
+      <div style="background:var(--card2);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">情感范围</div>
+        <div style="font-size:12px;">${escHtml((wb.tone_style||{}).emotional_range||'')}</div>
+      </div>
+    </div>
+    ${(wb.tone_style||{}).design_note ? `<div style="margin-top:10px;padding:8px 12px;background:rgba(249,115,22,0.08);border-radius:6px;font-size:12px;color:var(--orange);">💡 ${escHtml(wb.tone_style.design_note)}</div>` : ''}
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">⚔️ 核心势力</div>
+    ${(wb.core_factions||[]).map(f=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;">• ${escHtml(f)}</div>`).join('')}
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">📜 世界规则</div>
+    ${(wb.world_rules||[]).map(r=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;">• ${escHtml(r)}</div>`).join('')}
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">🎨 视觉语言</div>
+    <div style="font-size:13px;">${escHtml(wb.visual_language||'')}</div>
+  </div>`;
+  html += `</div>`;
+
+  // Tab 故事结构
+  html += `<div id="tab-ln-story" class="tab-panel">`;
+  const actColors = {'act1':'#8b5cf6','act2':'#f59e0b','act3':'#ec4899'};
+  [['act1','第一幕'], ['act2','第二幕'], ['act3','第三幕']].forEach(([k,label]) => {
+    const act = (story.three_act||{})[k] || {};
+    const c   = actColors[k];
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${c};border-radius:12px;padding:20px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:${c};">${label}</div>
+        <div style="font-size:11px;color:var(--muted);">·</div>
+        <div style="font-size:13px;font-weight:700;">${escHtml(act.title||'')}</div>
+        <div style="margin-left:auto;font-size:11px;color:var(--muted);">${escHtml(act.proportion||act.duration||'')}</div>
+      </div>
+      <div style="font-size:13px;line-height:1.6;margin-bottom:10px;">${escHtml(act.content||'')}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div style="background:var(--card2);border-radius:6px;padding:8px 10px;font-size:12px;"><strong>关键情节：</strong>${escHtml(act.key_beat||'')}</div>
+        <div style="background:var(--card2);border-radius:6px;padding:8px 10px;font-size:12px;"><strong>玩法焦点：</strong>${escHtml(act.gameplay||'')}</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">情感弧：${escHtml(act.emotion||'')}</div>
+      ${(act.beats||[]).length ? `<div style="margin-top:10px;"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">关键节拍：</div>
+        ${act.beats.map(b=>`<div style="display:flex;gap:8px;padding:4px 0;font-size:12px;"><span style="color:${c};min-width:80px;">${escHtml(b.position||'')}</span><span style="font-weight:600;">${escHtml(b.name||'')}</span><span style="color:var(--muted);">—${escHtml(b.purpose||'')}</span></div>`).join('')}
+      </div>` : ''}
+    </div>`;
+  });
+  html += `<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px;font-size:12px;color:var(--muted);">${escHtml(story.player_choice_note||'')}</div>`;
+  html += `</div>`;
+
+  // Tab 关卡序列
+  html += `<div id="tab-ln-levels" class="tab-panel">`;
+  const typeColors = {'Boss 关':'var(--red)','奖励关':'#10b981','教学关':'#818cf8','叙事关':'#06b6d4'};
+  html += `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <tr>
+      <th style="text-align:center;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted);width:36px;">No.</th>
+      <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted);">类型</th>
+      <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted);">幕</th>
+      <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted);">区域</th>
+      <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted);">引入机制</th>
+      <th style="text-align:center;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted);">难度</th>
+      <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--muted);">设计目标</th>
+    </tr>
+    ${ls.map(lv => {
+      const tc = typeColors[lv.type] || 'var(--muted)';
+      const diffBar = '●'.repeat(Math.max(1,Math.round(lv.difficulty/2))) + '○'.repeat(5-Math.max(1,Math.round(lv.difficulty/2)));
+      return `<tr>
+        <td style="text-align:center;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:700;color:var(--muted);">${lv.no}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);"><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:${tc}22;color:${tc};font-weight:600;">${escHtml(lv.type||'')}</span></td>
+        <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted);font-size:11px;">${escHtml(lv.act||'')}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;">${escHtml(lv.zone||'')}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);">${escHtml(lv.mechanic||'')}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:center;font-family:monospace;font-size:10px;color:#f59e0b;">${diffBar}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;color:var(--muted);">${escHtml(lv.notes||lv.design_goal||'')}</td>
+      </tr>`;
+    }).join('')}
+  </table></div>`;
+  html += `</div>`;
+
+  // Tab 难度曲线
+  html += `<div id="tab-ln-diff" class="tab-panel">`;
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">难度曲线可视化（▁-█ = 简单-极难）</div>
+    <div style="font-family:monospace;font-size:18px;letter-spacing:2px;color:#f59e0b;margin-bottom:8px;">${dp.visualization||''}</div>
+    <div style="font-size:12px;color:var(--muted);">← 第1关 &nbsp;|&nbsp; 第${ls.length}关 →</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+    <div style="font-size:12px;color:var(--muted);">${escHtml(dp.description||'')}</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">节奏设计原则</div>
+    <ul style="margin:0;padding-left:18px;">${(dp.pacing_principles||[]).map(r=>`<li style="font-size:12px;color:var(--text);margin-bottom:6px;">${escHtml(r)}</li>`).join('')}</ul>
+    ${dp.flow_theory_note ? `<div style="margin-top:12px;padding:10px 14px;background:rgba(139,92,246,0.08);border-radius:8px;font-size:12px;color:var(--muted);">💡 Flow理论：${escHtml(dp.flow_theory_note)}</div>` : ''}
+  </div>`;
+  html += `</div>`;
+
+  // Tab 教学设计
+  html += `<div id="tab-ln-tutorial" class="tab-panel">`;
+  html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #06b6d4;border-radius:12px;padding:18px 20px;margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-bottom:4px;">${escHtml(tut.style||'')}</div>
+    <div style="font-size:13px;color:var(--text);">${escHtml(tut.philosophy||'')}</div>
+  </div>`;
+  (tut.steps||[]).forEach((s,i) => {
+    html += `<div style="display:flex;gap:12px;margin-bottom:10px;align-items:flex-start;">
+      <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(6,182,212,0.2);color:#06b6d4;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">${s.step||i+1}</div>
+      <div style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">教：${escHtml(s.teaches||'')}</div>
+        <div style="font-size:12px;color:var(--muted);">方式：${escHtml(s.method||'')} · 时长：${escHtml(s.duration||'')}</div>
+        ${s.principle ? `<div style="font-size:11px;color:#06b6d4;margin-top:4px;">原则：${escHtml(s.principle)}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += `<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 18px;margin-top:8px;">
+    <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px;">🚫 教学禁忌</div>
+    <ul style="margin:0;padding-left:18px;">${(tut.avoid||[]).map(a=>`<li style="font-size:12px;color:var(--muted);margin-bottom:4px;">${escHtml(a)}</li>`).join('')}</ul>
+  </div>`;
+  html += `</div>`;
+
+  // Tab 关键叙事场景
+  html += `<div id="tab-ln-moments" class="tab-panel">`;
+  const momentColors = ['#8b5cf6','#f59e0b','#10b981','#ec4899','#06b6d4','#6366f1','#f59e0b'];
+  nm.forEach((m,i) => {
+    const c = momentColors[i % momentColors.length];
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid ${c};border-radius:12px;padding:18px 20px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="min-width:24px;height:24px;border-radius:50%;background:${c}22;color:${c};font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;">${m.order||i+1}</div>
+        <div style="font-size:13px;font-weight:700;">${escHtml(m.name||'')}</div>
+        <div style="margin-left:auto;font-size:11px;color:var(--muted);">${escHtml(m.trigger||'')}</div>
+      </div>
+      <div style="font-size:13px;margin-bottom:6px;">${escHtml(m.purpose||'')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">✍️ 写法建议：${escHtml(m.craft_tip||'')}</div>
+      <div style="font-size:12px;color:var(--red);">🚫 避免：${escHtml(m.avoid||'')}</div>
+      <div style="margin-top:8px;padding:4px 10px;border-radius:6px;background:${c}11;color:${c};font-size:11px;display:inline-block;">情感：${escHtml(m.emotion||'')}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Tab 设计原则
+  html += `<div id="tab-ln-principles" class="tab-panel">`;
+  prn.forEach(p => {
+    html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;">${escHtml(p.source||'')}</div>
+      <div style="font-size:13px;font-weight:700;color:#ec4899;margin-bottom:6px;">${escHtml(p.principle||'')}</div>
+      <div style="font-size:13px;color:var(--text);">${escHtml(p.application||'')}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  return html;
 }
 </script>
 </body>

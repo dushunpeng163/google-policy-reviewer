@@ -1,6 +1,10 @@
 # 🎮📚 教育游戏应用全球合规专家系统 - Python依赖包
 # Educational Game Compliance Expert System Requirements
 
+# ===== LLM API 客户端 =====
+anthropic>=0.30.0               # Anthropic Claude API
+openai>=1.30.0                  # OpenAI GPT API
+
 # ===== 核心Web框架 =====
 flask>=2.0.0                    # Web框架
 flask-cors>=3.0.0               # 跨域资源分享支持  

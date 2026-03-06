@@ -1,186 +1,171 @@
-# Unity 游戏全球合规平台 v5.3
+# 游戏开发 AI 工作坊
 
-帮助 Unity 游戏开发者在 **App Store + Google Play** 双平台合规上架，覆盖美国、欧盟、英国等主流市场，并持续跟踪平台政策变化。
+以 AI 驱动的游戏开发全流程工作坊。7 个专业角色覆盖从设计到上线的完整链路，每个角色都由真实 LLM 提供支持，给出针对你具体游戏的定制分析。
 
-[English Documentation](README_EN.md)
+---
+
+## 角色阵容
+
+| 角色 | 职责 | 核心输出 |
+|------|------|---------|
+| 🏗️ Unity 架构师 | 技术选型与系统设计 | 游戏框架、渲染管线、网络方案、性能预算 |
+| 🗺️ 系统策划师 | 玩法骨架设计 | 核心循环、MDA 分析、系统交互图 |
+| 📊 数值策划师 | 数值体系建模 | 战斗公式、成长曲线、经济模型、Gacha 概率 |
+| 📖 关卡叙事策划师 | 关卡与故事设计 | 叙事结构、关卡序列、难度曲线、教程设计 |
+| ⚙️ 技术实现向导 | 代码脚手架生成 | 项目目录、C# 接口、DI 注册、编码规范 |
+| 🧪 QA 工程师 | 测试质量保障 | 测试计划、平台专项用例、Bug 矩阵、发布清单 |
+| 📈 数据分析师 | 数据驱动迭代 | KPI 体系、埋点方案、留存/付费分析、A/B 测试 |
 
 ---
 
 ## 快速启动
 
-```bash
-# 安装依赖
-pip3 install flask
+**第一步：安装依赖**
 
-# 启动 Web 界面
-python3 launcher.py --mode web
+```bash
+pip install anthropic        # Claude API（推荐）
+# 或
+pip install openai           # OpenAI API
+```
+
+**第二步：配置 API Key**
+
+```bash
+cp .env.example .env
+# 编辑 .env，填入：
+# ANTHROPIC_API_KEY=sk-ant-你的Key
+```
+
+**第三步：启动**
+
+```bash
+python launcher.py --mode web
 # 浏览器打开 http://localhost:8080
 ```
 
 ---
 
-## 两大核心功能
+## 工作方式
 
-### 模式 A · 新游戏开发合规指南
+```
+填写游戏描述（名称 / 类型 / 平台 / 功能）
+        ↓
+选择角色 → 点击提交
+        ↓
+LLM 以该角色的专业视角实时分析
+        ↓
+流式 Markdown 输出（打字机效果）
+        ↓
+复制结果 → 团队讨论 → 下一个角色
+```
 
-输入游戏基本信息，生成完整合规开发路线图：
-
-- 适用法规分析（GDPR / COPPA / CCPA / UK AADC）
-- 分阶段实现清单（法律 → 账号 → 隐私 → 内购 → 广告 → 测试）
-- App Store Connect 和 Google Play Console 配置指南
-- Unity C# / iOS Swift / Android Kotlin 技术实现要点
-
-### 模式 B · 现有游戏合规审计
-
-扫描现有 Unity 项目代码，输出合规问题报告：
-
-- 代码级问题定位（文件路径 + 行号 + 修复建议）
-- 法规符合性检查（数据收集、儿童保护、用户权利）
-- 平台政策检查（22 条核心规则）
-- 风险分级报告（critical / high / medium / low）
+每个角色都有专属的系统提示词（知识库），包含该领域的决策框架、行业基准和判断标准——不是通用 AI，是有专业背景的定制角色。
 
 ---
 
-## 政策管理
+## 两种使用方式
 
-点击 Web 界面右上角「📋 政策管理」，共四个 Tab：
+### Web 工作坊（本项目）
 
-| Tab | 功能 |
-|-----|------|
-| 📊 状态 | 22 条政策规则新鲜度；LLM 检测到变化时显示告警卡片 |
-| ⚙️ 配置 | 设置 LLM API Key 和远程规则更新 URL（热生效，无需重启） |
-| 🔍 检查 | 触发 RSS + 页面哈希监控 + LLM 自动分析（后台运行，切 Tab 不中断） |
-| ⏰ 定时 | 配置自动定时检查频率；查看通知历史 |
-
-### 政策变化追踪闭环
-
-```
-RSS / 页面哈希检测到变化
-        ↓
-LLM 分析变化内容，识别受影响的规则
-        ↓
-受影响规则自动标记为「待复核」，在状态 Tab 显示告警
-        ↓
-开发者查看告警，点击「标记已复核」
-        ↓
-告警清除，规则新鲜度恢复
-```
-
-此闭环按照你设定的频率（每小时 / 每天 / 每周）自动运行。  
-未配置 LLM 时，仍可检测页面变化，但无法自动标记受影响规则。
-
----
-
-## LLM 配置（可选）
-
-在「配置」Tab 中直接填写，或在项目根目录创建 `.env` 文件：
+适合：需要完整报告、团队分享、正式文档
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-xxx   # 推荐（Claude）
-OPENAI_API_KEY=sk-xxx          # 备选（GPT-4o）
+python launcher.py --mode web
 ```
 
-保存后立即生效，无需重启服务器。
+### Cursor Agent Skills
 
----
+适合：开发过程中实时讨论、追问、让 AI 直接动手写代码
 
-## 规则热更新
+7 个 Agent Skills 安装在 `~/.agents/skills/`，在 Cursor 对话中自动激活：
 
-无需重启即可更新合规规则：
-
-- **本地模式**：直接编辑 `config/compliance-rules.yaml`，系统自动检测文件变化并重载
-- **远程模式**：在「配置」Tab 设置 `RULES_UPDATE_URL`，系统自动拉取远端 YAML 文件并应用更新
-
----
-
-## CLI 使用
-
-```bash
-# 新游戏合规指南
-python3 launcher.py --mode guide
-
-# 现有项目审计
-python3 launcher.py --mode audit --path /your/unity/project
-
-# 政策监控
-python3 launcher.py --mode check-policies --rss
-python3 launcher.py --mode check-policies --watch
-
-# 仅启动 Web 服务器
-python3 launcher.py --mode web
 ```
-
----
-
-## API 接口
-
-服务运行在 8080 端口（默认）：
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/v1/health` | 服务健康状态和规则版本 |
-| POST | `/api/v1/guide/new-game` | 生成新游戏合规指南 |
-| POST | `/api/v1/audit/game` | 审计现有游戏项目 |
-| GET | `/api/v1/policies/freshness` | 获取 22 条规则新鲜度报告 |
-| POST | `/api/v1/policies/run-check` | 触发政策检查（异步，返回 `job_id`） |
-| GET | `/api/v1/policies/check-status/<job_id>` | 轮询异步检查结果 |
-| POST | `/api/v1/policies/mark-verified` | 人工标记规则已复核（清除告警） |
-| GET/POST | `/api/v1/rules/update` | 查询或触发规则热更新 |
-| GET/POST | `/api/v1/policies/scheduler` | 查询或配置定时检查 |
-| GET | `/api/v1/notifications` | 获取通知列表和未读数量 |
-| POST | `/api/v1/notifications/read` | 标记通知为已读 |
-| POST | `/api/v1/policies/save-config` | 保存 LLM Key / 规则 URL 到 `.env` |
+unity-architect            → Unity 技术选型
+game-system-designer       → 系统策划
+game-numerical-designer    → 数值策划
+game-level-narrative-designer → 关卡叙事
+unity-implementation-wizard → 代码实现
+game-qa-engineer           → QA 测试
+game-data-analyst          → 数据分析
+```
 
 ---
 
 ## 项目结构
 
 ```
-launcher.py                      主入口
-api/compliance_api.py            Flask API 服务器
-web_interface.html               Web 界面（单文件）
+launcher.py                   启动入口
+api/compliance_api.py         Flask API（含 7 个流式 AI 端点）
+web_interface.html            Web 界面（单文件）
 engines/
-  ├── dev_guide.py               新游戏合规路线图
-  ├── unified_audit.py           现有游戏综合审计
-  ├── code_scanner.py            静态代码扫描
-  ├── code_template_generator.py 合规代码模板
-  ├── advanced_rule_engine.py    核心合规规则引擎
-  ├── policy_monitor.py          RSS + 页面哈希监控
-  └── policy_diff_analyzer.py   LLM 政策变化解读
-config/
-  └── compliance-rules.yaml     规则定义（支持热更新）
-references/                      政策知识库
-policy_versions.json             22 条规则版本追踪（含变化告警）
-.env                             API Keys（手动创建，不提交 Git）
+  ├── llm_client.py           LLM 统一接口（Claude / OpenAI）
+  ├── system_prompts.py       7 个角色系统提示词
+  ├── unity_architect_expert.py
+  ├── system_designer_expert.py
+  ├── numerical_designer_expert.py
+  ├── level_narrative_designer_expert.py
+  ├── implementation_wizard_expert.py
+  ├── qa_engineer_expert.py
+  └── data_analyst_expert.py
+.env.example                  配置模板
 ```
 
 ---
 
-## 覆盖范围
+## AI 端点
 
-**法规**：GDPR · COPPA · CCPA · UK AADC
+服务运行在 `http://localhost:8080`：
 
-**平台**：App Store（Apple）· Google Play（Google）
+| 方法 | 路径 | 角色 |
+|------|------|------|
+| POST | `/api/v1/ai/architect` | Unity 架构师 |
+| POST | `/api/v1/ai/system-designer` | 系统策划师 |
+| POST | `/api/v1/ai/numerical-designer` | 数值策划师 |
+| POST | `/api/v1/ai/level-narrative` | 关卡叙事策划师 |
+| POST | `/api/v1/ai/impl-wizard` | 技术实现向导 |
+| POST | `/api/v1/ai/qa-engineer` | QA 工程师 |
+| POST | `/api/v1/ai/data-analyst` | 数据分析师 |
 
-**市场**：美国 · 欧盟 · 英国 · 加拿大 · 澳大利亚
+所有端点接受 `{"game_profile": {...}}` JSON，返回 `text/event-stream` SSE 流。
 
-**技术栈**：Unity C# · iOS Swift · Android Kotlin
+**请求示例：**
+
+```bash
+curl -X POST http://localhost:8080/api/v1/ai/architect \
+  -H "Content-Type: application/json" \
+  -d '{
+    "game_profile": {
+      "game_name": "我的RPG",
+      "game_type": "rpg",
+      "target_platforms": ["mobile"],
+      "features": ["multiplayer", "iap", "gacha"],
+      "team_size": "small"
+    }
+  }'
+```
+
+---
+
+## 环境变量
+
+| 变量 | 说明 | 默认值 |
+|------|------|-------|
+| `LLM_PROVIDER` | `anthropic` 或 `openai` | `anthropic` |
+| `ANTHROPIC_API_KEY` | Claude API Key | — |
+| `OPENAI_API_KEY` | OpenAI API Key | — |
+| `LLM_MODEL` | 模型名称 | `claude-sonnet-4-5` / `gpt-4o` |
+| `LLM_MAX_TOKENS` | 最大输出 Token | `4096` |
+
+未配置 API Key 时，系统不会崩溃，而是在输出区域显示配置引导。
 
 ---
 
 ## 依赖
 
 - Python 3.8+
-- Flask（`pip3 install flask`）
-- 可选：`anthropic` 或 `openai`（LLM 功能）
-- 可选：`python-dotenv`（`.env` 文件支持）
+- `flask` `flask-cors` `flask-limiter`
+- `anthropic>=0.30.0` 或 `openai>=1.30.0`
 
 ```bash
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
-
----
-
-## 许可证
-
-MIT License — 详见 [LICENSE](LICENSE)

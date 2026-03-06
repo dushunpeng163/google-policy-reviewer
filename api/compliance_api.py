@@ -12,7 +12,7 @@ Compliance API Server
 - 缓存和性能优化
 """
 
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, Response, stream_with_context
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -194,8 +194,255 @@ def analyze_compliance():
             'message': str(e)
         }), 500
 
+@app.route('/api/v1/architect/analyze', methods=['POST'])
+@limiter.limit("10 per minute")
+def architect_analyze():
+    """Unity 架构师分析 API — 根据游戏描述输出完整技术架构方案"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        game_profile = data.get('game_profile', data)
+
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.unity_architect_expert import UnityArchitectExpert
+        architect = UnityArchitectExpert()
+        result = architect.analyze(game_profile)
+
+        return jsonify(result)
+
+    except Exception as e:
+        app.logger.error(f"Architect analysis error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/designer/system', methods=['POST'])
+@limiter.limit("10 per minute")
+def system_designer_analyze():
+    """系统策划师 API — 根据游戏描述输出核心循环、系统清单、MDA分析"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        game_profile = data.get('game_profile', data)
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.system_designer_expert import SystemDesignerExpert
+        designer = SystemDesignerExpert()
+        result = designer.analyze(game_profile)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"System designer error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/designer/numerical', methods=['POST'])
+@limiter.limit("10 per minute")
+def numerical_designer_analyze():
+    """数值策划师 API — 输出战斗公式、成长曲线、经济模型、掉落系统"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        game_profile = data.get('game_profile', data)
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.numerical_designer_expert import NumericalDesignerExpert
+        designer = NumericalDesignerExpert()
+        result = designer.analyze(game_profile)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Numerical designer error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/designer/level-narrative', methods=['POST'])
+@limiter.limit("10 per minute")
+def level_narrative_designer_analyze():
+    """关卡&叙事策划师 API — 输出故事结构、关卡序列、难度曲线、教学设计"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        game_profile = data.get('game_profile', data)
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.level_narrative_designer_expert import LevelNarrativeDesignerExpert
+        designer = LevelNarrativeDesignerExpert()
+        result = designer.analyze(game_profile)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Level&Narrative designer error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/wizard/implementation', methods=['POST'])
+@limiter.limit("10 per minute")
+def implementation_wizard_analyze():
+    """技术实现向导 API — 生成 Unity 项目骨架、接口定义、框架引导代码"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        game_profile = data.get('game_profile', data)
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.implementation_wizard_expert import ImplementationWizardExpert
+        wizard = ImplementationWizardExpert()
+        result = wizard.analyze(game_profile)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Implementation wizard error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/qa/analyze', methods=['POST'])
+@limiter.limit("10 per minute")
+def qa_engineer_analyze():
+    """QA 工程师 API — 生成测试计划、平台测试用例、Bug矩阵、发布清单"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        game_profile = data.get('game_profile', data)
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.qa_engineer_expert import QAEngineerExpert
+        engineer = QAEngineerExpert()
+        result = engineer.analyze(game_profile)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"QA engineer error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ── 真正的 AI 工作坊：7 个流式 AI 端点（基于 LLM）
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _make_ai_stream_response(system_prompt_name: str, profile: dict):
+    """公共工厂：构造 SSE 流式响应。"""
+    from engines.llm_client import LLMClient
+    from engines.system_prompts import format_profile_as_message
+    import engines.system_prompts as sp
+
+    system_prompt = getattr(sp, system_prompt_name)
+    user_msg      = format_profile_as_message(profile)
+    client        = LLMClient()
+
+    def generate():
+        try:
+            for chunk in client.stream(system_prompt, user_msg):
+                # 转义 JSON 中的控制字符
+                yield f"data: {json.dumps({'text': chunk})}\n\n"
+        except Exception as e:
+            err_md = f"\n\n## 内部错误\n\n```\n{type(e).__name__}: {e}\n```"
+            yield f"data: {json.dumps({'text': err_md})}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'X-Accel-Buffering': 'no',
+            'Cache-Control':     'no-cache',
+            'Connection':        'keep-alive',
+        }
+    )
+
+
+@app.route('/api/v1/ai/architect', methods=['POST'])
+@limiter.limit("20 per minute")
+def ai_architect_stream():
+    """Unity 架构师 — 真实 LLM 流式分析"""
+    profile = (request.get_json() or {}).get('game_profile', request.get_json() or {})
+    return _make_ai_stream_response('UNITY_ARCHITECT_PROMPT', profile)
+
+
+@app.route('/api/v1/ai/system-designer', methods=['POST'])
+@limiter.limit("20 per minute")
+def ai_system_designer_stream():
+    """系统策划师 — 真实 LLM 流式分析"""
+    profile = (request.get_json() or {}).get('game_profile', request.get_json() or {})
+    return _make_ai_stream_response('SYSTEM_DESIGNER_PROMPT', profile)
+
+
+@app.route('/api/v1/ai/numerical-designer', methods=['POST'])
+@limiter.limit("20 per minute")
+def ai_numerical_designer_stream():
+    """数值策划师 — 真实 LLM 流式分析"""
+    profile = (request.get_json() or {}).get('game_profile', request.get_json() or {})
+    return _make_ai_stream_response('NUMERICAL_DESIGNER_PROMPT', profile)
+
+
+@app.route('/api/v1/ai/level-narrative', methods=['POST'])
+@limiter.limit("20 per minute")
+def ai_level_narrative_stream():
+    """关卡与叙事策划师 — 真实 LLM 流式分析"""
+    profile = (request.get_json() or {}).get('game_profile', request.get_json() or {})
+    return _make_ai_stream_response('LEVEL_NARRATIVE_PROMPT', profile)
+
+
+@app.route('/api/v1/ai/impl-wizard', methods=['POST'])
+@limiter.limit("20 per minute")
+def ai_impl_wizard_stream():
+    """技术实现向导 — 真实 LLM 流式分析"""
+    profile = (request.get_json() or {}).get('game_profile', request.get_json() or {})
+    return _make_ai_stream_response('IMPL_WIZARD_PROMPT', profile)
+
+
+@app.route('/api/v1/ai/qa-engineer', methods=['POST'])
+@limiter.limit("20 per minute")
+def ai_qa_engineer_stream():
+    """QA 工程师 — 真实 LLM 流式分析"""
+    profile = (request.get_json() or {}).get('game_profile', request.get_json() or {})
+    return _make_ai_stream_response('QA_ENGINEER_PROMPT', profile)
+
+
+@app.route('/api/v1/ai/data-analyst', methods=['POST'])
+@limiter.limit("20 per minute")
+def ai_data_analyst_stream():
+    """数据分析师 — 真实 LLM 流式分析"""
+    profile = (request.get_json() or {}).get('game_profile', request.get_json() or {})
+    return _make_ai_stream_response('DATA_ANALYST_PROMPT', profile)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ── 模板引擎端点（保留，向后兼容）
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.route('/api/v1/data/analyze', methods=['POST'])
+@limiter.limit("10 per minute")
+def data_analyst_analyze():
+    """数据分析师 API — 生成KPI体系、埋点方案、留存/付费分析、A/B测试、迭代框架"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        game_profile = data.get('game_profile', data)
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from engines.data_analyst_expert import DataAnalystExpert
+        analyst = DataAnalystExpert()
+        result = analyst.analyze(game_profile)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Data analyst error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+
 @app.route('/api/v1/compliance/batch', methods=['POST'])
-@limiter.limit("5 per minute")  
+@limiter.limit("5 per minute")
 @require_api_key
 def batch_analyze():
     """批量分析API"""

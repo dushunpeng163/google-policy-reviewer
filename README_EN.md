@@ -1,188 +1,171 @@
-# Unity Game Global Compliance Platform v5.3
+# Game Development AI Workshop
 
-Helps Unity game developers ship compliant apps on **App Store + Google Play** across the US, EU, UK, and other major markets — and stay up to date as platform policies change.
+An AI-powered workshop covering the full game development lifecycle. 7 specialized roles driven by real LLM calls — each role delivers analysis tailored to your specific game, not generic templates.
 
-[中文文档](README.md)
+---
+
+## Roles
+
+| Role | Responsibility | Key Output |
+|------|---------------|------------|
+| 🏗️ Unity Architect | Tech stack selection & system design | Framework, render pipeline, network, performance budget |
+| 🗺️ System Designer | Gameplay skeleton | Core loops, MDA analysis, system interaction map |
+| 📊 Numerical Designer | Numerical systems modeling | Combat formulas, growth curves, economy model, Gacha odds |
+| 📖 Level & Narrative Designer | Level and story design | Narrative structure, level sequence, difficulty curve, tutorial |
+| ⚙️ Implementation Wizard | Code scaffolding | Project structure, C# interfaces, DI setup, coding standards |
+| 🧪 QA Engineer | Quality assurance | Test plans, platform-specific cases, bug matrix, release checklist |
+| 📈 Data Analyst | Data-driven iteration | KPI system, event tracking, retention/monetization analysis, A/B tests |
 
 ---
 
 ## Quick Start
 
-```bash
-# Install dependencies
-pip3 install flask
+**Step 1: Install dependencies**
 
-# Start the web interface
-python3 launcher.py --mode web
+```bash
+pip install anthropic        # Claude API (recommended)
+# or
+pip install openai           # OpenAI API
+```
+
+**Step 2: Configure API Key**
+
+```bash
+cp .env.example .env
+# Edit .env and fill in:
+# ANTHROPIC_API_KEY=sk-ant-your-key
+```
+
+**Step 3: Launch**
+
+```bash
+python launcher.py --mode web
 # Open http://localhost:8080 in your browser
 ```
 
 ---
 
-## Two Core Modes
+## How It Works
 
-### Mode A · New Game Compliance Guide
+```
+Fill in game description (name / type / platform / features)
+        ↓
+Choose a role → Submit
+        ↓
+LLM analyzes from that role's professional perspective
+        ↓
+Streaming Markdown output (typewriter effect)
+        ↓
+Copy result → Team discussion → Next role
+```
 
-Enter your game's basic info and receive a complete compliance roadmap:
-
-- Applicable regulations analysis (GDPR / COPPA / CCPA / UK AADC)
-- Phase-by-phase implementation checklist (Legal → Account → Privacy → IAP → Ads → Testing)
-- App Store Connect and Google Play Console configuration guides
-- Unity C# / iOS Swift / Android Kotlin technical implementation notes
-
-### Mode B · Existing Game Compliance Audit
-
-Scan your existing Unity project code and receive a detailed compliance report:
-
-- Code-level issue location (file path + line number + fix suggestion)
-- Regulatory compliance check (data collection, child protection, user rights)
-- Platform policy check against 22 core rules
-- Risk-graded report (critical / high / medium / low)
+Each role has a dedicated system prompt encoding domain-specific decision frameworks, industry benchmarks, and judgment criteria — not generic AI, but a customized professional role.
 
 ---
 
-## Policy Management
+## Two Ways to Use
 
-Click **「📋 Policy Management」** in the top-right corner of the web UI. Four tabs are available:
+### Web Workshop (this project)
 
-| Tab | Function |
-|-----|----------|
-| 📊 Status | Freshness of all 22 policy rules; shows LLM-detected change alerts |
-| ⚙️ Config | Set LLM API keys and remote rules update URL (hot-reload, no restart needed) |
-| 🔍 Check | Trigger RSS + page-hash monitoring + LLM auto-analysis (runs in background) |
-| ⏰ Schedule | Configure automatic scheduled checks; view notification history |
-
-### Policy Change Detection Loop
-
-The platform continuously tracks official policy sources and automatically updates rule status:
-
-```
-RSS / Page hash change detected
-        ↓
-LLM analyzes what changed and which rules are affected
-        ↓
-Affected rules automatically flagged as "needs review" in the Status tab
-        ↓
-Developer reviews the alert and clicks "Mark as Reviewed"
-        ↓
-Alert cleared, rule freshness restored
-```
-
-This loop runs automatically on schedule (configurable: hourly / daily / weekly).  
-No LLM key? The system still detects page changes — you just won't get automatic rule tagging.
-
----
-
-## LLM Configuration (Optional)
-
-Configure in the **Config** tab, or create a `.env` file in the project root:
+Best for: complete reports, team sharing, formal documentation
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-xxx   # Recommended (Claude)
-OPENAI_API_KEY=sk-xxx          # Alternative (GPT-4o)
+python launcher.py --mode web
 ```
 
-Changes take effect immediately — no server restart required.
+### Cursor Agent Skills
 
----
+Best for: real-time discussion during development, follow-up questions, letting AI write code directly
 
-## Rules Hot-Reload
+7 Agent Skills installed in `~/.agents/skills/`, auto-activated in Cursor conversations:
 
-The platform supports updating compliance rules without restarting:
-
-- **Local mode**: Edit `config/compliance-rules.yaml` — the system detects file changes and reloads automatically
-- **Remote mode**: Set `RULES_UPDATE_URL` in the Config tab to a remote YAML URL; the system fetches and applies updates automatically
-
----
-
-## CLI Usage
-
-```bash
-# New game compliance guide
-python3 launcher.py --mode guide
-
-# Existing project audit
-python3 launcher.py --mode audit --path /your/unity/project
-
-# Policy monitoring
-python3 launcher.py --mode check-policies --rss
-python3 launcher.py --mode check-policies --watch
-
-# Web server only
-python3 launcher.py --mode web
 ```
-
----
-
-## API Reference
-
-The platform exposes a REST API on port 8080 (default):
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/health` | Server health and rules version |
-| POST | `/api/v1/guide/new-game` | Generate compliance guide for a new game |
-| POST | `/api/v1/audit/game` | Audit an existing game project |
-| GET | `/api/v1/policies/freshness` | Get freshness report for all 22 rules |
-| POST | `/api/v1/policies/run-check` | Trigger policy check (async, returns `job_id`) |
-| GET | `/api/v1/policies/check-status/<job_id>` | Poll async check result |
-| POST | `/api/v1/policies/mark-verified` | Mark a rule as reviewed (clears alert) |
-| GET/POST | `/api/v1/rules/update` | Check or trigger rules hot-reload |
-| GET/POST | `/api/v1/policies/scheduler` | Get or configure scheduled check |
-| GET | `/api/v1/notifications` | Get notification list and unread count |
-| POST | `/api/v1/notifications/read` | Mark notifications as read |
-| POST | `/api/v1/policies/save-config` | Save LLM keys / rules URL to `.env` |
+unity-architect
+game-system-designer
+game-numerical-designer
+game-level-narrative-designer
+unity-implementation-wizard
+game-qa-engineer
+game-data-analyst
+```
 
 ---
 
 ## Project Structure
 
 ```
-launcher.py                      Main entry point
-api/compliance_api.py            Flask API server
-web_interface.html               Web UI (single-file)
+launcher.py                   Entry point
+api/compliance_api.py         Flask API (with 7 streaming AI endpoints)
+web_interface.html            Web UI (single file)
 engines/
-  ├── dev_guide.py               New game compliance roadmap
-  ├── unified_audit.py           Comprehensive game audit
-  ├── code_scanner.py            Static code analysis
-  ├── code_template_generator.py Compliance code templates
-  ├── advanced_rule_engine.py    Core compliance rule engine
-  ├── policy_monitor.py          RSS + page-hash monitoring
-  └── policy_diff_analyzer.py   LLM-powered policy diff analysis
-config/
-  └── compliance-rules.yaml     Rule definitions (hot-reloadable)
-references/                      Policy knowledge base
-policy_versions.json             22 rule version tracking (with change alerts)
-.env                             API keys (create manually, not committed)
+  ├── llm_client.py           Unified LLM client (Claude / OpenAI)
+  ├── system_prompts.py       System prompts for all 7 roles
+  ├── unity_architect_expert.py
+  ├── system_designer_expert.py
+  ├── numerical_designer_expert.py
+  ├── level_narrative_designer_expert.py
+  ├── implementation_wizard_expert.py
+  ├── qa_engineer_expert.py
+  └── data_analyst_expert.py
+.env.example                  Configuration template
 ```
 
 ---
 
-## Coverage
+## AI Endpoints
 
-**Regulations**: GDPR · COPPA · CCPA · UK AADC
+Server runs at `http://localhost:8080`:
 
-**Platforms**: App Store (Apple) · Google Play (Google)
+| Method | Path | Role |
+|--------|------|------|
+| POST | `/api/v1/ai/architect` | Unity Architect |
+| POST | `/api/v1/ai/system-designer` | System Designer |
+| POST | `/api/v1/ai/numerical-designer` | Numerical Designer |
+| POST | `/api/v1/ai/level-narrative` | Level & Narrative Designer |
+| POST | `/api/v1/ai/impl-wizard` | Implementation Wizard |
+| POST | `/api/v1/ai/qa-engineer` | QA Engineer |
+| POST | `/api/v1/ai/data-analyst` | Data Analyst |
 
-**Markets**: United States · European Union · United Kingdom · Canada · Australia
+All endpoints accept `{"game_profile": {...}}` JSON and return `text/event-stream` SSE.
 
-**Tech stacks**: Unity C# · iOS Swift · Android Kotlin
+**Example request:**
+
+```bash
+curl -X POST http://localhost:8080/api/v1/ai/architect \
+  -H "Content-Type: application/json" \
+  -d '{
+    "game_profile": {
+      "game_name": "My RPG",
+      "game_type": "rpg",
+      "target_platforms": ["mobile"],
+      "features": ["multiplayer", "iap", "gacha"],
+      "team_size": "small"
+    }
+  }'
+```
+
+---
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LLM_PROVIDER` | `anthropic` or `openai` | `anthropic` |
+| `ANTHROPIC_API_KEY` | Claude API Key | — |
+| `OPENAI_API_KEY` | OpenAI API Key | — |
+| `LLM_MODEL` | Model name | `claude-sonnet-4-5` / `gpt-4o` |
+| `LLM_MAX_TOKENS` | Max output tokens | `4096` |
+
+Without an API Key, the system won't crash — it displays a setup guide in the output area instead.
 
 ---
 
 ## Requirements
 
 - Python 3.8+
-- Flask (`pip3 install flask`)
-- Optional: `anthropic` or `openai` package for LLM features
-- Optional: `python-dotenv` for `.env` file support
+- `flask` `flask-cors` `flask-limiter`
+- `anthropic>=0.30.0` or `openai>=1.30.0`
 
 ```bash
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
-
----
-
-## License
-
-MIT License — see [LICENSE](LICENSE)

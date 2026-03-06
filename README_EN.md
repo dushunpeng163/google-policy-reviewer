@@ -80,14 +80,47 @@ Best for: real-time discussion during development, follow-up questions, letting 
 7 Agent Skills installed in `~/.agents/skills/`, auto-activated in Cursor conversations:
 
 ```
-unity-architect
-game-system-designer
-game-numerical-designer
-game-level-narrative-designer
-unity-implementation-wizard
-game-qa-engineer
-game-data-analyst
+unity-architect            → Tech stack selection
+game-system-designer       → Gameplay systems
+game-numerical-designer    → Numerical design
+game-level-narrative-designer → Level & narrative
+unity-implementation-wizard → Code scaffolding
+game-qa-engineer           → QA & testing
+game-data-analyst          → Data & analytics
 ```
+
+---
+
+## Web Workshop vs Agent Skills
+
+| | Web Workshop | Agent Skills |
+|--|-------------|-------------|
+| **Best for** | Formal deliverables, team sharing | Real-time help during development |
+| **Output** | Complete structured report (Markdown) | Conversational, supports follow-up |
+| **Code access** | Cannot read/write files | Can read code, generate files, edit implementation |
+| **Context** | Fresh start each time | Full conversation history, continuous iteration |
+| **Audience** | Product, design, PM | Developer themselves |
+
+### Recommended Workflow
+
+```
+Project kickoff
+  └─ Web Workshop: Unity Architect → Full tech selection report (for the team)
+
+Development
+  └─ Agent Skills: Unity Architect / Implementation Wizard
+       → Ask questions while coding, let AI generate interfaces and modify code
+
+Testing
+  └─ Web Workshop: QA Engineer → Formal test plan document
+  └─ Agent Skills: QA Engineer → Generate unit tests for specific code, find edge cases
+
+Post-launch
+  └─ Web Workshop: Data Analyst → KPI system and event tracking plan
+  └─ Agent Skills: Data Analyst → Discuss retention drops with real data, adjust strategy
+```
+
+Both share the same role knowledge base. Web Workshop is for **producing documents**; Agent Skills is for **getting things done**.
 
 ---
 

@@ -61,3 +61,7 @@ Thumbs.db
 # Output files
 policy_review_*.md
 *.skill
+
+# Runtime data (auto-generated, not for version control)
+policy_versions.json
+data/

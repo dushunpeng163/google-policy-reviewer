@@ -23,9 +23,7 @@
 **第一步：安装依赖**
 
 ```bash
-pip install anthropic        # Claude API（推荐）
-# 或
-pip install openai           # OpenAI API
+pip install -r requirements.txt
 ```
 
 **第二步：配置 API Key**
@@ -195,10 +193,4 @@ curl -X POST http://localhost:8080/api/v1/ai/architect \
 
 ## 依赖
 
-- Python 3.8+
-- `flask` `flask-cors` `flask-limiter`
-- `anthropic>=0.30.0` 或 `openai>=1.30.0`
-
-```bash
-pip install -r requirements.txt
-```
+Python 3.8+，详见 [`requirements.txt`](requirements.txt)。

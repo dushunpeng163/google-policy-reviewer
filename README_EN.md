@@ -23,9 +23,7 @@ An AI-powered workshop covering the full game development lifecycle. 7 specializ
 **Step 1: Install dependencies**
 
 ```bash
-pip install anthropic        # Claude API (recommended)
-# or
-pip install openai           # OpenAI API
+pip install -r requirements.txt
 ```
 
 **Step 2: Configure API Key**
@@ -195,10 +193,4 @@ Without an API Key, the system won't crash — it displays a setup guide in the 
 
 ## Requirements
 
-- Python 3.8+
-- `flask` `flask-cors` `flask-limiter`
-- `anthropic>=0.30.0` or `openai>=1.30.0`
-
-```bash
-pip install -r requirements.txt
-```
+Python 3.8+, see [`requirements.txt`](requirements.txt) for full list.
